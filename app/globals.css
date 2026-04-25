@@ -2,12 +2,15 @@
 
 @layer base {
   :root {
+    /* ── Primary ── */
     --blue: #2563EB;
     --blue-ink: #1D4ED8;
     --blue-soft: #EFF6FF;
     --cyan: #06B6D4;
     --cyan-ink: #0891B2;
     --cyan-soft: #ECFEFF;
+
+    /* ── Semantic ── */
     --green: #10B981;
     --green-soft: #ECFDF5;
     --red: #EF4444;
@@ -15,20 +18,31 @@
     --amber: #F59E0B;
     --amber-soft: #FFFBEB;
 
+    /* ── Ink (text) ── */
     --ink-1: #0F172A;
     --ink-2: #334155;
     --ink-3: #64748B;
     --ink-4: #94A3B8;
 
+    /* ── Surfaces & lines ── */
     --line: #E2E8F0;
     --line-soft: #EEF2F7;
     --bg: #F8FAFC;
     --card: #FFFFFF;
 
-    --shadow-sm: 0 1px 2px rgba(15,23,42,.04), 0 0 0 1px rgba(15,23,42,.04);
-    --shadow:    0 1px 3px rgba(15,23,42,.05), 0 1px 2px rgba(15,23,42,.03), 0 0 0 1px rgba(15,23,42,.05);
-    --shadow-md: 0 4px 14px -4px rgba(15,23,42,.08), 0 0 0 1px rgba(15,23,42,.05);
-    --shadow-lg: 0 10px 28px -8px rgba(15,23,42,.12), 0 0 0 1px rgba(15,23,42,.05);
+    /* ── Shadows (soft, no hard borders) ── */
+    --shadow-xs: 0 1px 2px rgba(15,23,42,.03);
+    --shadow-sm: 0 1px 3px rgba(15,23,42,.04), 0 1px 2px rgba(15,23,42,.02);
+    --shadow:    0 2px 8px -2px rgba(15,23,42,.06), 0 1px 2px rgba(15,23,42,.03);
+    --shadow-md: 0 4px 16px -4px rgba(15,23,42,.08), 0 1px 3px rgba(15,23,42,.04);
+    --shadow-lg: 0 8px 24px -6px rgba(15,23,42,.10), 0 2px 6px rgba(15,23,42,.04);
+
+    /* ── Radii ── */
+    --radius-sm: 8px;
+    --radius: 12px;
+    --radius-lg: 14px;
+    --radius-xl: 16px;
+    --radius-full: 99px;
   }
 
   html {
@@ -40,13 +54,29 @@
   body {
     background: var(--bg);
     color: var(--ink-1);
-    line-height: 1.5;
+    line-height: 1.55;
   }
 
   * { box-sizing: border-box; }
   button { cursor: pointer; border: none; background: none; color: inherit; font-family: inherit; }
   a { color: inherit; text-decoration: none; }
   input, select, textarea { font-family: inherit; }
+}
+
+/* ====== Card Utility ====== */
+.card {
+  background: var(--card);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
+  border: 1px solid var(--line-soft);
+  transition: box-shadow 200ms ease, transform 200ms ease;
+}
+.card:hover {
+  box-shadow: var(--shadow-md);
+}
+.card-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
 }
 
 /* ====== Animations ====== */
@@ -75,10 +105,29 @@
   from { opacity: 0; transform: translateY(8px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-.fade-up { animation: fade-up .35s ease forwards; }
+.fade-up { animation: fade-up .3s ease forwards; }
+
+@keyframes slide-up {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.slide-up { animation: slide-up .25s ease-out forwards; }
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.fade-in { animation: fade-in .2s ease forwards; }
 
 /* ====== Scrollbar ====== */
-::-webkit-scrollbar        { width: 5px; height: 5px; }
+::-webkit-scrollbar        { width: 4px; height: 4px; }
 ::-webkit-scrollbar-track  { background: transparent; }
 ::-webkit-scrollbar-thumb  { background: var(--line); border-radius: 99px; }
 ::-webkit-scrollbar-thumb:hover { background: var(--ink-4); }
+
+/* ====== Focus ring utility ====== */
+.focus-ring:focus-visible {
+  outline: 2px solid var(--blue);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}

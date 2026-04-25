@@ -14,15 +14,15 @@ const DAYS = [
 
 export default function WeeklyStreak() {
   return (
-    <div className="rounded-[14px] p-5" style={{ background: "white", border: "1px solid var(--line)", boxShadow: "var(--shadow-sm)" }}>
+    <div className="card p-5">
       <div className="flex items-start justify-between mb-5">
         <div>
-          <div className="text-[14px] font-semibold" style={{ color: "var(--ink-1)" }}>Weekly Streak</div>
-          <div className="text-[12px] mt-0.5" style={{ color: "var(--ink-3)" }}>5 days active this week · keep it going</div>
+          <div className="text-[13px] font-semibold" style={{ color: "var(--ink-1)" }}>Weekly Streak</div>
+          <div className="text-[11px] mt-0.5" style={{ color: "var(--ink-4)" }}>5 days active this week</div>
         </div>
         <div
-          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[12px] font-medium"
-          style={{ background: "var(--amber-soft)", border: "1px solid #FDE68A", color: "#92400E" }}
+          className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-[11px] font-medium"
+          style={{ background: "var(--amber-soft)", color: "#92400E" }}
         >
           <span className="flicker">🔥</span>
           <strong>12</strong> day streak
@@ -32,23 +32,23 @@ export default function WeeklyStreak() {
       <div className="grid grid-cols-7 gap-2">
         {DAYS.map((day, i) => (
           <div key={i} className="flex flex-col items-center gap-2">
-            <span className="text-[11px] font-semibold" style={{ color: "var(--ink-3)" }}>{day.label}</span>
+            <span className="text-[10px] font-medium" style={{ color: "var(--ink-4)" }}>{day.label}</span>
             <div
-              className="w-9 h-9 rounded-[10px] flex items-center justify-center transition-all"
+              className="w-8 h-8 rounded-[8px] flex items-center justify-center transition-all"
               style={
                 day.state === "done"
-                  ? { background: "var(--green)", border: "1.5px solid var(--green)", boxShadow: "0 3px 8px -2px rgba(16,185,129,.4)" }
+                  ? { background: "var(--green)", boxShadow: "0 2px 6px -1px rgba(16,185,129,.3)" }
                   : day.state === "today"
-                  ? { background: "var(--blue)", border: "1.5px solid var(--blue)", boxShadow: "0 3px 8px -2px rgba(37,99,235,.45)" }
+                  ? { background: "var(--blue)", boxShadow: "0 2px 6px -1px rgba(37,99,235,.3)" }
                   : { background: "var(--bg)", border: "1.5px dashed var(--line)" }
               }
             >
-              {day.state === "done" && <CheckIcon size={14} stroke="white" strokeWidth={3} />}
-              {day.state === "today" && <span className="w-2.5 h-2.5 rounded-full bg-white pulse-ring" />}
+              {day.state === "done" && <CheckIcon size={13} stroke="white" strokeWidth={2.5} />}
+              {day.state === "today" && <span className="w-2 h-2 rounded-full bg-white pulse-ring" />}
             </div>
             <span
-              className="text-[10px] font-medium text-center leading-tight"
-              style={{ color: day.state === "today" ? "var(--blue)" : day.state === "done" ? "var(--ink-2)" : "var(--ink-4)" }}
+              className="text-[9px] font-medium text-center leading-tight"
+              style={{ color: day.state === "today" ? "var(--blue)" : day.state === "done" ? "var(--ink-3)" : "var(--ink-4)" }}
             >
               {day.time}
             </span>

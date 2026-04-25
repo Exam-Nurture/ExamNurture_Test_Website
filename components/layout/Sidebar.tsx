@@ -22,12 +22,12 @@ export default function Sidebar() {
 
   return (
     <aside
-      className="fixed top-16 bottom-0 left-0 w-[248px] flex flex-col pt-5 pb-5 px-3.5 z-40 overflow-y-auto"
-      style={{ background: "white", borderRight: "1px solid var(--line)" }}
+      className="fixed top-14 bottom-0 left-0 w-[224px] hidden md:flex flex-col pt-5 pb-5 px-3 z-40 overflow-y-auto"
+      style={{ background: "white", borderRight: "1px solid var(--line-soft)" }}
     >
       <nav className="flex flex-col gap-0.5 flex-1">
         <span
-          className="text-[11px] font-semibold tracking-widest px-3 pb-3"
+          className="text-[10px] font-semibold tracking-widest px-3 pb-3"
           style={{ color: "var(--ink-4)" }}
         >MAIN MENU</span>
 
@@ -39,25 +39,25 @@ export default function Sidebar() {
               key={item.id}
               href={item.href}
               className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-[9px] text-[14px] font-medium transition-all",
+                "flex items-center gap-3 px-3 py-2.5 rounded-[10px] text-[13px] font-medium transition-all",
                 active
-                  ? "text-white"
+                  ? ""
                   : "hover:bg-[var(--bg)]"
               )}
               style={active
                 ? {
-                    background: "var(--blue)",
-                    boxShadow: "0 4px 10px -3px rgba(37,99,235,.45)",
-                    color: "white",
+                    background: "var(--blue-soft)",
+                    color: "var(--blue)",
                   }
-                : { color: "var(--ink-2)" }
+                : { color: "var(--ink-3)" }
               }
             >
-              <Icon size={17} strokeWidth={active ? 2.2 : 1.8} />
+              <Icon size={16} strokeWidth={active ? 2 : 1.7} />
               <span>{item.label}</span>
               {active && (
                 <span
-                  className="ml-auto w-1.5 h-1.5 rounded-full bg-white opacity-80"
+                  className="ml-auto w-1.5 h-1.5 rounded-full"
+                  style={{ background: "var(--blue)" }}
                 />
               )}
             </Link>
@@ -67,23 +67,23 @@ export default function Sidebar() {
 
       {/* Pro upgrade banner */}
       <div
-        className="mt-4 rounded-[14px] p-4 relative overflow-hidden"
-        style={{ background: "linear-gradient(135deg, #2563EB 0%, #1E40AF 100%)" }}
+        className="mt-4 rounded-[12px] p-4 relative overflow-hidden"
+        style={{ background: "linear-gradient(135deg, #2563EB 0%, #3B82F6 100%)" }}
       >
         <div
-          className="absolute -right-8 -top-8 w-36 h-36 rounded-full pointer-events-none"
-          style={{ background: "radial-gradient(circle at center, rgba(6,182,212,.45), transparent 65%)" }}
+          className="absolute -right-6 -top-6 w-28 h-28 rounded-full pointer-events-none"
+          style={{ background: "radial-gradient(circle at center, rgba(255,255,255,.12), transparent 65%)" }}
         />
         <div className="relative">
-          <div className="flex items-center gap-1.5 bg-white/20 rounded-full px-2 py-0.5 w-fit mb-2">
-            <Sparkles size={10} className="text-sky-200" />
-            <span className="text-[10px] font-bold tracking-wider text-sky-100">PRO</span>
+          <div className="flex items-center gap-1.5 bg-white/15 rounded-full px-2 py-0.5 w-fit mb-2">
+            <Sparkles size={9} className="text-blue-200" />
+            <span className="text-[9px] font-bold tracking-wider text-blue-100">PRO</span>
           </div>
-          <div className="text-[14px] font-bold text-white leading-snug">Upgrade to Pro</div>
-          <div className="text-[11px] text-white/75 mt-1 leading-snug">
+          <div className="text-[13px] font-semibold text-white leading-snug">Upgrade to Pro</div>
+          <div className="text-[11px] text-white/65 mt-1 leading-snug">
             Unlock all mock tests, PYQs & detailed analytics.
           </div>
-          <button className="mt-3 w-full py-2 rounded-[8px] bg-white text-[13px] font-semibold transition-all hover:-translate-y-0.5 hover:shadow-lg"
+          <button className="mt-3 w-full py-2 rounded-[8px] bg-white text-[12px] font-semibold transition-all hover:-translate-y-0.5 hover:shadow-md"
             style={{ color: "var(--blue)" }}
           >
             Upgrade Plan →

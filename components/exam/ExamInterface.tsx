@@ -50,11 +50,11 @@ Object.keys(BASE_QS).forEach((k) => {
 
 // ─── Status colours (minimal, meaning-driven) ─────────────────────────
 const S: Record<QStatus, { bg: string; fg: string; ring?: string }> = {
-  "not-visited":     { bg: "#F3F4F6", fg: "#9CA3AF", ring: "#E5E7EB" },
-  "not-answered":    { bg: "#FEE2E2", fg: "#DC2626" },
-  "answered":        { bg: "#D1FAE5", fg: "#065F46" },
-  "marked":          { bg: "#EDE9FE", fg: "#5B21B6" },
-  "answered-marked": { bg: "#DBEAFE", fg: "#1D4ED8" },
+  "not-visited":     { bg: "#F8FAFC", fg: "#94A3B8", ring: "#E2E8F0" },
+  "not-answered":    { bg: "#FEF2F2", fg: "#DC2626" },
+  "answered":        { bg: "#ECFDF5", fg: "#059669" },
+  "marked":          { bg: "#F3E8FF", fg: "#7C3AED" },
+  "answered-marked": { bg: "#EFF6FF", fg: "#2563EB" },
 };
 
 const LEGEND: { key: QStatus; label: string }[] = [
@@ -82,23 +82,24 @@ function initState(): Record<string, QState[]> {
 
 // ─── Component ────────────────────────────────────────────────────────
 export default function ExamInterface({ examId }: { examId: string }) {
-  const [si, setSi]               = useState(0);        // subject index
-  const [qi, setQi]               = useState(0);        // question index within subject
+  const [si, setSi]               = useState(0);
+  const [qi, setQi]               = useState(0);
   const [qs, setQs]               = useState(initState);
   const [timeLeft, setTimeLeft]   = useState(3 * 60 * 60);
   const [showModal, setShowModal] = useState(false);
+  const [animKey, setAnimKey]     = useState(0);
 
   const sub      = SUBJECTS[si];
   const questions = QUESTIONS[sub.id];
   const cur       = qs[sub.id][qi];
 
-  // ── Timer ──────────────────────────────────────────────────────────
+  // ── Timer ──
   useEffect(() => {
     const id = setInterval(() => setTimeLeft((t) => (t > 0 ? t - 1 : 0)), 1000);
     return () => clearInterval(id);
   }, []);
 
-  // ── Mark as not-answered on first visit ────────────────────────────
+  // ── Mark as not-answered on first visit ──
   useEffect(() => {
     setQs((prev) => {
       if (prev[sub.id][qi].status !== "not-visited") return prev;
@@ -106,6 +107,7 @@ export default function ExamInterface({ examId }: { examId: string }) {
       arr[qi] = { ...arr[qi], status: "not-answered" };
       return { ...prev, [sub.id]: arr };
     });
+    setAnimKey((k) => k + 1);
   }, [sub.id, qi]);
 
   const patch = useCallback((p: Partial<QState>) => {
@@ -143,7 +145,7 @@ export default function ExamInterface({ examId }: { examId: string }) {
     if (si > 0) { setSi((s) => s - 1); setQi(QUESTIONS[SUBJECTS[si - 1].id].length - 1); }
   };
 
-  // ── Counts ─────────────────────────────────────────────────────────
+  // ── Counts ──
   const counts = (sid: string) => {
     const arr = qs[sid];
     return {
@@ -160,28 +162,28 @@ export default function ExamInterface({ examId }: { examId: string }) {
   return (
     <div
       className="flex flex-col h-screen select-none"
-      style={{ background: "#F9FAFB", fontFamily: "var(--font-inter)", color: "#111827" }}
+      style={{ background: "#F8FAFC", fontFamily: "var(--font-inter)", color: "#0F172A" }}
     >
 
       {/* ══════════════════ TOP BAR ══════════════════════════════════════ */}
       <header
-        className="flex-shrink-0 flex items-center justify-between px-6 h-[52px] z-50"
-        style={{ background: "#fff", borderBottom: "1px solid #F0F0F0" }}
+        className="flex-shrink-0 flex items-center justify-between px-5 h-[48px] z-50"
+        style={{ background: "#fff", borderBottom: "1px solid #EEF2F7" }}
       >
         {/* Left — Exit + test title */}
-        <div className="flex items-center gap-4 min-w-0">
+        <div className="flex items-center gap-3.5 min-w-0">
           <Link
             href="/dashboard"
-            className="flex items-center gap-1.5 text-[12px] font-medium transition-colors flex-shrink-0"
-            style={{ color: "#6B7280" }}
+            className="flex items-center gap-1 text-[11px] font-medium transition-colors hover:text-[#374151] flex-shrink-0"
+            style={{ color: "#94A3B8" }}
           >
-            <ChevronLeft size={14} />
+            <ChevronLeft size={13} />
             Exit
           </Link>
 
-          <div className="w-px h-4 bg-gray-200 flex-shrink-0" />
+          <div className="w-px h-3.5 flex-shrink-0" style={{ background: "#E2E8F0" }} />
 
-          <span className="text-[13px] font-semibold truncate" style={{ color: "#374151" }}>
+          <span className="text-[12px] font-semibold truncate" style={{ color: "#334155" }}>
             JEE Main — Full Mock #14
           </span>
         </div>
@@ -195,11 +197,11 @@ export default function ExamInterface({ examId }: { examId: string }) {
               <button
                 key={s.id}
                 onClick={() => { setSi(idx); setQi(0); }}
-                className="relative flex flex-col items-center justify-center px-6 h-full text-[13px] font-medium transition-colors"
-                style={{ color: active ? "#111827" : "#9CA3AF" }}
+                className="relative flex flex-col items-center justify-center px-5 h-full text-[12px] font-medium transition-colors"
+                style={{ color: active ? "#0F172A" : "#94A3B8" }}
               >
                 <span>{s.label}</span>
-                <span className="text-[10px] mt-0.5" style={{ color: active ? s.color : "#D1D5DB" }}>
+                <span className="text-[10px] mt-0.5 tabular-nums" style={{ color: active ? s.color : "#CBD5E1" }}>
                   {c.answered}/25
                 </span>
                 {active && (
@@ -214,19 +216,19 @@ export default function ExamInterface({ examId }: { examId: string }) {
         </nav>
 
         {/* Right — Marks + Timer */}
-        <div className="flex items-center gap-4 flex-shrink-0">
-          <div className="hidden sm:flex items-center gap-1 text-[11px]" style={{ color: "#9CA3AF" }}>
-            <span className="font-semibold" style={{ color: "#16A34A" }}>+4</span>
+        <div className="flex items-center gap-3 flex-shrink-0">
+          <div className="hidden sm:flex items-center gap-1 text-[10px]" style={{ color: "#94A3B8" }}>
+            <span className="font-semibold" style={{ color: "#10B981" }}>+4</span>
             <span>/</span>
-            <span className="font-semibold" style={{ color: "#DC2626" }}>−1</span>
+            <span className="font-semibold" style={{ color: "#EF4444" }}>−1</span>
           </div>
 
           <div
-            className="font-mono text-[15px] font-bold px-3 py-1 rounded-[8px] tabular-nums tracking-wide transition-all"
+            className="font-mono text-[14px] font-bold px-3 py-1 rounded-[8px] tabular-nums tracking-wide transition-all"
             style={{
-              background:  isLow ? "#FEF2F2"  : "#F3F4F6",
-              color:       isLow ? "#DC2626"  : "#111827",
-              border:      isLow ? "1px solid #FECACA" : "1px solid #E5E7EB",
+              background:  isLow ? "#FEF2F2"  : "#F8FAFC",
+              color:       isLow ? "#DC2626"  : "#0F172A",
+              border:      isLow ? "1px solid #FECACA" : "1px solid #E2E8F0",
             }}
           >
             {fmtTime(timeLeft)}
@@ -238,42 +240,42 @@ export default function ExamInterface({ examId }: { examId: string }) {
       <div className="flex flex-1 overflow-hidden">
 
         {/* ─── Question area ─────────────────────────────────────────── */}
-        <main className="flex-1 overflow-y-auto flex flex-col items-center py-8 px-4">
-          {/* Centred container — max 760px for reading comfort */}
-          <div className="w-full max-w-[760px] flex flex-col gap-6">
+        <main className="flex-1 overflow-y-auto flex flex-col items-center py-10 px-4">
+          {/* Centred container */}
+          <div key={animKey} className="w-full max-w-[760px] flex flex-col gap-8 slide-up">
 
             {/* Question meta row */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <span
-                  className="text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full"
-                  style={{ background: sub.color + "14", color: sub.color }}
+                  className="text-[9px] font-bold uppercase tracking-widest px-2 py-1 rounded-full"
+                  style={{ background: sub.color + "10", color: sub.color }}
                 >
                   {sub.label}
                 </span>
-                <span className="text-[12px]" style={{ color: "#9CA3AF" }}>
+                <span className="text-[11px] font-medium" style={{ color: "#94A3B8" }}>
                   Question {qi + 1}
-                  <span style={{ color: "#D1D5DB" }}> / {questions.length}</span>
+                  <span style={{ color: "#CBD5E1" }}> / {questions.length}</span>
                 </span>
               </div>
 
               {/* Mini progress dots */}
-              <div className="hidden sm:flex items-center gap-1">
+              <div className="hidden sm:flex items-center gap-[3px]">
                 {questions.map((_, i) => {
                   const st = qs[sub.id][i].status;
                   return (
                     <button
                       key={i}
                       onClick={() => setQi(i)}
-                      className="w-1.5 h-1.5 rounded-full transition-all"
+                      className="w-[5px] h-[5px] rounded-full transition-all"
                       style={{
                         background: i === qi ? "#2563EB"
                           : st === "answered"        ? "#10B981"
                           : st === "answered-marked" ? "#60A5FA"
                           : st === "marked"          ? "#7C3AED"
                           : st === "not-answered"    ? "#FCA5A5"
-                          : "#E5E7EB",
-                        transform: i === qi ? "scale(1.5)" : "scale(1)",
+                          : "#E2E8F0",
+                        transform: i === qi ? "scale(1.6)" : "scale(1)",
                       }}
                     />
                   );
@@ -284,43 +286,43 @@ export default function ExamInterface({ examId }: { examId: string }) {
             {/* Question text */}
             <div>
               <p
-                className="text-[17px] leading-[1.75] font-medium"
-                style={{ color: "#111827" }}
+                className="text-[16px] leading-[1.8] font-medium"
+                style={{ color: "#0F172A" }}
               >
                 {curQ(questions, qi).q}
               </p>
             </div>
 
             {/* Options */}
-            <div className="flex flex-col gap-2.5">
+            <div className="flex flex-col gap-3">
               {curQ(questions, qi).opts.map((opt, oi) => {
                 const selected = cur.answer === oi;
                 return (
                   <button
                     key={oi}
                     onClick={() => selectAnswer(oi)}
-                    className="group flex items-center gap-4 px-5 py-4 rounded-[12px] text-left w-full transition-all duration-150"
+                    className="group flex items-center gap-4 px-5 py-[18px] rounded-[12px] text-left w-full transition-all duration-150 hover:shadow-md"
                     style={
                       selected
                         ? {
                             background:  "#EFF6FF",
                             border:      "1.5px solid #2563EB",
-                            boxShadow:   "0 0 0 3px rgba(37,99,235,.08)",
+                            boxShadow:   "0 0 0 3px rgba(37,99,235,.06)",
                           }
                         : {
                             background:  "#fff",
-                            border:      "1.5px solid #F3F4F6",
-                            boxShadow:   "0 1px 2px rgba(0,0,0,.04)",
+                            border:      "1.5px solid #EEF2F7",
+                            boxShadow:   "0 1px 3px rgba(0,0,0,.03)",
                           }
                     }
                   >
                     {/* Letter badge */}
                     <span
-                      className="w-7 h-7 rounded-full flex items-center justify-center text-[12px] font-semibold flex-shrink-0 transition-all"
+                      className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-semibold flex-shrink-0 transition-all"
                       style={
                         selected
                           ? { background: "#2563EB", color: "#fff" }
-                          : { background: "#F9FAFB", color: "#9CA3AF", border: "1.5px solid #E5E7EB" }
+                          : { background: "#F8FAFC", color: "#94A3B8", border: "1.5px solid #E2E8F0" }
                       }
                     >
                       {String.fromCharCode(65 + oi)}
@@ -328,8 +330,8 @@ export default function ExamInterface({ examId }: { examId: string }) {
 
                     {/* Option text */}
                     <span
-                      className="text-[15px] leading-relaxed transition-colors"
-                      style={{ color: selected ? "#1D4ED8" : "#374151", fontWeight: selected ? 500 : 400 }}
+                      className="text-[14px] leading-relaxed transition-colors"
+                      style={{ color: selected ? "#1D4ED8" : "#334155", fontWeight: selected ? 500 : 400 }}
                     >
                       {opt}
                     </span>
@@ -339,26 +341,22 @@ export default function ExamInterface({ examId }: { examId: string }) {
             </div>
 
             {/* Actions */}
-            <div className="flex items-center justify-between pt-2 border-t" style={{ borderColor: "#F3F4F6" }}>
+            <div className="flex items-center justify-between pt-4 border-t" style={{ borderColor: "#EEF2F7" }}>
               {/* Secondary left */}
               <div className="flex items-center gap-2">
                 <button
                   onClick={markAndNext}
-                  className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-[8px] text-[12px] font-medium transition-all"
-                  style={{ background: "#F5F3FF", color: "#6D28D9", border: "1px solid #DDD6FE" }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#EDE9FE"; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "#F5F3FF"; }}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-[8px] text-[11px] font-medium transition-all hover:bg-[#EDE9FE]"
+                  style={{ background: "#F5F3FF", color: "#6D28D9" }}
                 >
-                  <Bookmark size={12} strokeWidth={2} />
+                  <Bookmark size={11} strokeWidth={2} />
                   Mark &amp; Next
                 </button>
 
                 <button
                   onClick={clearResponse}
-                  className="px-3.5 py-2 rounded-[8px] text-[12px] font-medium transition-all"
-                  style={{ color: "#9CA3AF" }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.color = "#6B7280"; (e.currentTarget as HTMLElement).style.background = "#F9FAFB"; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.color = "#9CA3AF"; (e.currentTarget as HTMLElement).style.background = "transparent"; }}
+                  className="px-3 py-2 rounded-[8px] text-[11px] font-medium transition-all hover:bg-[#F1F5F9]"
+                  style={{ color: "#94A3B8" }}
                 >
                   Clear
                 </button>
@@ -368,24 +366,20 @@ export default function ExamInterface({ examId }: { examId: string }) {
               <div className="flex items-center gap-2">
                 <button
                   onClick={retreat}
-                  className="inline-flex items-center gap-1 px-3.5 py-2 rounded-[8px] text-[12px] font-medium transition-all"
-                  style={{ background: "#F9FAFB", color: "#6B7280", border: "1px solid #E5E7EB" }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#F3F4F6"; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "#F9FAFB"; }}
+                  className="inline-flex items-center gap-1 px-3 py-2 rounded-[8px] text-[11px] font-medium transition-all hover:bg-[#F1F5F9]"
+                  style={{ color: "#64748B" }}
                 >
-                  <ChevronLeft size={14} />
+                  <ChevronLeft size={13} />
                   Prev
                 </button>
 
                 <button
                   onClick={saveAndNext}
-                  className="inline-flex items-center gap-1.5 px-5 py-2 rounded-[8px] text-[13px] font-semibold text-white transition-all"
-                  style={{ background: "#2563EB", boxShadow: "0 1px 3px rgba(37,99,235,.35)" }}
-                  onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#1D4ED8"; }}
-                  onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "#2563EB"; }}
+                  className="inline-flex items-center gap-1.5 px-5 py-2 rounded-[8px] text-[12px] font-semibold text-white transition-all hover:brightness-105"
+                  style={{ background: "#2563EB", boxShadow: "0 2px 8px -2px rgba(37,99,235,.35)" }}
                 >
                   Save &amp; Next
-                  <ChevronRight size={14} />
+                  <ChevronRight size={13} />
                 </button>
               </div>
             </div>
@@ -395,22 +389,22 @@ export default function ExamInterface({ examId }: { examId: string }) {
 
         {/* ─── Question Palette ───────────────────────────────────────── */}
         <aside
-          className="hidden lg:flex flex-col w-[264px] flex-shrink-0 overflow-y-auto"
-          style={{ background: "#fff", borderLeft: "1px solid #F0F0F0" }}
+          className="hidden lg:flex flex-col w-[240px] flex-shrink-0 overflow-y-auto"
+          style={{ background: "#fff", borderLeft: "1px solid #EEF2F7" }}
         >
           {/* Status legend */}
-          <div className="px-4 pt-4 pb-3" style={{ borderBottom: "1px solid #F5F5F5" }}>
-            <p className="text-[10px] font-semibold uppercase tracking-widest mb-3" style={{ color: "#9CA3AF" }}>
+          <div className="px-4 pt-4 pb-3" style={{ borderBottom: "1px solid #F8FAFC" }}>
+            <p className="text-[9px] font-semibold uppercase tracking-widest mb-2.5" style={{ color: "#94A3B8" }}>
               Status Key
             </p>
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-wrap gap-x-3 gap-y-1.5">
               {LEGEND.map(({ key, label }) => (
-                <div key={key} className="flex items-center gap-2">
+                <div key={key} className="flex items-center gap-1.5">
                   <span
-                    className="w-3.5 h-3.5 rounded-[3px] flex-shrink-0"
+                    className="w-3 h-3 rounded-[3px] flex-shrink-0"
                     style={{ background: S[key].bg, border: S[key].ring ? `1px solid ${S[key].ring}` : "none" }}
                   />
-                  <span className="text-[11px]" style={{ color: "#6B7280" }}>{label}</span>
+                  <span className="text-[10px]" style={{ color: "#64748B" }}>{label}</span>
                 </div>
               ))}
             </div>
@@ -421,14 +415,14 @@ export default function ExamInterface({ examId }: { examId: string }) {
             {SUBJECTS.map((s, idx) => {
               const c = allCounts[idx];
               return (
-                <div key={s.id} className="px-4 py-4" style={{ borderBottom: "1px solid #F5F5F5" }}>
+                <div key={s.id} className="px-4 py-3.5" style={{ borderBottom: "1px solid #F8FAFC" }}>
                   {/* Section header */}
-                  <div className="flex items-center justify-between mb-3">
+                  <div className="flex items-center justify-between mb-2.5">
                     <div className="flex items-center gap-1.5">
-                      <span className="w-2 h-2 rounded-full" style={{ background: s.color }} />
-                      <span className="text-[12px] font-semibold" style={{ color: "#374151" }}>{s.label}</span>
+                      <span className="w-1.5 h-1.5 rounded-full" style={{ background: s.color }} />
+                      <span className="text-[11px] font-semibold" style={{ color: "#334155" }}>{s.label}</span>
                     </div>
-                    <span className="text-[11px] font-semibold tabular-nums" style={{ color: s.color }}>
+                    <span className="text-[10px] font-semibold tabular-nums" style={{ color: s.color }}>
                       {c.answered}/25
                     </span>
                   </div>
@@ -443,11 +437,11 @@ export default function ExamInterface({ examId }: { examId: string }) {
                         <button
                           key={n}
                           onClick={() => { setSi(idx); setQi(n); }}
-                          className="w-8 h-8 rounded-[6px] text-[11px] font-semibold transition-all hover:opacity-80"
+                          className="w-7 h-7 rounded-[5px] text-[10px] font-semibold transition-all hover:opacity-80"
                           style={{
                             background: isCurrent ? "#2563EB" : sc.bg,
                             color:      isCurrent ? "#fff"    : sc.fg,
-                            boxShadow:  isCurrent ? "0 0 0 2px rgba(37,99,235,.3)" : "none",
+                            boxShadow:  isCurrent ? "0 0 0 2px rgba(37,99,235,.25)" : "none",
                             border:     sc.ring && !isCurrent ? `1px solid ${sc.ring}` : "none",
                           }}
                         >
@@ -462,26 +456,24 @@ export default function ExamInterface({ examId }: { examId: string }) {
           </div>
 
           {/* Summary + Submit */}
-          <div className="p-4 flex-shrink-0" style={{ borderTop: "1px solid #F0F0F0" }}>
-            <div className="grid grid-cols-3 gap-2 mb-3 text-center">
+          <div className="p-4 flex-shrink-0" style={{ borderTop: "1px solid #EEF2F7" }}>
+            <div className="grid grid-cols-3 gap-1.5 mb-3 text-center">
               {[
-                { label: "Answered", val: totalAnswered, bg: "#F0FDF4", fg: "#16A34A" },
-                { label: "Marked",   val: totalMarked,   bg: "#F5F3FF", fg: "#7C3AED" },
+                { label: "Answered", val: totalAnswered, bg: "#ECFDF5", fg: "#059669" },
+                { label: "Marked",   val: totalMarked,   bg: "#F3E8FF", fg: "#7C3AED" },
                 { label: "Pending",  val: 75 - totalAnswered - totalMarked, bg: "#FEF2F2", fg: "#DC2626" },
               ].map((r) => (
                 <div key={r.label} className="rounded-[8px] py-2" style={{ background: r.bg }}>
-                  <div className="text-[16px] font-bold tabular-nums" style={{ color: r.fg }}>{r.val}</div>
-                  <div className="text-[9px] font-medium mt-0.5" style={{ color: r.fg + "99" }}>{r.label}</div>
+                  <div className="text-[15px] font-bold tabular-nums" style={{ color: r.fg }}>{r.val}</div>
+                  <div className="text-[8px] font-medium mt-0.5" style={{ color: r.fg, opacity: 0.6 }}>{r.label}</div>
                 </div>
               ))}
             </div>
 
             <button
               onClick={() => setShowModal(true)}
-              className="w-full py-2.5 rounded-[9px] text-[13px] font-semibold text-white transition-all"
+              className="w-full py-2.5 rounded-[8px] text-[12px] font-semibold text-white transition-all hover:brightness-105"
               style={{ background: "#2563EB" }}
-              onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#1D4ED8"; }}
-              onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "#2563EB"; }}
             >
               Submit Test
             </button>
@@ -492,45 +484,42 @@ export default function ExamInterface({ examId }: { examId: string }) {
       {/* ══════════════════ SUBMIT MODAL ═════════════════════════════════ */}
       {showModal && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4"
-          style={{ background: "rgba(0,0,0,.35)", backdropFilter: "blur(4px)" }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 fade-in"
+          style={{ background: "rgba(15,23,42,.4)", backdropFilter: "blur(6px)" }}
           onClick={(e) => { if (e.target === e.currentTarget) setShowModal(false); }}
         >
           <div
-            className="w-full max-w-[360px] rounded-[16px] p-6 shadow-xl"
-            style={{ background: "#fff" }}
+            className="w-full max-w-[340px] rounded-[14px] p-6 slide-up"
+            style={{ background: "#fff", boxShadow: "var(--shadow-lg)" }}
           >
             {/* Header */}
             <div className="flex items-start justify-between mb-5">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
                   style={{ background: "#FFFBEB" }}>
-                  <AlertTriangle size={17} style={{ color: "#D97706" }} />
+                  <AlertTriangle size={16} style={{ color: "#D97706" }} />
                 </div>
                 <div>
-                  <p className="text-[15px] font-semibold" style={{ color: "#111827" }}>Submit test?</p>
-                  <p className="text-[12px] mt-0.5" style={{ color: "#9CA3AF" }}>This action cannot be undone.</p>
+                  <p className="text-[14px] font-semibold" style={{ color: "#0F172A" }}>Submit test?</p>
+                  <p className="text-[11px] mt-0.5" style={{ color: "#94A3B8" }}>This action cannot be undone.</p>
                 </div>
               </div>
-              <button onClick={() => setShowModal(false)} className="p-1 rounded-[6px] transition-colors"
-                style={{ color: "#9CA3AF" }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#F3F4F6"; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
-              >
-                <X size={16} />
+              <button onClick={() => setShowModal(false)} className="p-1 rounded-[6px] transition-colors hover:bg-[#F1F5F9]"
+                style={{ color: "#94A3B8" }}>
+                <X size={15} />
               </button>
             </div>
 
             {/* Stats */}
-            <div className="grid grid-cols-3 gap-2 mb-5">
+            <div className="grid grid-cols-3 gap-1.5 mb-5">
               {[
-                { label: "Answered", val: totalAnswered,                bg: "#F0FDF4", fg: "#16A34A" },
-                { label: "Marked",   val: totalMarked,                  bg: "#F5F3FF", fg: "#7C3AED" },
+                { label: "Answered", val: totalAnswered,                bg: "#ECFDF5", fg: "#059669" },
+                { label: "Marked",   val: totalMarked,                  bg: "#F3E8FF", fg: "#7C3AED" },
                 { label: "Pending",  val: 75 - totalAnswered - totalMarked, bg: "#FEF2F2", fg: "#DC2626" },
               ].map((r) => (
                 <div key={r.label} className="rounded-[10px] py-3 text-center" style={{ background: r.bg }}>
-                  <div className="text-[22px] font-bold tabular-nums" style={{ color: r.fg }}>{r.val}</div>
-                  <div className="text-[10px] font-medium mt-0.5" style={{ color: r.fg + "99" }}>{r.label}</div>
+                  <div className="text-[20px] font-bold tabular-nums" style={{ color: r.fg }}>{r.val}</div>
+                  <div className="text-[9px] font-medium mt-0.5" style={{ color: r.fg, opacity: 0.6 }}>{r.label}</div>
                 </div>
               ))}
             </div>
@@ -539,18 +528,15 @@ export default function ExamInterface({ examId }: { examId: string }) {
             <div className="flex gap-2.5">
               <button
                 onClick={() => setShowModal(false)}
-                className="flex-1 py-2.5 rounded-[9px] text-[13px] font-medium transition-all"
-                style={{ border: "1.5px solid #E5E7EB", color: "#6B7280" }}
-                onMouseEnter={e => { (e.currentTarget as HTMLElement).style.background = "#F9FAFB"; }}
-                onMouseLeave={e => { (e.currentTarget as HTMLElement).style.background = "transparent"; }}
+                className="flex-1 py-2.5 rounded-[8px] text-[12px] font-medium transition-all hover:bg-[#F8FAFC]"
+                style={{ border: "1.5px solid #E2E8F0", color: "#64748B" }}
               >
                 Cancel
               </button>
               <Link
                 href="/results/mock-14"
-                className="flex-1 py-2.5 rounded-[9px] text-[13px] font-semibold text-white text-center transition-all"
+                className="flex-1 py-2.5 rounded-[8px] text-[12px] font-semibold text-white text-center transition-all hover:brightness-105"
                 style={{ background: "#2563EB" }}
-                onMouseEnter={undefined}
               >
                 Submit →
               </Link>

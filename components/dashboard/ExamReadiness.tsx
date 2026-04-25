@@ -8,84 +8,88 @@ const SUBJECTS = [
 
 export default function ExamReadiness() {
   return (
-    <div className="rounded-[14px] p-5" style={{ background: "white", border: "1px solid var(--line)", boxShadow: "var(--shadow-sm)" }}>
+    <div
+      className="rounded-[14px] p-6 relative overflow-hidden"
+      style={{
+        background: "linear-gradient(135deg, #FAFCFF 0%, #F0F6FF 100%)",
+        border: "1px solid rgba(37,99,235,.08)",
+        boxShadow: "var(--shadow-sm), 0 0 0 1px rgba(37,99,235,.04)",
+      }}
+    >
+      {/* Subtle accent glow */}
+      <div
+        className="absolute -right-20 -top-20 w-60 h-60 rounded-full pointer-events-none"
+        style={{ background: "radial-gradient(circle, rgba(37,99,235,.04) 0%, transparent 70%)" }}
+      />
+
       {/* Header */}
-      <div className="flex items-start justify-between mb-5">
+      <div className="flex items-start justify-between mb-6 relative">
         <div>
           <div className="text-[14px] font-semibold" style={{ color: "var(--ink-1)" }}>Exam Readiness</div>
-          <div className="text-[12px] mt-0.5" style={{ color: "var(--ink-3)" }}>Based on last 30 days · mock scores &amp; topic mastery</div>
+          <div className="text-[11px] mt-0.5" style={{ color: "var(--ink-4)" }}>Based on last 30 days · mock scores &amp; topic mastery</div>
         </div>
         <div
-          className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[12px] font-semibold"
-          style={{ background: "var(--green-soft)", border: "1px solid #A7F3D0", color: "#047857" }}
+          className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold"
+          style={{ background: "var(--green-soft)", color: "#047857" }}
         >
-          <span className="w-1.5 h-1.5 rounded-full" style={{ background: "var(--green)", boxShadow: "0 0 0 3px rgba(16,185,129,.22)" }} />
+          <span className="w-1.5 h-1.5 rounded-full" style={{ background: "var(--green)", boxShadow: "0 0 0 3px rgba(16,185,129,.18)" }} />
           On Track
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-[1.2fr_1fr] gap-8 items-start relative">
         {/* Overall gauge */}
         <div>
-          <div className="flex items-end gap-3 mb-4">
+          <div className="flex items-end gap-3 mb-5">
             <div
-              className="text-[48px] font-bold tracking-tight leading-none"
+              className="text-[44px] font-bold tracking-tight leading-none"
               style={{ fontFamily: "var(--font-sora)", color: "var(--ink-1)" }}
             >
-              73<span className="text-[22px] font-medium" style={{ color: "var(--ink-3)" }}>%</span>
+              73<span className="text-[20px] font-medium" style={{ color: "var(--ink-4)" }}>%</span>
             </div>
             <div className="pb-1">
               <div className="text-[13px] font-semibold" style={{ color: "var(--ink-1)" }}>Overall Readiness</div>
-              <div className="text-[12px] mt-0.5" style={{ color: "var(--ink-3)" }}>
+              <div className="text-[11px] mt-0.5" style={{ color: "var(--ink-3)" }}>
                 <span style={{ color: "var(--green)", fontWeight: 600 }}>▲ 12%</span> vs last month
               </div>
             </div>
           </div>
 
-          {/* Progress bar */}
-          <div className="relative h-3.5 rounded-full overflow-visible" style={{ background: "var(--bg)", border: "1px solid var(--line)" }}>
+          {/* Progress bar — clean, flat */}
+          <div className="relative h-3 rounded-full overflow-visible" style={{ background: "rgba(0,0,0,.04)" }}>
             {/* Target marker at 85% */}
-            <div className="absolute top-[-5px] bottom-[-5px] w-0.5 z-10" style={{ left: "85%", background: "var(--ink-1)" }}>
+            <div className="absolute top-[-4px] bottom-[-4px] w-px z-10" style={{ left: "85%", background: "var(--ink-3)" }}>
               <div
-                className="absolute -top-6 left-1/2 -translate-x-1/2 whitespace-nowrap text-[10px] font-semibold text-white px-1.5 py-0.5 rounded-[4px]"
-                style={{ background: "var(--ink-1)" }}
+                className="absolute -top-5 left-1/2 -translate-x-1/2 whitespace-nowrap text-[9px] font-medium px-1.5 py-0.5 rounded-[4px]"
+                style={{ background: "var(--ink-2)", color: "white" }}
               >
                 Target 85%
-                <span className="absolute bottom-[-4px] left-1/2 -translate-x-1/2 w-2 h-2 rotate-45 inline-block" style={{ background: "var(--ink-1)" }} />
               </div>
             </div>
-            {/* Fill */}
+            {/* Fill — flat blue */}
             <div
-              className="h-full rounded-full relative flex items-center justify-end pr-2"
+              className="h-full rounded-full"
               style={{
                 width: "73%",
-                background: "linear-gradient(90deg, var(--blue) 0%, var(--cyan) 100%)",
-                boxShadow: "0 2px 6px -1px rgba(37,99,235,.35)",
+                background: "var(--blue)",
+                boxShadow: "0 1px 4px -1px rgba(37,99,235,.25)",
               }}
-            >
-              <span className="text-[10px] font-bold text-white">73%</span>
-            </div>
-          </div>
-          <div
-            className="flex justify-between text-[10px] mt-2 font-mono"
-            style={{ color: "var(--ink-4)" }}
-          >
-            {["0", "25", "50", "75", "100"].map((v) => <span key={v}>{v}</span>)}
+            />
           </div>
         </div>
 
         {/* Subject bars */}
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-5">
           {SUBJECTS.map((s) => (
             <div key={s.name}>
-              <div className="flex justify-between mb-1.5">
-                <span className="text-[13px] font-semibold" style={{ color: "var(--ink-1)" }}>{s.name}</span>
-                <span className="text-[13px] font-bold font-mono" style={{ color: s.color }}>{s.pct}%</span>
+              <div className="flex justify-between mb-2">
+                <span className="text-[12px] font-semibold" style={{ color: "var(--ink-1)" }}>{s.name}</span>
+                <span className="text-[12px] font-bold font-mono tabular-nums" style={{ color: s.color }}>{s.pct}%</span>
               </div>
-              <div className="h-2 rounded-full overflow-hidden" style={{ background: "var(--bg)", border: "1px solid var(--line-soft)" }}>
+              <div className="h-1.5 rounded-full overflow-hidden" style={{ background: "rgba(0,0,0,.04)" }}>
                 <div
                   className="h-full rounded-full transition-all"
-                  style={{ width: `${s.pct}%`, background: s.color }}
+                  style={{ width: `${s.pct}%`, background: s.color, opacity: 0.85 }}
                 />
               </div>
             </div>

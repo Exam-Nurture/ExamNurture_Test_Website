@@ -12,33 +12,43 @@ export const metadata = { title: "Dashboard — ExamNurture" };
 
 export default function DashboardPage() {
   return (
-    <div className="flex flex-col gap-5 fade-up">
-      {/* Greeting */}
+    <div className="flex flex-col gap-6 fade-up">
+      {/* Greeting — full width */}
       <GreetingRow />
 
-      {/* Stat cards */}
-      <StatCards />
+      {/* 2-column layout */}
+      <div className="grid grid-cols-1 xl:grid-cols-[1fr_340px] gap-6 items-start">
 
-      {/* Streak + Quick Actions — 2 col */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <WeeklyStreak />
-        <QuickActions />
+        {/* ── Left column: primary content ── */}
+        <div className="flex flex-col gap-6 min-w-0">
+          {/* Stat cards */}
+          <StatCards />
+
+          {/* Exam Readiness — highlight card */}
+          <ExamReadiness />
+
+          {/* Recent Tests */}
+          <RecentTests />
+
+          {/* Test Series */}
+          <TestSeriesCards />
+        </div>
+
+        {/* ── Right column: secondary / quick access ── */}
+        <div className="flex flex-col gap-6">
+          {/* Quick Actions */}
+          <QuickActions />
+
+          {/* Weekly Streak */}
+          <WeeklyStreak />
+
+          {/* Weak Areas */}
+          <WeakAreas />
+
+          {/* Recommendations */}
+          <Recommendations />
+        </div>
       </div>
-
-      {/* Exam Readiness */}
-      <ExamReadiness />
-
-      {/* Weak Areas + Recommendations — 2 col */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
-        <WeakAreas />
-        <Recommendations />
-      </div>
-
-      {/* Recent Tests */}
-      <RecentTests />
-
-      {/* Test Series */}
-      <TestSeriesCards />
     </div>
   );
 }

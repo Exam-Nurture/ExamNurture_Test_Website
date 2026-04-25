@@ -5,7 +5,7 @@ import { TrendingUp, TrendingDown } from "lucide-react";
 type Sparkline = { points: number[]; color: string };
 
 function Spark({ points, color }: Sparkline) {
-  const w = 100, h = 28;
+  const w = 80, h = 24;
   const max = Math.max(...points), min = Math.min(...points);
   const range = max - min || 1;
   const coords = points.map((p, i) => {
@@ -15,8 +15,8 @@ function Spark({ points, color }: Sparkline) {
   }).join(" ");
   return (
     <svg width={w} height={h} viewBox={`0 0 ${w} ${h}`} fill="none">
-      <polyline points={coords} stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" fill="none" />
-      <polyline points={`${coords} ${w},${h} 0,${h}`} fill={color} opacity="0.08" stroke="none" />
+      <polyline points={coords} stroke={color} strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" fill="none" opacity="0.7" />
+      <polyline points={`${coords} ${w},${h} 0,${h}`} fill={color} opacity="0.05" stroke="none" />
     </svg>
   );
 }
@@ -33,30 +33,27 @@ interface StatCardProps {
 
 function StatCard({ label, value, sub, trend, trendUp = true, spark, accent }: StatCardProps) {
   return (
-    <div
-      className="rounded-[14px] p-5 transition-all hover:-translate-y-0.5 cursor-default"
-      style={{ background: "white", border: "1px solid var(--line)", boxShadow: "var(--shadow-sm)" }}
-    >
+    <div className="card card-lift p-6">
       <div className="flex justify-between items-start gap-2">
         <div>
-          <div className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: "var(--ink-3)" }}>
+          <div className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: "var(--ink-4)" }}>
             {label}
           </div>
           <div
-            className="text-[30px] font-bold tracking-tight leading-none mt-1.5 flex items-baseline gap-1"
+            className="text-[28px] font-bold tracking-tight leading-none mt-2 flex items-baseline gap-1"
             style={{ color: accent ?? "var(--ink-1)", fontFamily: "var(--font-sora)" }}
           >
             {value}
-            {sub && <span className="text-[16px] font-medium" style={{ color: "var(--ink-3)" }}>{sub}</span>}
+            {sub && <span className="text-[15px] font-medium" style={{ color: "var(--ink-4)" }}>{sub}</span>}
           </div>
         </div>
         <Spark {...spark} />
       </div>
       <div
-        className="mt-3 inline-flex items-center gap-1.5 text-[12px] font-semibold"
+        className="mt-4 inline-flex items-center gap-1.5 text-[11px] font-medium"
         style={{ color: trendUp ? "var(--green)" : "var(--red)" }}
       >
-        {trendUp ? <TrendingUp size={12} /> : <TrendingDown size={12} />}
+        {trendUp ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
         {trend}
       </div>
     </div>
