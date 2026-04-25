@@ -1,0 +1,8 @@
+import ResultsPage from "@/components/results/ResultsPage";
+
+export const metadata = { title: "Results — ExamNurture" };
+
+export default async function Page({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  return <ResultsPage resultId={id} />;
+}

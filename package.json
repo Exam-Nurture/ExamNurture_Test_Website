@@ -1,7 +1,8 @@
 {
-  "name": "examnurture-app",
+  "name": "examnurture-test-website",
   "version": "0.1.0",
   "private": true,
+  "description": "ExamNurture — Student-facing web application for JEE & NEET exam preparation. Provides mock test series, PYQ papers, a live CBT exam interface, performance analytics, and AI-driven weak-area recommendations. Frontend built with Next.js 15 (App Router); pairs with a shared Node.js backend that serves both this web app and the mobile app.",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
@@ -9,9 +10,12 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "clsx": "^2.1.1",
+    "lucide-react": "^1.11.0",
     "next": "16.2.4",
     "react": "19.2.4",
-    "react-dom": "19.2.4"
+    "react-dom": "19.2.4",
+    "tailwind-merge": "^3.5.0"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",

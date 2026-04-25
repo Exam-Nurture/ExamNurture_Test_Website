@@ -1,0 +1,8 @@
+import ExamInterface from "@/components/exam/ExamInterface";
+
+export const metadata = { title: "Exam — ExamNurture" };
+
+export default async function ExamPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
+  return <ExamInterface examId={id} />;
+}
