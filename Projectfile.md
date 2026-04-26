@@ -1380,4 +1380,505 @@ When the backend is ready, update the frontend:
 
 ---
 
+## 13. New-Chat Starter Prompt (Backend Project)
+
+> **Usage:** Copy everything inside the code block below and paste it as your first message in a **new Claude conversation** to kick off the Node.js backend project from scratch.
+
+````
+You are a senior full-stack Node.js/TypeScript engineer. I need you to build the complete backend API server for **ExamNurture** — an Indian government competitive exam preparation platform.
+
+## What ExamNurture does
+- Students prepare for JPSC, IBPS PO, SBI PO, SSC CGL, Railway NTPC, Police SI, Army GD, etc.
+- Subscription model: 3 tiers based on educational qualification (10th / 12th / Graduation). Tiers are cumulative — Tier 3 users get access to all 11 exam boards.
+- Core features: Mock tests, Previous Year Questions (PYQ), Leveled study guides, Live contests (competitive quiz), Daily practice sets, Live events/webinars, Analytics/streak tracking.
+
+## Tech stack to build
+- **Runtime:** Node.js 20+ LTS
+- **Framework:** Express.js with TypeScript
+- **Database:** PostgreSQL (primary) + Redis (JWT revocation / caching)
+- **ORM:** Prisma
+- **Auth:** JWT access token (15 min expiry) + httpOnly cookie refresh token (7 days expiry)
+- **Payments:** Razorpay (Indian payment gateway — subscriptions + one-time)
+- **File storage:** AWS S3 or Cloudflare R2 (PDF papers, images)
+- **Email:** Resend (transactional email)
+- **API style:** REST/JSON versioned under `/api/v1/`
+
+## Database models (Prisma — build from this exact schema)
+
+```prisma
+model User {
+  id           String   @id @default(cuid())
+  name         String
+  email        String   @unique
+  phone        String?  @unique
+  passwordHash String
+  avatarUrl    String?
+  isVerified   Boolean  @default(false)
+  role         Role     @default(STUDENT)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  subscription  Subscription?
+  refreshTokens RefreshToken[]
+  attempts      Attempt[]
+  contestEntries ContestEntry[]
+  bookmarks     Bookmark[]
+  streak        Streak?
+  topicProgress UserTopicProgress[]
+  scheduleItems ScheduleItem[]
+  payments      Payment[]
+}
+
+enum Role { STUDENT ADMIN }
+
+model RefreshToken {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model Subscription {
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id])
+  tierLevel       Int      // 1 | 2 | 3
+  billingCycle    BillingCycle
+  status          SubStatus @default(ACTIVE)
+  currentPeriodEnd DateTime
+  razorpaySubId   String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  payments        Payment[]
+}
+
+enum BillingCycle { MONTHLY YEARLY }
+enum SubStatus    { ACTIVE EXPIRED CANCELLED PAUSED }
+
+model Payment {
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id])
+  subscriptionId  String?
+  subscription    Subscription? @relation(fields: [subscriptionId], references: [id])
+  razorpayOrderId String   @unique
+  razorpayPaymentId String? @unique
+  amountPaise     Int
+  currency        String   @default("INR")
+  status          PaymentStatus @default(PENDING)
+  createdAt       DateTime @default(now())
+}
+
+enum PaymentStatus { PENDING SUCCESS FAILED REFUNDED }
+
+model Board {
+  id          String @id  // e.g. "state-psc"
+  name        String
+  shortName   String
+  description String
+  tint        String      // hex color
+  colorSoft   String
+  minTier     Int         // 1 | 2 | 3
+  exams       Exam[]
+}
+
+model Exam {
+  id           String  @id   // e.g. "jpsc-prelims-2025"
+  boardId      String
+  board        Board   @relation(fields: [boardId], references: [id])
+  name         String
+  shortName    String
+  tier         Int           // min tier to access
+  eligibility  String
+  pattern      String
+  subjects     String[]
+  hasTests     Boolean @default(false)
+  hasPYQ       Boolean @default(false)
+  hasGuide     Boolean @default(false)
+  upcomingDate String?
+  daysLeft     Int?
+  testSeries   TestSeries[]
+  pyqPapers    PYQPaper[]
+  contests     Contest[]
+}
+
+model TestSeries {
+  id          String  @id @default(cuid())
+  examId      String
+  exam        Exam    @relation(fields: [examId], references: [id])
+  title       String
+  description String?
+  totalTests  Int
+  isPaid      Boolean @default(false)
+  isActive    Boolean @default(true)
+  createdAt   DateTime @default(now())
+  tests       Test[]
+}
+
+model Test {
+  id           String  @id @default(cuid())
+  seriesId     String
+  series       TestSeries @relation(fields: [seriesId], references: [id])
+  title        String
+  durationSec  Int
+  totalMarks   Int
+  negMarks     Float  @default(0.25)
+  isLocked     Boolean @default(false)
+  scheduledAt  DateTime?
+  questions    TestQuestion[]
+  attempts     Attempt[]
+}
+
+model Question {
+  id           String   @id @default(cuid())
+  examId       String?
+  text         String
+  options      Json     // string[]
+  correctIndex Int
+  explanation  String?
+  subject      String?
+  topic        String?
+  difficulty   Difficulty @default(MEDIUM)
+  language     Lang    @default(EN)
+  source       String?
+  year         Int?
+  createdAt    DateTime @default(now())
+  testQuestions TestQuestion[]
+  pyqQuestions  PYQQuestion[]
+}
+
+enum Difficulty { EASY MEDIUM HARD }
+enum Lang       { EN HI BOTH }
+
+model TestQuestion {
+  testId     String
+  questionId String
+  order      Int
+  test       Test     @relation(fields: [testId], references: [id])
+  question   Question @relation(fields: [questionId], references: [id])
+  @@id([testId, questionId])
+}
+
+model Attempt {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  testId      String
+  test        Test     @relation(fields: [testId], references: [id])
+  answers     Json     // { questionId: selectedIndex }
+  score       Float
+  totalMarks  Int
+  timeTakenSec Int
+  completedAt  DateTime @default(now())
+}
+
+model PYQPaper {
+  id         String   @id @default(cuid())
+  examId     String
+  exam       Exam     @relation(fields: [examId], references: [id])
+  title      String
+  year       Int
+  shift      String?
+  totalQs    Int
+  pdfUrl     String?
+  isActive   Boolean  @default(true)
+  questions  PYQQuestion[]
+}
+
+model PYQQuestion {
+  paperId    String
+  questionId String
+  order      Int
+  paper      PYQPaper  @relation(fields: [paperId], references: [id])
+  question   Question  @relation(fields: [questionId], references: [id])
+  @@id([paperId, questionId])
+}
+
+model UserTopicProgress {
+  id          String   @id @default(cuid())
+  userId      String
+  examId      String
+  topicName   String
+  strength    Int      @default(0)  // 0-100
+  status      TopicStatus @default(AVAILABLE)
+  lastStudied DateTime?
+  @@unique([userId, examId, topicName])
+}
+
+enum TopicStatus { DONE IN_PROGRESS AVAILABLE LOCKED }
+
+model Contest {
+  id              String        @id @default(cuid())
+  examId          String
+  exam            Exam          @relation(fields: [examId], references: [id])
+  title           String
+  subtitle        String
+  duration        Int
+  totalQuestions  Int
+  prize           String?
+  scheduledAt     DateTime
+  endsAt          DateTime
+  status          ContestStatus @default(UPCOMING)
+  registeredCount Int           @default(0)
+  isActive        Boolean       @default(true)
+  createdAt       DateTime      @default(now())
+  entries         ContestEntry[]
+  questions       ContestQuestion[]
+}
+
+enum ContestStatus { UPCOMING LIVE ENDED }
+
+model ContestEntry {
+  id         String   @id @default(cuid())
+  contestId  String
+  contest    Contest  @relation(fields: [contestId], references: [id])
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  score      Int      @default(0)
+  rank       Int?
+  answers    Json?
+  submittedAt DateTime?
+  @@unique([contestId, userId])
+}
+
+model ContestQuestion {
+  contestId  String
+  questionId String
+  order      Int
+  @@id([contestId, questionId])
+}
+
+model LiveEvent {
+  id          String   @id @default(cuid())
+  title       String
+  host        String
+  hostRole    String
+  scheduledAt DateTime
+  durationMin Int
+  isLive      Boolean  @default(false)
+  registeredCount Int  @default(0)
+  meetUrl     String?
+  isActive    Boolean  @default(true)
+}
+
+model Streak {
+  id         String   @id @default(cuid())
+  userId     String   @unique
+  user       User     @relation(fields: [userId], references: [id])
+  current    Int      @default(0)
+  longest    Int      @default(0)
+  lastDate   DateTime?
+}
+
+model Bookmark {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation(fields: [userId], references: [id])
+  questionId String
+  createdAt  DateTime @default(now())
+  @@unique([userId, questionId])
+}
+
+model ScheduleItem {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  examId    String
+  subject   String
+  topic     String
+  date      DateTime
+  doneAt    DateTime?
+}
+```
+
+## Complete API contract (all endpoints your backend must implement)
+
+### Auth
+```
+POST /api/v1/auth/register     body: { name, email, phone?, password }
+POST /api/v1/auth/login        body: { email, password }   → { accessToken } + Set-Cookie: refreshToken
+POST /api/v1/auth/refresh      cookie: refreshToken         → { accessToken }
+POST /api/v1/auth/logout       clears cookie
+POST /api/v1/auth/verify-email body: { token }
+POST /api/v1/auth/forgot-password  body: { email }
+POST /api/v1/auth/reset-password   body: { token, newPassword }
+```
+
+### User
+```
+GET    /api/v1/user/profile      → { id, name, email, phone, avatarUrl, subscription, stats }
+PATCH  /api/v1/user/profile      body: { name?, phone?, avatarUrl? }
+GET    /api/v1/user/dashboard    → { streak, dailyPractice, upcomingTests, recentAttempts, liveEvents }
+GET    /api/v1/user/analytics    → { weakTopics, attemptHistory, scoreProgress, examBreakdown }
+```
+
+### Exams & Boards
+```
+GET /api/v1/boards               ?tier=&minTier=
+GET /api/v1/boards/:id
+GET /api/v1/exams                ?board=&tier=&hasTests=&hasPYQ=&hasGuide=
+GET /api/v1/exams/:id
+```
+
+### Tiers & Subscriptions
+```
+GET  /api/v1/tiers               → Tier[]  (public — for plans page)
+GET  /api/v1/tiers/:id           ?withBoards=true
+POST /api/v1/subscription/checkout    body: { tierLevel, billingCycle } → { razorpayOrderId, amount }
+POST /api/v1/subscription/verify      body: { razorpayOrderId, razorpayPaymentId, razorpaySignature }
+GET  /api/v1/subscription/status
+POST /api/v1/subscription/cancel
+```
+
+### Tests
+```
+GET  /api/v1/test-series          ?examId=&page=&limit=
+GET  /api/v1/test-series/:id
+GET  /api/v1/tests/:id
+POST /api/v1/attempts/start       body: { testId }
+POST /api/v1/attempts/:id/submit  body: { answers: { questionId: number }[] }
+GET  /api/v1/attempts/:id/result  → { score, totalMarks, rank?, analysis[] }
+GET  /api/v1/attempts             ?userId=  (own history)
+```
+
+### PYQ
+```
+GET /api/v1/pyq          ?examId=&year=&page=&limit=
+GET /api/v1/pyq/:paperId
+GET /api/v1/pyq/:paperId/questions
+```
+
+### Guides
+```
+GET   /api/v1/guides              ?examId=
+GET   /api/v1/guides/:examId      → { levels: [{ level, topics: [{ name, notes, pyqs, strength, status }] }] }
+PATCH /api/v1/guides/:examId/topics/:topicName/progress   body: { status }
+```
+
+### Contests
+```
+GET  /api/v1/contests             ?status=UPCOMING|LIVE|ENDED&examId=
+GET  /api/v1/contests/:id
+POST /api/v1/contests/:id/register
+GET  /api/v1/contests/:id/leaderboard  → [{ rank, userId, name, score, timeTakenSec }]
+POST /api/v1/contests/:id/submit       body: { answers }
+```
+
+### Daily Practice
+```
+GET  /api/v1/daily-practice       → { date, questions: Question[] }
+POST /api/v1/daily-practice/submit body: { answers: { questionId: number }[] }
+```
+
+### Library
+```
+GET  /api/v1/library    ?type=article|video&subject=&page=
+GET  /api/v1/bookmarks
+POST /api/v1/bookmarks  body: { questionId }
+DELETE /api/v1/bookmarks/:questionId
+```
+
+### Schedule
+```
+GET    /api/v1/schedule              ?date=
+POST   /api/v1/schedule              body: { examId, subject, topic, date }
+PATCH  /api/v1/schedule/:id          body: { doneAt }
+DELETE /api/v1/schedule/:id
+```
+
+### Live Events
+```
+GET  /api/v1/events    ?upcoming=true
+POST /api/v1/events/:id/register
+```
+
+## Backend file structure to create
+```
+examnurture-api/
+├── src/
+│   ├── routes/
+│   │   ├── auth.ts
+│   │   ├── user.ts
+│   │   ├── exams.ts
+│   │   ├── tiers.ts
+│   │   ├── subscription.ts
+│   │   ├── tests.ts
+│   │   ├── attempts.ts
+│   │   ├── pyq.ts
+│   │   ├── guides.ts
+│   │   ├── contests.ts
+│   │   ├── dailyPractice.ts
+│   │   ├── library.ts
+│   │   ├── schedule.ts
+│   │   └── events.ts
+│   ├── middleware/
+│   │   ├── auth.ts          # verifyToken middleware
+│   │   ├── requireTier.ts   # check user subscription tier
+│   │   ├── rateLimiter.ts
+│   │   └── errorHandler.ts
+│   ├── services/
+│   │   ├── authService.ts
+│   │   ├── subscriptionService.ts
+│   │   ├── razorpayService.ts
+│   │   ├── emailService.ts
+│   │   ├── scoringService.ts
+│   │   └── streakService.ts
+│   ├── lib/
+│   │   ├── prisma.ts        # PrismaClient singleton
+│   │   ├── redis.ts         # ioredis client
+│   │   ├── jwt.ts           # sign / verify helpers
+│   │   └── seed.ts          # seed boards, exams, tiers from static data
+│   └── app.ts
+├── prisma/
+│   ├── schema.prisma
+│   └── migrations/
+├── .env
+├── package.json
+└── tsconfig.json
+```
+
+## Required environment variables
+```env
+DATABASE_URL="postgresql://user:pass@localhost:5432/examnurture"
+REDIS_URL="redis://localhost:6379"
+JWT_SECRET="<random-256-bit>"
+JWT_REFRESH_SECRET="<random-256-bit>"
+RAZORPAY_KEY_ID=""
+RAZORPAY_KEY_SECRET=""
+RAZORPAY_WEBHOOK_SECRET=""
+RESEND_API_KEY=""
+FROM_EMAIL="noreply@examnurture.in"
+CLIENT_URL="http://localhost:3000"
+PORT=4000
+```
+
+## Business rules (must enforce in backend)
+1. **Tier access:** A user can only access boards/exams whose `minTier` ≤ their active subscription `tierLevel`. Tiers are cumulative (T3 ⊃ T2 ⊃ T1).
+2. **Subscription check on every protected route:** `requireTier(n)` middleware must verify `subscription.status === ACTIVE` and `subscription.tierLevel >= n` before serving test, PYQ, or guide content.
+3. **Attempt scoring:** `score = correct × 1 − wrong × 0.25` (configurable per test). Return rank among all users who attempted same test.
+4. **Streak logic:** Increment `streak.current` if last activity was yesterday. Reset to 1 if more than 1 day gap. Run a cron at midnight IST to detect resets.
+5. **Contest timing:** Auto-transition contest status: `UPCOMING → LIVE` at `scheduledAt`, `LIVE → ENDED` at `endsAt`. Use a cron or Redis TTL trigger.
+6. **Daily practice:** Generate 5 questions/day from the user's weakest topics (lowest `UserTopicProgress.strength`). Cache per user per day in Redis.
+7. **Razorpay webhook:** Verify signature. On `payment.captured` → activate/extend subscription. On `subscription.cancelled` → set status to CANCELLED.
+8. **Refresh token rotation:** Issue a new refresh token on every `/auth/refresh`. Revoke old token. Store tokens in DB with expiry.
+
+## Task for you
+Build this backend step by step:
+1. Set up the Express + TypeScript + Prisma project skeleton
+2. Implement the Prisma schema (copy from above exactly)
+3. Write seed data for boards, exams, and tiers (use the 11-board / 3-tier data defined above)
+4. Implement Auth routes first (register, login, refresh, logout) with JWT + httpOnly cookie
+5. Implement User routes
+6. Implement Exams + Boards + Tiers routes (these are mostly read-only)
+7. Implement Subscription + Razorpay checkout + webhook
+8. Implement Tests + Attempts with scoring
+9. Implement remaining routes (PYQ, Guides, Contests, Daily Practice, etc.)
+
+Start with step 1. Ask me before moving to each new step so I can review.
+````
+
+---
+
 *Last updated: April 2026 · ExamNurture v1.0*
