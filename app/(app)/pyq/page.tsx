@@ -2,180 +2,277 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { FileText, Clock, BookOpen, Download, Play, ChevronDown } from "lucide-react";
+import { Clock, BookOpen, Download, Play, CheckCircle2, ChevronDown, Zap } from "lucide-react";
+import { EXAM_BOARDS, type ExamBoard, type Exam } from "@/lib/data/examData";
 
-const EXAMS   = ["All", "JEE Main", "JEE Advanced", "NEET", "BITSAT"];
-const YEARS   = ["All Years", "2024", "2023", "2022", "2021", "2020", "2019", "2018"];
-const SUBJECTS_F = ["All Subjects", "Physics", "Chemistry", "Mathematics", "Biology"];
+/* ─────────────────────────────────────────────
+   Filter boards that have PYQ papers
+───────────────────────────────────────────── */
+const PYQ_BOARDS = EXAM_BOARDS.filter((b) => b.exams.some((e) => e.hasPYQ));
+const BOARD_TABS = ["All", ...PYQ_BOARDS.map((b) => b.shortName)];
+const YEARS     = ["All Years", "2024", "2023", "2022", "2021", "2020", "2019"];
+const SUBJECTS  = ["All Subjects", "General Knowledge", "Reasoning", "Quantitative Aptitude", "English", "Hindi", "Computer"];
 
-const PAPERS = [
-  { id: "jee-main-2024-s1", exam: "JEE Main", year: "2024", shift: "Shift 1", date: "Jan 27, 2024", qs: 90, duration: "3 hrs", subjects: ["Physics", "Chemistry", "Mathematics"], attempted: true, score: "248/300", difficulty: "Medium" },
-  { id: "jee-main-2024-s2", exam: "JEE Main", year: "2024", shift: "Shift 2", date: "Jan 27, 2024", qs: 90, duration: "3 hrs", subjects: ["Physics", "Chemistry", "Mathematics"], attempted: false, score: null, difficulty: "Hard", isNew: true },
-  { id: "jee-main-2024-s3", exam: "JEE Main", year: "2024", shift: "Shift 3", date: "Jan 29, 2024", qs: 90, duration: "3 hrs", subjects: ["Physics", "Chemistry", "Mathematics"], attempted: false, score: null, difficulty: "Medium" },
-  { id: "jee-adv-2024-p1",  exam: "JEE Advanced", year: "2024", shift: "Paper 1", date: "May 26, 2024", qs: 54, duration: "3 hrs", subjects: ["Physics", "Chemistry", "Mathematics"], attempted: false, score: null, difficulty: "Hard" },
-  { id: "jee-adv-2024-p2",  exam: "JEE Advanced", year: "2024", shift: "Paper 2", date: "May 26, 2024", qs: 54, duration: "3 hrs", subjects: ["Physics", "Chemistry", "Mathematics"], attempted: false, score: null, difficulty: "Hard" },
-  { id: "jee-main-2023-s1", exam: "JEE Main", year: "2023", shift: "Shift 1", date: "Jan 24, 2023", qs: 90, duration: "3 hrs", subjects: ["Physics", "Chemistry", "Mathematics"], attempted: true, score: "220/300", difficulty: "Medium" },
-  { id: "jee-main-2023-s2", exam: "JEE Main", year: "2023", shift: "Shift 2", date: "Jan 24, 2023", qs: 90, duration: "3 hrs", subjects: ["Physics", "Chemistry", "Mathematics"], attempted: false, score: null, difficulty: "Easy" },
-  { id: "neet-2024",        exam: "NEET",     year: "2024", shift: "Paper",   date: "May 5, 2024",  qs: 200, duration: "3h 20m", subjects: ["Physics", "Chemistry", "Biology"], attempted: false, score: null, difficulty: "Medium" },
-];
-
-const DIFF_STYLE: Record<string, { bg: string; fg: string }> = {
-  Easy:   { bg: "#ECFDF5", fg: "#059669" },
-  Medium: { bg: "#FFFBEB", fg: "#B45309" },
-  Hard:   { bg: "#FEF2F2", fg: "#DC2626" },
+/* ─────────────────────────────────────────────
+   Mock PYQ Papers — will come from API
+   Each paper is tagged with boardId + examId
+───────────────────────────────────────────── */
+type Paper = {
+  id: string;
+  boardId: string;
+  examId: string;
+  examName: string;
+  boardShortName: string;
+  year: string;
+  paper: string;
+  date: string;
+  qs: number;
+  duration: string;
+  subjects: string[];
+  attempted: boolean;
+  score: string | null;
+  difficulty: "Easy" | "Medium" | "Hard";
+  isNew?: boolean;
 };
 
-export default function PYQPage() {
-  const [exam, setExam]    = useState("All");
-  const [year, setYear]    = useState("All Years");
-  const [subj, setSubj]    = useState("All Subjects");
+const PAPERS: Paper[] = [
+  { id: "jpsc-pre-2023", boardId: "state-psc", examId: "jpsc-prelims-2025", examName: "JPSC Prelims", boardShortName: "State PSC", year: "2023", paper: "Paper I", date: "Oct 15, 2023", qs: 100, duration: "2 hrs", subjects: ["General Knowledge", "Reasoning"], attempted: true, score: "71/100", difficulty: "Medium" },
+  { id: "jpsc-pre-2022", boardId: "state-psc", examId: "jpsc-prelims-2025", examName: "JPSC Prelims", boardShortName: "State PSC", year: "2022", paper: "Paper I", date: "Sep 18, 2022", qs: 100, duration: "2 hrs", subjects: ["General Knowledge", "Reasoning"], attempted: false, score: null, difficulty: "Medium", isNew: true },
+  { id: "sbi-po-2024", boardId: "banking-po", examId: "sbi-po-2025", examName: "SBI PO Prelims", boardShortName: "Banking PO", year: "2024", paper: "Shift 1", date: "Mar 2, 2024", qs: 100, duration: "1 hr", subjects: ["Reasoning", "Quantitative Aptitude", "English"], attempted: true, score: "67/100", difficulty: "Hard" },
+  { id: "ibps-po-2023", boardId: "banking-po", examId: "ibps-po-2025", examName: "IBPS PO Prelims", boardShortName: "Banking PO", year: "2023", paper: "Shift 2", date: "Oct 7, 2023", qs: 100, duration: "1 hr", subjects: ["Reasoning", "Quantitative Aptitude", "English"], attempted: false, score: null, difficulty: "Hard" },
+  { id: "ssc-cgl-2023", boardId: "ssc-upper", examId: "ssc-cgl-2025", examName: "SSC CGL Tier I", boardShortName: "SSC Upper", year: "2023", paper: "Shift 1", date: "Jul 14, 2023", qs: 100, duration: "1 hr", subjects: ["General Knowledge", "Reasoning", "Quantitative Aptitude", "English"], attempted: false, score: null, difficulty: "Medium" },
+  { id: "rrb-ntpc-2022", boardId: "railway-ntpc", examId: "rrb-ntpc-grad-2025", examName: "RRB NTPC CBT 1", boardShortName: "Railway NTPC", year: "2022", paper: "Shift 1", date: "Jan 16, 2022", qs: 100, duration: "1.5 hrs", subjects: ["General Knowledge", "Reasoning", "Quantitative Aptitude"], attempted: false, score: null, difficulty: "Easy" },
+  { id: "up-si-2023", boardId: "police-si", examId: "up-si-2025", examName: "UP SI / Daroga", boardShortName: "Police SI", year: "2023", paper: "Paper 1", date: "Dec 17, 2023", qs: 160, duration: "2 hrs", subjects: ["General Knowledge", "Reasoning", "Hindi"], attempted: false, score: null, difficulty: "Medium", isNew: true },
+  { id: "rrb-grp-d-2022", boardId: "railway-group-d", examId: "rrb-group-d-2025", examName: "RRB Group D", boardShortName: "Railway Gr D", year: "2022", paper: "Shift 1", date: "Aug 18, 2022", qs: 100, duration: "1.5 hrs", subjects: ["General Science", "Maths", "General Intelligence"], attempted: false, score: null, difficulty: "Easy" },
+  { id: "ssc-mts-2023", boardId: "ssc-lower", examId: "ssc-mts-2025", examName: "SSC MTS", boardShortName: "SSC MTS", year: "2023", paper: "Shift 1", date: "May 7, 2023", qs: 90, duration: "1.5 hrs", subjects: ["Reasoning", "Quantitative Aptitude", "General English", "General Awareness"], attempted: false, score: null, difficulty: "Easy" },
+  { id: "jpsc-pre-2021", boardId: "state-psc", examId: "jpsc-prelims-2025", examName: "JPSC Prelims", boardShortName: "State PSC", year: "2021", paper: "Paper I", date: "Apr 19, 2021", qs: 100, duration: "2 hrs", subjects: ["General Knowledge", "Reasoning"], attempted: true, score: "63/100", difficulty: "Easy" },
+  { id: "ibps-clerk-2023", boardId: "banking-clerk", examId: "ibps-clerk-2025", examName: "IBPS Clerk Pre", boardShortName: "Bank Clerk", year: "2023", paper: "Shift 1", date: "Aug 26, 2023", qs: 100, duration: "1 hr", subjects: ["Reasoning", "Quantitative Aptitude", "English"], attempted: false, score: null, difficulty: "Easy" },
+  { id: "bpsc-pre-2023", boardId: "state-psc", examId: "bpsc-prelims-2025", examName: "BPSC Prelims", boardShortName: "State PSC", year: "2023", paper: "Paper I", date: "Sep 28, 2023", qs: 150, duration: "2 hrs", subjects: ["General Studies", "Current Affairs"], attempted: false, score: null, difficulty: "Medium" },
+];
 
-  const filtered = PAPERS.filter((p) =>
-    (exam === "All" || p.exam === exam) &&
-    (year === "All Years" || p.year === year) &&
-    (subj === "All Subjects" || p.subjects.includes(subj))
+const DIFF: Record<string, string> = {
+  Easy: "var(--green)", Medium: "var(--ink-4)", Hard: "var(--red)",
+};
+
+/* ─────────────────────────────────────────────
+   Page
+───────────────────────────────────────────── */
+export default function PYQPage() {
+  const [tab, setTab] = useState("All");
+  const [year, setYear] = useState("All Years");
+  const [subj, setSubj] = useState("All Subjects");
+
+  const filtered = PAPERS.filter(
+    (p) =>
+      (tab === "All" || p.boardShortName === tab) &&
+      (year === "All Years" || p.year === year) &&
+      (subj === "All Subjects" || p.subjects.includes(subj)),
   );
 
   return (
-    <div className="flex flex-col gap-6 fade-up">
-      {/* Header */}
-      <div>
-        <h1 className="text-[22px] font-bold tracking-tight" style={{ fontFamily: "var(--font-sora)", color: "var(--ink-1)" }}>
+    <div className="fade-up" style={{ maxWidth: 1200 }}>
+
+      {/* Page header */}
+      <div className="mb-7">
+        <h1
+          className="text-3xl font-bold tracking-tight leading-none"
+          style={{ fontFamily: "var(--font-sora)", color: "var(--ink-1)" }}
+        >
           PYQ Papers
         </h1>
-        <p className="text-[13px] mt-1" style={{ color: "var(--ink-3)" }}>
-          Previous year question papers with detailed solutions
+        <p className="text-[12px] mt-2" style={{ color: "var(--ink-4)", letterSpacing: "0.01em" }}>
+          {PAPERS.length}+ papers · {PYQ_BOARDS.map((b) => b.shortName).join(" · ")} · 2019–2024 · 100% with solutions
         </p>
       </div>
 
-      {/* Stats strip */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        {[
-          { label: "Total Papers", value: "180+", color: "var(--blue)" },
-          { label: "Exams Covered", value: "6", color: "var(--cyan)" },
-          { label: "Years (2015–2024)", value: "10", color: "var(--green)" },
-          { label: "With Solutions", value: "100%", color: "var(--amber)" },
-        ].map((s) => (
-          <div key={s.label} className="rounded-[12px] p-4 text-center" style={{ background: "white", border: "1px solid var(--line)", boxShadow: "var(--shadow-sm)" }}>
-            <div className="text-[22px] font-bold" style={{ color: s.color, fontFamily: "var(--font-sora)" }}>{s.value}</div>
-            <div className="text-[11px] mt-0.5" style={{ color: "var(--ink-3)" }}>{s.label}</div>
-          </div>
-        ))}
-      </div>
+      {/* Filter bar */}
+      <div
+        className="flex flex-wrap items-center justify-between gap-3 pb-4 mb-7"
+        style={{ borderBottom: "1px solid var(--line-soft)" }}
+      >
+        {/* Board tabs */}
+        <div
+          className="flex items-center gap-0.5 p-1 rounded-[10px] overflow-x-auto"
+          style={{ background: "var(--bg)", border: "1px solid var(--line)", scrollbarWidth: "none" }}
+        >
+          {BOARD_TABS.map((t) => (
+            <button
+              key={t}
+              onClick={() => setTab(t)}
+              className="whitespace-nowrap px-3 py-1.5 rounded-[7px] text-[12px] font-medium transition-all duration-150 flex-shrink-0"
+              style={{
+                background: tab === t ? "var(--card)" : "transparent",
+                color: tab === t ? "var(--ink-1)" : "var(--ink-4)",
+                boxShadow: tab === t ? "var(--shadow-xs)" : "none",
+              }}
+            >
+              {t}
+            </button>
+          ))}
+        </div>
 
-      {/* Filters */}
-      <div className="flex flex-wrap gap-3 items-center">
-        <Select label="Exam" options={EXAMS} value={exam} onChange={setExam} />
-        <Select label="Year" options={YEARS} value={year} onChange={setYear} />
-        <Select label="Subject" options={SUBJECTS_F} value={subj} onChange={setSubj} />
-        <div className="ml-auto text-[12px]" style={{ color: "var(--ink-3)" }}>
-          {filtered.length} papers found
+        {/* Dropdowns + count */}
+        <div className="flex items-center gap-2">
+          <Dropdown options={YEARS} value={year} onChange={setYear} />
+          <Dropdown options={SUBJECTS} value={subj} onChange={setSubj} />
+          <span
+            className="text-[12px] pl-3"
+            style={{ color: "var(--ink-4)", borderLeft: "1px solid var(--line)" }}
+          >
+            {filtered.length} {filtered.length === 1 ? "paper" : "papers"}
+          </span>
         </div>
       </div>
 
       {/* Paper grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-        {filtered.map((p) => {
-          const d = DIFF_STYLE[p.difficulty];
-          return (
-            <div
-              key={p.id}
-              className="rounded-[14px] p-4 border flex flex-col transition-all hover:-translate-y-0.5 hover:shadow-md"
-              style={{ background: "white", borderColor: "var(--line)" }}
+      {filtered.length === 0 ? (
+        <div className="text-center py-20 text-[14px]" style={{ color: "var(--ink-4)" }}>
+          No papers match the selected filters.
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5 stagger">
+          {filtered.map((p) => <PaperCard key={p.id} paper={p} />)}
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   Paper Card
+───────────────────────────────────────────── */
+function PaperCard({ paper: p }: { paper: Paper }) {
+  const cta = p.attempted ? "Reattempt" : "Attempt";
+
+  return (
+    <div
+      className="card card-lift flex flex-col"
+      style={{ padding: "22px 24px 20px", borderRadius: 16 }}
+    >
+      {/* Row 1: exam label + status */}
+      <div className="flex items-center justify-between mb-3">
+        <span
+          className="text-[10px] font-semibold tracking-widest uppercase"
+          style={{ color: "var(--ink-4)" }}
+        >
+          {p.examName}
+        </span>
+
+        {p.attempted ? (
+          <div className="flex flex-col items-end">
+            <span
+              className="inline-flex items-center gap-1 text-[11px] font-medium leading-none"
+              style={{ color: "var(--green)" }}
             >
-              {/* Top row */}
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center gap-2 flex-wrap">
-                  <span
-                    className="text-[10px] font-bold tracking-wider px-2 py-0.5 rounded-[4px]"
-                    style={{ background: "var(--blue-soft)", color: "var(--blue)" }}
-                  >
-                    {p.exam.toUpperCase()}
-                  </span>
-                  <span
-                    className="text-[10px] font-semibold px-2 py-0.5 rounded-[4px]"
-                    style={{ background: d.bg, color: d.fg }}
-                  >
-                    {p.difficulty}
-                  </span>
-                  {p.isNew && (
-                    <span className="text-[9px] font-bold px-1.5 py-0.5 rounded-[4px]" style={{ background: "#ECFDF5", color: "#059669" }}>NEW</span>
-                  )}
-                </div>
-                {p.attempted && (
-                  <span className="text-[10px] font-semibold" style={{ color: "var(--green)" }}>✓ Done</span>
-                )}
-              </div>
+              <CheckCircle2 size={11} strokeWidth={2.5} />
+              Done
+            </span>
+            {p.score && (
+              <span
+                className="text-[12px] font-bold mt-1.5 leading-none"
+                style={{ fontFamily: "var(--font-mono)", color: "var(--green)" }}
+              >
+                {p.score}
+              </span>
+            )}
+          </div>
+        ) : p.isNew ? (
+          <span
+            className="inline-flex items-center gap-1 text-[10px] font-semibold px-2 py-0.5 rounded-full"
+            style={{ background: "var(--blue-soft)", color: "var(--blue)" }}
+          >
+            <Zap size={9} strokeWidth={2.5} />
+            New
+          </span>
+        ) : null}
+      </div>
 
-              {/* Title */}
-              <div className="text-[15px] font-semibold leading-snug" style={{ color: "var(--ink-1)", fontFamily: "var(--font-sora)" }}>
-                {p.year} — {p.shift}
-              </div>
-              <div className="text-[12px] mt-0.5" style={{ color: "var(--ink-3)" }}>{p.date}</div>
+      {/* Row 2: title */}
+      <div
+        className="text-[17px] font-semibold leading-tight"
+        style={{ fontFamily: "var(--font-sora)", color: "var(--ink-1)" }}
+      >
+        {p.year} — {p.paper}
+      </div>
 
-              {/* Meta */}
-              <div className="flex flex-wrap gap-3 mt-3 pb-3" style={{ borderBottom: "1px dashed var(--line)" }}>
-                <span className="inline-flex items-center gap-1 text-[11px]" style={{ color: "var(--ink-3)" }}>
-                  <BookOpen size={12} /> {p.qs} Questions
-                </span>
-                <span className="inline-flex items-center gap-1 text-[11px]" style={{ color: "var(--ink-3)" }}>
-                  <Clock size={12} /> {p.duration}
-                </span>
-              </div>
+      {/* Row 3: date */}
+      <div className="text-[12px] mt-1" style={{ color: "var(--ink-4)" }}>{p.date}</div>
 
-              {/* Score if attempted */}
-              {p.attempted && p.score && (
-                <div className="mt-3 flex items-center justify-between">
-                  <span className="text-[12px]" style={{ color: "var(--ink-3)" }}>Your score</span>
-                  <span className="text-[13px] font-bold font-mono" style={{ color: "var(--green)" }}>{p.score}</span>
-                </div>
-              )}
+      {/* Row 4: meta */}
+      <div className="flex items-center gap-0 mt-4">
+        <span className="inline-flex items-center gap-1.5 text-[12px]" style={{ color: "var(--ink-3)" }}>
+          <BookOpen size={12} strokeWidth={1.75} />
+          {p.qs} Questions
+        </span>
+        <span className="mx-2.5 text-[11px]" style={{ color: "var(--line)" }}>·</span>
+        <span className="inline-flex items-center gap-1.5 text-[12px]" style={{ color: "var(--ink-3)" }}>
+          <Clock size={12} strokeWidth={1.75} />
+          {p.duration}
+        </span>
+        <span
+          className="ml-auto text-[11px] font-semibold"
+          style={{ color: DIFF[p.difficulty] }}
+        >
+          {p.difficulty}
+        </span>
+      </div>
 
-              {/* Actions */}
-              <div className="flex gap-2 mt-3">
-                <Link
-                  href={`/exam/${p.id}`}
-                  className="flex-1 inline-flex items-center justify-center gap-1.5 py-2 text-[12px] font-semibold rounded-[9px] text-white transition-all hover:brightness-105"
-                  style={{ background: "var(--blue)" }}
-                >
-                  <Play size={12} fill="white" stroke="none" />
-                  {p.attempted ? "Reattempt" : "Attempt"}
-                </Link>
-                <button
-                  className="px-3 py-2 rounded-[9px] transition-all hover:bg-[var(--bg)]"
-                  style={{ border: "1px solid var(--line)", color: "var(--ink-3)" }}
-                  title="Download PDF"
-                >
-                  <Download size={14} />
-                </button>
-              </div>
-            </div>
-          );
-        })}
+      {/* Empty space for alignment */}
+      <div className="mt-4" />
+
+      {/* Separator */}
+      <div className="mt-5 mb-4" style={{ borderTop: "1px solid var(--line-soft)" }} />
+
+      {/* Actions */}
+      <div className="flex items-center gap-2">
+        <Link
+          href={`/exam/${p.id}`}
+          className="flex-1 inline-flex items-center justify-center gap-2 rounded-[10px] text-[13px] font-semibold text-white transition-all duration-150 hover:brightness-110 active:scale-[0.98]"
+          style={{ background: "var(--blue)", height: 38 }}
+        >
+          <Play size={11} fill="white" stroke="none" />
+          {cta}
+        </Link>
+        <button
+          className="inline-flex items-center justify-center rounded-[10px] transition-all duration-150 hover:bg-[var(--bg)] active:scale-[0.96]"
+          style={{ width: 38, height: 38, border: "1px solid var(--line)", color: "var(--ink-4)" }}
+          title="Download paper PDF"
+        >
+          <Download size={14} strokeWidth={1.75} />
+        </button>
       </div>
     </div>
   );
 }
 
-function Select({ label, options, value, onChange }: {
-  label: string; options: string[]; value: string; onChange: (v: string) => void;
+/* ─────────────────────────────────────────────
+   Dropdown
+───────────────────────────────────────────── */
+function Dropdown({ options, value, onChange }: {
+  options: string[]; value: string; onChange: (v: string) => void;
 }) {
+  const isDefault = value === options[0];
   return (
     <div className="relative">
       <select
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        className="appearance-none pl-3 pr-8 py-2 rounded-[10px] text-[13px] font-medium transition-all outline-none cursor-pointer"
+        className="appearance-none cursor-pointer outline-none rounded-[8px] text-[12px] font-medium transition-all duration-150"
         style={{
-          background: "white",
+          paddingLeft: 12, paddingRight: 28, paddingTop: 7, paddingBottom: 7,
+          background: "var(--card)",
           border: "1px solid var(--line)",
-          color: "var(--ink-1)",
-          boxShadow: "var(--shadow-sm)",
+          color: isDefault ? "var(--ink-3)" : "var(--ink-1)",
         }}
       >
         {options.map((o) => <option key={o} value={o}>{o}</option>)}
       </select>
-      <ChevronDown size={13} className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" style={{ color: "var(--ink-3)" }} />
+      <ChevronDown
+        size={12}
+        strokeWidth={2}
+        className="absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none"
+        style={{ color: "var(--ink-4)" }}
+      />
     </div>
   );
 }

@@ -36,58 +36,79 @@ function StatCard({ label, value, sub, trend, trendUp = true, spark, accent }: S
     <div className="card card-lift p-6">
       <div className="flex justify-between items-start gap-2">
         <div>
-          <div className="text-[11px] font-semibold uppercase tracking-widest" style={{ color: "var(--ink-4)" }}>
+          <div className="text-xs font-semibold uppercase tracking-widest" style={{ color: "var(--ink-4)" }}>
             {label}
           </div>
           <div
-            className="text-[28px] font-bold tracking-tight leading-none mt-2 flex items-baseline gap-1"
+            className="text-3xl font-bold tracking-tight leading-none mt-2 flex items-baseline gap-1"
             style={{ color: accent ?? "var(--ink-1)", fontFamily: "var(--font-sora)" }}
           >
             {value}
-            {sub && <span className="text-[15px] font-medium" style={{ color: "var(--ink-4)" }}>{sub}</span>}
+            {sub && <span className="text-base font-medium" style={{ color: "var(--ink-4)" }}>{sub}</span>}
           </div>
         </div>
         <Spark {...spark} />
       </div>
       <div
-        className="mt-4 inline-flex items-center gap-1.5 text-[11px] font-medium"
+        className="mt-4 inline-flex items-center gap-1.5 text-xs font-medium"
         style={{ color: trendUp ? "var(--green)" : "var(--red)" }}
       >
-        {trendUp ? <TrendingUp size={11} /> : <TrendingDown size={11} />}
+        {trendUp ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
         {trend}
       </div>
     </div>
   );
 }
 
+import { motion } from "framer-motion";
+
+const container = {
+  hidden: { opacity: 0 },
+  show: {
+    opacity: 1,
+    transition: { staggerChildren: 0.04, delayChildren: 0.1 }
+  }
+};
+
+const item = {
+  hidden: { opacity: 0, y: 16 },
+  show: { opacity: 1, y: 0, transition: { duration: 0.25 } }
+};
+
 export default function StatCards() {
   return (
-    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-      <StatCard
-        label="Tests Completed"
-        value="42"
-        sub="/ 120"
-        trend="+6 this week"
-        trendUp
-        spark={{ points: [0.3, 0.5, 0.4, 0.7, 0.6, 0.85, 0.9], color: "#2563EB" }}
-      />
-      <StatCard
-        label="Average Score"
-        value="73"
-        sub="%"
-        trend="+8% vs last month"
-        trendUp
-        spark={{ points: [0.4, 0.35, 0.55, 0.5, 0.65, 0.7, 0.78], color: "#10B981" }}
-      />
-      <StatCard
-        label="Current Streak"
-        value="12"
-        sub={<span className="flicker">🔥</span>}
-        trend="Best: 18 days"
-        trendUp
-        accent="#F59E0B"
-        spark={{ points: [0.2, 0.3, 0.5, 0.45, 0.6, 0.75, 0.85], color: "#F59E0B" }}
-      />
-    </div>
+    <motion.div variants={container} initial="hidden" animate="show" className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+      <motion.div variants={item}>
+        <StatCard
+          label="Tests Completed"
+          value="42"
+          sub="/ 120"
+          trend="+6 this week"
+          trendUp
+          spark={{ points: [0.3, 0.5, 0.4, 0.7, 0.6, 0.85, 0.9], color: "var(--blue)" }}
+        />
+      </motion.div>
+      <motion.div variants={item}>
+        <StatCard
+          label="Average Score"
+          value="73"
+          sub="%"
+          trend="+8% vs last month"
+          trendUp
+          spark={{ points: [0.4, 0.35, 0.55, 0.5, 0.65, 0.7, 0.78], color: "var(--green)" }}
+        />
+      </motion.div>
+      <motion.div variants={item}>
+        <StatCard
+          label="Current Streak"
+          value="12"
+          sub={<span className="flicker">🔥</span>}
+          trend="Best: 18 days"
+          trendUp
+          accent="var(--amber)"
+          spark={{ points: [0.2, 0.3, 0.5, 0.45, 0.6, 0.75, 0.85], color: "var(--amber)" }}
+        />
+      </motion.div>
+    </motion.div>
   );
 }

@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter, Sora, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import { ThemeProvider } from "@/components/theme-provider";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -21,19 +22,24 @@ const jetbrainsMono = JetBrains_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "ExamNurture — JEE & NEET Exam Preparation Platform",
+  title: "ExamNurture — India's Competitive Exam Preparation Platform",
   description:
-    "ExamNurture helps students crack JEE Main, JEE Advanced, and NEET with full-length mock tests, chapter-wise tests, previous year question papers (PYQ), real-time All India Rank, AI-powered weak-area analysis, and detailed solutions — all in one platform.",
+    "ExamNurture helps students crack JPSC Prelims, Banking (SBI PO, IBPS PO, RBI), Daroga / Sub-Inspector, SSC CGL, Railway NTPC, UET and more — with full-length mock tests, previous year papers (PYQ), subject-wise chapter tests, AI-powered weak-area analysis, real-time percentile ranking, and detailed solutions. One platform for all government competitive exams.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${inter.variable} ${sora.variable} ${jetbrainsMono.variable} h-full`}
       style={{ fontFamily: "var(--font-inter), system-ui, sans-serif" }}
     >
-      <body className="min-h-full">{children}</body>
+      <body className="min-h-full">
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          {children}
+        </ThemeProvider>
+      </body>
     </html>
   );
 }

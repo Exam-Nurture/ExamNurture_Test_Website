@@ -4,6 +4,8 @@ import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import { Bookmark, ChevronLeft, ChevronRight, AlertTriangle, X } from "lucide-react";
 
+import { ThemeToggle } from "@/components/ui/theme-toggle";
+
 // ─── Types ────────────────────────────────────────────────────────────
 type QStatus = "not-visited" | "not-answered" | "answered" | "marked" | "answered-marked";
 
@@ -12,9 +14,9 @@ interface QState    { status: QStatus; answer: number | null }
 
 // ─── Data ─────────────────────────────────────────────────────────────
 const SUBJECTS = [
-  { id: "physics",     label: "Physics",     color: "#059669" },
-  { id: "chemistry",   label: "Chemistry",   color: "#DC2626" },
-  { id: "mathematics", label: "Mathematics", color: "#D97706" },
+  { id: "physics",     label: "Physics",     color: "var(--green)" },
+  { id: "chemistry",   label: "Chemistry",   color: "var(--red)" },
+  { id: "mathematics", label: "Mathematics", color: "var(--amber)" },
 ];
 
 const BASE_QS: Record<string, Question[]> = {
@@ -50,11 +52,11 @@ Object.keys(BASE_QS).forEach((k) => {
 
 // ─── Status colours (minimal, meaning-driven) ─────────────────────────
 const S: Record<QStatus, { bg: string; fg: string; ring?: string }> = {
-  "not-visited":     { bg: "#F8FAFC", fg: "#94A3B8", ring: "#E2E8F0" },
-  "not-answered":    { bg: "#FEF2F2", fg: "#DC2626" },
-  "answered":        { bg: "#ECFDF5", fg: "#059669" },
-  "marked":          { bg: "#F3E8FF", fg: "#7C3AED" },
-  "answered-marked": { bg: "#EFF6FF", fg: "#2563EB" },
+  "not-visited":     { bg: "var(--bg)", fg: "var(--ink-4)", ring: "var(--line)" },
+  "not-answered":    { bg: "var(--red-soft)", fg: "var(--red)" },
+  "answered":        { bg: "var(--green-soft)", fg: "var(--green)" },
+  "marked":          { bg: "var(--amber-soft)", fg: "var(--amber)" },
+  "answered-marked": { bg: "var(--blue-soft)", fg: "var(--blue)" },
 };
 
 const LEGEND: { key: QStatus; label: string }[] = [
@@ -162,28 +164,28 @@ export default function ExamInterface({ examId }: { examId: string }) {
   return (
     <div
       className="flex flex-col h-screen select-none"
-      style={{ background: "#F8FAFC", fontFamily: "var(--font-inter)", color: "#0F172A" }}
+      style={{ background: "var(--bg)", fontFamily: "var(--font-inter)", color: "var(--ink-1)" }}
     >
 
       {/* ══════════════════ TOP BAR ══════════════════════════════════════ */}
       <header
         className="flex-shrink-0 flex items-center justify-between px-5 h-[48px] z-50"
-        style={{ background: "#fff", borderBottom: "1px solid #EEF2F7" }}
+        style={{ background: "var(--card)", borderBottom: "1px solid var(--line-soft)" }}
       >
         {/* Left — Exit + test title */}
         <div className="flex items-center gap-3.5 min-w-0">
           <Link
             href="/dashboard"
-            className="flex items-center gap-1 text-[11px] font-medium transition-colors hover:text-[#374151] flex-shrink-0"
-            style={{ color: "#94A3B8" }}
+            className="flex items-center gap-1 text-[11px] font-medium transition-colors hover:text-[var(--ink-2)] flex-shrink-0"
+            style={{ color: "var(--ink-4)" }}
           >
             <ChevronLeft size={13} />
             Exit
           </Link>
 
-          <div className="w-px h-3.5 flex-shrink-0" style={{ background: "#E2E8F0" }} />
+          <div className="w-px h-3.5 flex-shrink-0" style={{ background: "var(--line)" }} />
 
-          <span className="text-[12px] font-semibold truncate" style={{ color: "#334155" }}>
+          <span className="text-[12px] font-semibold truncate" style={{ color: "var(--ink-2)" }}>
             JEE Main — Full Mock #14
           </span>
         </div>
@@ -198,16 +200,16 @@ export default function ExamInterface({ examId }: { examId: string }) {
                 key={s.id}
                 onClick={() => { setSi(idx); setQi(0); }}
                 className="relative flex flex-col items-center justify-center px-5 h-full text-[12px] font-medium transition-colors"
-                style={{ color: active ? "#0F172A" : "#94A3B8" }}
+                style={{ color: active ? "var(--ink-1)" : "var(--ink-4)" }}
               >
                 <span>{s.label}</span>
-                <span className="text-[10px] mt-0.5 tabular-nums" style={{ color: active ? s.color : "#CBD5E1" }}>
+                <span className="text-[10px] mt-0.5 tabular-nums" style={{ color: active ? s.color : "var(--ink-3)" }}>
                   {c.answered}/25
                 </span>
                 {active && (
                   <span
                     className="absolute bottom-0 left-4 right-4 h-[2px] rounded-full"
-                    style={{ background: "#2563EB" }}
+                    style={{ background: "var(--blue)" }}
                   />
                 )}
               </button>
@@ -215,20 +217,21 @@ export default function ExamInterface({ examId }: { examId: string }) {
           })}
         </nav>
 
-        {/* Right — Marks + Timer */}
+        {/* Right — ThemeToggle + Marks + Timer */}
         <div className="flex items-center gap-3 flex-shrink-0">
-          <div className="hidden sm:flex items-center gap-1 text-[10px]" style={{ color: "#94A3B8" }}>
-            <span className="font-semibold" style={{ color: "#10B981" }}>+4</span>
+          <ThemeToggle />
+          <div className="hidden sm:flex items-center gap-1 text-[10px]" style={{ color: "var(--ink-4)" }}>
+            <span className="font-semibold" style={{ color: "var(--green)" }}>+4</span>
             <span>/</span>
-            <span className="font-semibold" style={{ color: "#EF4444" }}>−1</span>
+            <span className="font-semibold" style={{ color: "var(--red)" }}>−1</span>
           </div>
 
           <div
             className="font-mono text-[14px] font-bold px-3 py-1 rounded-[8px] tabular-nums tracking-wide transition-all"
             style={{
-              background:  isLow ? "#FEF2F2"  : "#F8FAFC",
-              color:       isLow ? "#DC2626"  : "#0F172A",
-              border:      isLow ? "1px solid #FECACA" : "1px solid #E2E8F0",
+              background:  isLow ? "var(--red-soft)"  : "var(--bg)",
+              color:       isLow ? "var(--red)"  : "var(--ink-1)",
+              border:      isLow ? "1px solid var(--red)" : "1px solid var(--line)",
             }}
           >
             {fmtTime(timeLeft)}
@@ -253,9 +256,9 @@ export default function ExamInterface({ examId }: { examId: string }) {
                 >
                   {sub.label}
                 </span>
-                <span className="text-[11px] font-medium" style={{ color: "#94A3B8" }}>
+                <span className="text-[11px] font-medium" style={{ color: "var(--ink-4)" }}>
                   Question {qi + 1}
-                  <span style={{ color: "#CBD5E1" }}> / {questions.length}</span>
+                  <span style={{ color: "var(--ink-3)" }}> / {questions.length}</span>
                 </span>
               </div>
 
@@ -269,12 +272,12 @@ export default function ExamInterface({ examId }: { examId: string }) {
                       onClick={() => setQi(i)}
                       className="w-[5px] h-[5px] rounded-full transition-all"
                       style={{
-                        background: i === qi ? "#2563EB"
-                          : st === "answered"        ? "#10B981"
-                          : st === "answered-marked" ? "#60A5FA"
-                          : st === "marked"          ? "#7C3AED"
-                          : st === "not-answered"    ? "#FCA5A5"
-                          : "#E2E8F0",
+                        background: i === qi ? "var(--blue)"
+                          : st === "answered"        ? "var(--green)"
+                          : st === "answered-marked" ? "var(--blue-ink)"
+                          : st === "marked"          ? "var(--amber)"
+                          : st === "not-answered"    ? "var(--red)"
+                          : "var(--line)",
                         transform: i === qi ? "scale(1.6)" : "scale(1)",
                       }}
                     />
@@ -287,7 +290,7 @@ export default function ExamInterface({ examId }: { examId: string }) {
             <div>
               <p
                 className="text-[16px] leading-[1.8] font-medium"
-                style={{ color: "#0F172A" }}
+                style={{ color: "var(--ink-1)" }}
               >
                 {curQ(questions, qi).q}
               </p>
@@ -305,14 +308,14 @@ export default function ExamInterface({ examId }: { examId: string }) {
                     style={
                       selected
                         ? {
-                            background:  "#EFF6FF",
-                            border:      "1.5px solid #2563EB",
+                            background:  "var(--blue-soft)",
+                            border:      "1.5px solid var(--blue)",
                             boxShadow:   "0 0 0 3px rgba(37,99,235,.06)",
                           }
                         : {
-                            background:  "#fff",
-                            border:      "1.5px solid #EEF2F7",
-                            boxShadow:   "0 1px 3px rgba(0,0,0,.03)",
+                            background:  "var(--card)",
+                            border:      "1.5px solid var(--line-soft)",
+                            boxShadow:   "var(--shadow-xs)",
                           }
                     }
                   >
@@ -321,8 +324,8 @@ export default function ExamInterface({ examId }: { examId: string }) {
                       className="w-7 h-7 rounded-full flex items-center justify-center text-[11px] font-semibold flex-shrink-0 transition-all"
                       style={
                         selected
-                          ? { background: "#2563EB", color: "#fff" }
-                          : { background: "#F8FAFC", color: "#94A3B8", border: "1.5px solid #E2E8F0" }
+                          ? { background: "var(--blue)", color: "white" }
+                          : { background: "var(--bg)", color: "var(--ink-4)", border: "1.5px solid var(--line)" }
                       }
                     >
                       {String.fromCharCode(65 + oi)}
@@ -331,7 +334,7 @@ export default function ExamInterface({ examId }: { examId: string }) {
                     {/* Option text */}
                     <span
                       className="text-[14px] leading-relaxed transition-colors"
-                      style={{ color: selected ? "#1D4ED8" : "#334155", fontWeight: selected ? 500 : 400 }}
+                      style={{ color: selected ? "var(--blue)" : "var(--ink-2)", fontWeight: selected ? 500 : 400 }}
                     >
                       {opt}
                     </span>
@@ -341,13 +344,13 @@ export default function ExamInterface({ examId }: { examId: string }) {
             </div>
 
             {/* Actions */}
-            <div className="flex items-center justify-between pt-4 border-t" style={{ borderColor: "#EEF2F7" }}>
+            <div className="flex items-center justify-between pt-4 border-t" style={{ borderColor: "var(--line-soft)" }}>
               {/* Secondary left */}
               <div className="flex items-center gap-2">
                 <button
                   onClick={markAndNext}
-                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-[8px] text-[11px] font-medium transition-all hover:bg-[#EDE9FE]"
-                  style={{ background: "#F5F3FF", color: "#6D28D9" }}
+                  className="inline-flex items-center gap-1.5 px-3 py-2 rounded-[8px] text-[11px] font-medium transition-all hover:brightness-90"
+                  style={{ background: "var(--amber-soft)", color: "var(--amber)" }}
                 >
                   <Bookmark size={11} strokeWidth={2} />
                   Mark &amp; Next
@@ -355,8 +358,8 @@ export default function ExamInterface({ examId }: { examId: string }) {
 
                 <button
                   onClick={clearResponse}
-                  className="px-3 py-2 rounded-[8px] text-[11px] font-medium transition-all hover:bg-[#F1F5F9]"
-                  style={{ color: "#94A3B8" }}
+                  className="px-3 py-2 rounded-[8px] text-[11px] font-medium transition-all hover:bg-[var(--line-soft)]"
+                  style={{ color: "var(--ink-4)" }}
                 >
                   Clear
                 </button>
@@ -366,8 +369,8 @@ export default function ExamInterface({ examId }: { examId: string }) {
               <div className="flex items-center gap-2">
                 <button
                   onClick={retreat}
-                  className="inline-flex items-center gap-1 px-3 py-2 rounded-[8px] text-[11px] font-medium transition-all hover:bg-[#F1F5F9]"
-                  style={{ color: "#64748B" }}
+                  className="inline-flex items-center gap-1 px-3 py-2 rounded-[8px] text-[11px] font-medium transition-all hover:bg-[var(--line-soft)]"
+                  style={{ color: "var(--ink-3)" }}
                 >
                   <ChevronLeft size={13} />
                   Prev
@@ -376,7 +379,7 @@ export default function ExamInterface({ examId }: { examId: string }) {
                 <button
                   onClick={saveAndNext}
                   className="inline-flex items-center gap-1.5 px-5 py-2 rounded-[8px] text-[12px] font-semibold text-white transition-all hover:brightness-105"
-                  style={{ background: "#2563EB", boxShadow: "0 2px 8px -2px rgba(37,99,235,.35)" }}
+                  style={{ background: "var(--blue)", boxShadow: "0 2px 8px -2px rgba(37,99,235,.35)" }}
                 >
                   Save &amp; Next
                   <ChevronRight size={13} />
@@ -390,11 +393,11 @@ export default function ExamInterface({ examId }: { examId: string }) {
         {/* ─── Question Palette ───────────────────────────────────────── */}
         <aside
           className="hidden lg:flex flex-col w-[240px] flex-shrink-0 overflow-y-auto"
-          style={{ background: "#fff", borderLeft: "1px solid #EEF2F7" }}
+          style={{ background: "var(--card)", borderLeft: "1px solid var(--line-soft)" }}
         >
           {/* Status legend */}
-          <div className="px-4 pt-4 pb-3" style={{ borderBottom: "1px solid #F8FAFC" }}>
-            <p className="text-[9px] font-semibold uppercase tracking-widest mb-2.5" style={{ color: "#94A3B8" }}>
+          <div className="px-4 pt-4 pb-3" style={{ borderBottom: "1px solid var(--bg)" }}>
+            <p className="text-[9px] font-semibold uppercase tracking-widest mb-2.5" style={{ color: "var(--ink-4)" }}>
               Status Key
             </p>
             <div className="flex flex-wrap gap-x-3 gap-y-1.5">
@@ -404,7 +407,7 @@ export default function ExamInterface({ examId }: { examId: string }) {
                     className="w-3 h-3 rounded-[3px] flex-shrink-0"
                     style={{ background: S[key].bg, border: S[key].ring ? `1px solid ${S[key].ring}` : "none" }}
                   />
-                  <span className="text-[10px]" style={{ color: "#64748B" }}>{label}</span>
+                  <span className="text-[10px]" style={{ color: "var(--ink-3)" }}>{label}</span>
                 </div>
               ))}
             </div>
@@ -415,12 +418,12 @@ export default function ExamInterface({ examId }: { examId: string }) {
             {SUBJECTS.map((s, idx) => {
               const c = allCounts[idx];
               return (
-                <div key={s.id} className="px-4 py-3.5" style={{ borderBottom: "1px solid #F8FAFC" }}>
+                <div key={s.id} className="px-4 py-3.5" style={{ borderBottom: "1px solid var(--bg)" }}>
                   {/* Section header */}
                   <div className="flex items-center justify-between mb-2.5">
                     <div className="flex items-center gap-1.5">
                       <span className="w-1.5 h-1.5 rounded-full" style={{ background: s.color }} />
-                      <span className="text-[11px] font-semibold" style={{ color: "#334155" }}>{s.label}</span>
+                      <span className="text-[11px] font-semibold" style={{ color: "var(--ink-2)" }}>{s.label}</span>
                     </div>
                     <span className="text-[10px] font-semibold tabular-nums" style={{ color: s.color }}>
                       {c.answered}/25
@@ -439,7 +442,7 @@ export default function ExamInterface({ examId }: { examId: string }) {
                           onClick={() => { setSi(idx); setQi(n); }}
                           className="w-7 h-7 rounded-[5px] text-[10px] font-semibold transition-all hover:opacity-80"
                           style={{
-                            background: isCurrent ? "#2563EB" : sc.bg,
+                            background: isCurrent ? "var(--blue)" : sc.bg,
                             color:      isCurrent ? "#fff"    : sc.fg,
                             boxShadow:  isCurrent ? "0 0 0 2px rgba(37,99,235,.25)" : "none",
                             border:     sc.ring && !isCurrent ? `1px solid ${sc.ring}` : "none",
@@ -456,12 +459,12 @@ export default function ExamInterface({ examId }: { examId: string }) {
           </div>
 
           {/* Summary + Submit */}
-          <div className="p-4 flex-shrink-0" style={{ borderTop: "1px solid #EEF2F7" }}>
+          <div className="p-4 flex-shrink-0" style={{ borderTop: "1px solid var(--line-soft)" }}>
             <div className="grid grid-cols-3 gap-1.5 mb-3 text-center">
               {[
-                { label: "Answered", val: totalAnswered, bg: "#ECFDF5", fg: "#059669" },
-                { label: "Marked",   val: totalMarked,   bg: "#F3E8FF", fg: "#7C3AED" },
-                { label: "Pending",  val: 75 - totalAnswered - totalMarked, bg: "#FEF2F2", fg: "#DC2626" },
+                { label: "Answered", val: totalAnswered, bg: "var(--green-soft)", fg: "var(--green)" },
+                { label: "Marked",   val: totalMarked,   bg: "var(--amber-soft)", fg: "var(--amber)" },
+                { label: "Pending",  val: 75 - totalAnswered - totalMarked, bg: "var(--red-soft)", fg: "var(--red)" },
               ].map((r) => (
                 <div key={r.label} className="rounded-[8px] py-2" style={{ background: r.bg }}>
                   <div className="text-[15px] font-bold tabular-nums" style={{ color: r.fg }}>{r.val}</div>
@@ -473,7 +476,7 @@ export default function ExamInterface({ examId }: { examId: string }) {
             <button
               onClick={() => setShowModal(true)}
               className="w-full py-2.5 rounded-[8px] text-[12px] font-semibold text-white transition-all hover:brightness-105"
-              style={{ background: "#2563EB" }}
+              style={{ background: "var(--blue)" }}
             >
               Submit Test
             </button>
@@ -490,22 +493,22 @@ export default function ExamInterface({ examId }: { examId: string }) {
         >
           <div
             className="w-full max-w-[340px] rounded-[14px] p-6 slide-up"
-            style={{ background: "#fff", boxShadow: "var(--shadow-lg)" }}
+            style={{ background: "var(--card)", boxShadow: "var(--shadow-lg)" }}
           >
             {/* Header */}
             <div className="flex items-start justify-between mb-5">
               <div className="flex items-center gap-3">
                 <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
-                  style={{ background: "#FFFBEB" }}>
-                  <AlertTriangle size={16} style={{ color: "#D97706" }} />
+                  style={{ background: "var(--amber-soft)" }}>
+                  <AlertTriangle size={16} style={{ color: "var(--amber)" }} />
                 </div>
                 <div>
-                  <p className="text-[14px] font-semibold" style={{ color: "#0F172A" }}>Submit test?</p>
-                  <p className="text-[11px] mt-0.5" style={{ color: "#94A3B8" }}>This action cannot be undone.</p>
+                  <p className="text-[14px] font-semibold" style={{ color: "var(--ink-1)" }}>Submit test?</p>
+                  <p className="text-[11px] mt-0.5" style={{ color: "var(--ink-4)" }}>This action cannot be undone.</p>
                 </div>
               </div>
-              <button onClick={() => setShowModal(false)} className="p-1 rounded-[6px] transition-colors hover:bg-[#F1F5F9]"
-                style={{ color: "#94A3B8" }}>
+              <button onClick={() => setShowModal(false)} className="p-1 rounded-[6px] transition-colors hover:bg-[var(--line-soft)]"
+                style={{ color: "var(--ink-4)" }}>
                 <X size={15} />
               </button>
             </div>
@@ -513,9 +516,9 @@ export default function ExamInterface({ examId }: { examId: string }) {
             {/* Stats */}
             <div className="grid grid-cols-3 gap-1.5 mb-5">
               {[
-                { label: "Answered", val: totalAnswered,                bg: "#ECFDF5", fg: "#059669" },
-                { label: "Marked",   val: totalMarked,                  bg: "#F3E8FF", fg: "#7C3AED" },
-                { label: "Pending",  val: 75 - totalAnswered - totalMarked, bg: "#FEF2F2", fg: "#DC2626" },
+                { label: "Answered", val: totalAnswered,                bg: "var(--green-soft)", fg: "var(--green)" },
+                { label: "Marked",   val: totalMarked,                  bg: "var(--amber-soft)", fg: "var(--amber)" },
+                { label: "Pending",  val: 75 - totalAnswered - totalMarked, bg: "var(--red-soft)", fg: "var(--red)" },
               ].map((r) => (
                 <div key={r.label} className="rounded-[10px] py-3 text-center" style={{ background: r.bg }}>
                   <div className="text-[20px] font-bold tabular-nums" style={{ color: r.fg }}>{r.val}</div>
@@ -528,15 +531,15 @@ export default function ExamInterface({ examId }: { examId: string }) {
             <div className="flex gap-2.5">
               <button
                 onClick={() => setShowModal(false)}
-                className="flex-1 py-2.5 rounded-[8px] text-[12px] font-medium transition-all hover:bg-[#F8FAFC]"
-                style={{ border: "1.5px solid #E2E8F0", color: "#64748B" }}
+                className="flex-1 py-2.5 rounded-[8px] text-[12px] font-medium transition-all hover:bg-[var(--line-soft)]"
+                style={{ border: "1.5px solid var(--line)", color: "var(--ink-3)" }}
               >
                 Cancel
               </button>
               <Link
                 href="/results/mock-14"
                 className="flex-1 py-2.5 rounded-[8px] text-[12px] font-semibold text-white text-center transition-all hover:brightness-105"
-                style={{ background: "#2563EB" }}
+                style={{ background: "var(--blue)" }}
               >
                 Submit →
               </Link>

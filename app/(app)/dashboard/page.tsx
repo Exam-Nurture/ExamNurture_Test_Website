@@ -3,10 +3,9 @@ import StatCards from "@/components/dashboard/StatCards";
 import WeeklyStreak from "@/components/dashboard/WeeklyStreak";
 import QuickActions from "@/components/dashboard/QuickActions";
 import ExamReadiness from "@/components/dashboard/ExamReadiness";
-import WeakAreas from "@/components/dashboard/WeakAreas";
-import Recommendations from "@/components/dashboard/Recommendations";
 import RecentTests from "@/components/dashboard/RecentTests";
 import TestSeriesCards from "@/components/dashboard/TestSeriesCards";
+import DailyPractice from "@/components/dashboard/DailyPractice";
 
 export const metadata = { title: "Dashboard — ExamNurture" };
 
@@ -23,6 +22,9 @@ export default function DashboardPage() {
         <div className="flex flex-col gap-6 min-w-0">
           {/* Stat cards */}
           <StatCards />
+
+          {/* Daily Practice — 5 questions from weak areas */}
+          <DailyPractice />
 
           {/* Exam Readiness — highlight card */}
           <ExamReadiness />
@@ -41,12 +43,6 @@ export default function DashboardPage() {
 
           {/* Weekly Streak */}
           <WeeklyStreak />
-
-          {/* Weak Areas */}
-          <WeakAreas />
-
-          {/* Recommendations */}
-          <Recommendations />
         </div>
       </div>
     </div>
