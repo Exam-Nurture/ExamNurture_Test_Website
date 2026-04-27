@@ -3,7 +3,7 @@ import ExamInterface from "@/components/exam/ExamInterface";
 export const metadata = { title: "Exam — ExamNurture" };
 
 export function generateStaticParams() {
-  return [{ id: 'mock-id' }];
+  return [{ id: 'demo' }];
 }
 
 export default async function ExamPage({ params }: { params: Promise<{ id: string }> }) {

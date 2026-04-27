@@ -537,7 +537,7 @@ export default function ExamInterface({ examId }: { examId: string }) {
                 Cancel
               </button>
               <Link
-                href="/results/mock-14"
+                href="/results/demo"
                 className="flex-1 py-2.5 rounded-[8px] text-[12px] font-semibold text-white text-center transition-all hover:brightness-105"
                 style={{ background: "var(--blue)" }}
               >

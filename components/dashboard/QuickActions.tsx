@@ -14,7 +14,7 @@ export default function QuickActions() {
       <div className="flex flex-col gap-4">
         {/* Resume last test — primary CTA */}
         <Link
-          href="/exam/jpsc-mock-04"
+          href="/exam/demo"
           className="flex items-center gap-3.5 px-4 py-4 rounded-xl transition-all hover:-translate-y-0.5 hover:shadow-lg"
           style={{ background: "var(--blue)", boxShadow: "0 4px 14px -4px var(--blue-soft)" }}
         >

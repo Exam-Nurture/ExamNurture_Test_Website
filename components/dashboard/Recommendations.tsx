@@ -46,7 +46,7 @@ export default function Recommendations() {
               44% → 65% accuracy goal
             </div>
             <Link
-              href="/exam/di-drill"
+              href="/exam/demo"
               className="text-xs font-semibold px-4 py-2 rounded-lg text-white transition-all hover:brightness-105"
               style={{ background: "var(--blue)" }}
             >
@@ -89,7 +89,7 @@ export default function Recommendations() {
               Matches 2023 pattern
             </div>
             <Link
-              href="/exam/jpsc-mock-05"
+              href="/exam/demo"
               className="text-xs font-semibold px-4 py-2 rounded-lg text-white transition-all hover:brightness-105"
               style={{ background: "var(--violet)" }}
             >
