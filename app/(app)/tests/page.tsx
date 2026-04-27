@@ -243,7 +243,7 @@ function ExamCard({ exam, board, enrolled }: { exam: Exam; board: ExamBoard; enr
       <div className="flex-1" />
       <div className="flex gap-2 mt-4">
         <Link
-          href={`/exam/${exam.id}`}
+          href="/exam/demo"
           className="flex-1 py-2.5 text-center text-[13px] font-semibold rounded-[10px] text-white transition-all duration-150 hover:brightness-110 active:scale-[0.98]"
           style={{ background: board.tint }}
         >
