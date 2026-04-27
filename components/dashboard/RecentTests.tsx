@@ -86,7 +86,7 @@ export default function RecentTests() {
                 <Eye size={14} />
               </button>
               <Link
-                href="/results/mock-04"
+                href="/results/demo"
                 className="text-[11px] font-semibold px-2 py-1.5 rounded-[6px] transition-all hover:bg-[var(--blue-soft)]"
                 style={{ color: "var(--blue)" }}
               >
