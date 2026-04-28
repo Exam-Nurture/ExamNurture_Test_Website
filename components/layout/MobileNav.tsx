@@ -3,14 +3,14 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { Home, ClipboardList, FileText, Flame, User } from "lucide-react";
+import { Home, GraduationCap, BookOpen, FileText, Users } from "lucide-react";
 
 const ITEMS = [
-  { href: "/dashboard", label: "Home",     icon: Home         },
-  { href: "/tests",     label: "Tests",    icon: ClipboardList },
-  { href: "/pyq",       label: "PYQ",      icon: FileText     },
-  { href: "/contests",  label: "Contests", icon: Flame, hot: true },
-  { href: "/profile",   label: "Profile",  icon: User         },
+  { href: "/dashboard",  label: "Dashboard",  icon: Home          },
+  { href: "/series",     label: "Exams",      icon: GraduationCap },
+  { href: "/pyq",        label: "PYQ",        icon: FileText      },
+  { href: "/mentorship", label: "Mentorship", icon: Users         },
+  { href: "/profile",    label: "Profile",    icon: BookOpen      },
 ];
 
 export default function MobileNav() {
@@ -41,21 +41,15 @@ export default function MobileNav() {
         transition:    "transform 200ms ease",
       }}
     >
-      {ITEMS.map(({ href, label, icon: Icon, hot }) => {
+      {ITEMS.map(({ href, label, icon: Icon }) => {
         const active = pathname === href || pathname.startsWith(href + "/");
         return (
           <Link
             key={href}
             href={href}
-            className="flex-1 flex flex-col items-center gap-1 py-2.5 text-[10px] font-medium transition-colors duration-150 relative"
-            style={{ color: active ? "var(--blue)" : hot && !active ? "#EF4444" : "var(--ink-4)" }}
+            className="flex-1 flex flex-col items-center gap-1 py-2.5 text-[10px] font-medium transition-colors duration-150"
+            style={{ color: active ? "var(--blue)" : "var(--ink-4)" }}
           >
-            {hot && !active && (
-              <span
-                className="absolute top-2 right-[calc(50%-12px)] w-1.5 h-1.5 rounded-full"
-                style={{ background: "#EF4444" }}
-              />
-            )}
             <Icon size={18} strokeWidth={active ? 2 : 1.6} />
             <span>{label}</span>
           </Link>

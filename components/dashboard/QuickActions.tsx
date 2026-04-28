@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Play, BookOpen } from "lucide-react";
+import { Play, BookOpen, Flame } from "lucide-react";
 
 export default function QuickActions() {
   return (
@@ -31,6 +31,34 @@ export default function QuickActions() {
             <div className="text-sm font-bold text-white font-mono">52:17</div>
             <div className="text-[10px] text-white/50 uppercase tracking-wider mt-0.5">remaining</div>
           </div>
+        </Link>
+
+        {/* Daily Quiz — streak CTA */}
+        <Link
+          href="/daily-quiz"
+          className="flex items-center gap-3.5 px-4 py-3.5 rounded-xl transition-all hover:-translate-y-0.5 hover:shadow-md"
+          style={{ background: "var(--amber-soft)", border: "1px solid var(--amber)" }}
+        >
+          <div
+            className="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0"
+            style={{ background: "var(--amber)", color: "white" }}
+          >
+            <Flame size={18} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-sm font-semibold" style={{ color: "var(--ink-1)" }}>
+              Daily Quiz
+            </div>
+            <div className="text-xs mt-1" style={{ color: "var(--ink-3)" }}>
+              Today's challenge · Keep your streak alive 🔥
+            </div>
+          </div>
+          <span
+            className="text-[10px] font-bold tracking-wider px-2 py-1 rounded-md flex-shrink-0 text-white"
+            style={{ background: "var(--amber)" }}
+          >
+            LIVE
+          </span>
         </Link>
 
         {/* Latest PYQ — secondary */}

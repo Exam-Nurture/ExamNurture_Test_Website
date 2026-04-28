@@ -1,73 +1,220 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { Bell, Search } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import {
+  Bell, Search, LogOut, ChevronDown,
+  Sparkles, ClipboardList, FileText, BookOpen, Library,
+} from "lucide-react";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import { useAuth } from "@/lib/auth-context";
+import { useState, useRef, useEffect } from "react";
+import { AnimatePresence, motion } from "framer-motion";
+import MegaMenu from "@/components/layout/MegaMenu";
+
+const FREE_ITEMS = [
+  {
+    label: "Free Test Series",
+    href:  "/series?filter=free",
+    icon:  ClipboardList,
+    desc:  "Full mock tests at zero cost",
+    color: "text-blue-600",
+    bg:    "bg-blue-50 dark:bg-blue-900/20",
+  },
+  {
+    label: "Free Previous Year Papers",
+    href:  "/pyq?filter=free",
+    icon:  FileText,
+    desc:  "Solved PYQs, completely free",
+    color: "text-violet-600",
+    bg:    "bg-violet-50 dark:bg-violet-900/20",
+  },
+  {
+    label: "Free Courses",
+    href:  "/tests?filter=free",
+    icon:  BookOpen,
+    desc:  "Structured courses, no paywall",
+    color: "text-emerald-600",
+    bg:    "bg-emerald-50 dark:bg-emerald-900/20",
+  },
+  {
+    label: "Free Study Material",
+    href:  "/library?filter=free",
+    icon:  Library,
+    desc:  "Notes, PDFs & topic resources",
+    color: "text-amber-600",
+    bg:    "bg-amber-50 dark:bg-amber-900/20",
+  },
+];
+
+const NAV_ITEMS = [
+  { href: "/dashboard",  label: "Dashboard"            },
+  { href: "/series",     label: "Test Series"          },
+  { href: "/pyq",        label: "Previous Year Papers" },
+  { href: "/mentorship", label: "Mentorship"           },
+];
 
 export default function Topbar() {
   const pathname = usePathname();
+  const router   = useRouter();
+  const { user, logout } = useAuth();
+
+  const [showMenu,      setShowMenu]      = useState(false);
+  const [showFree,      setShowFree]      = useState(false);
+  const [showExamsMenu, setShowExamsMenu] = useState(false);
+  const freeRef = useRef<HTMLDivElement>(null);
+
+  const displayName = user?.name ?? "Student";
+  const initials    = displayName.split(" ").map((w) => w[0]).join("").slice(0, 2).toUpperCase();
+  const planLabel   = user?.subscription ? `Tier ${user.subscription.tierLevel}` : "Free Plan";
+
+  const handleLogout = async () => { await logout(); router.push("/"); };
+
+  // Close free dropdown on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (freeRef.current && !freeRef.current.contains(e.target as Node))
+        setShowFree(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  // Close everything on route change
+  useEffect(() => {
+    setShowFree(false);
+    setShowMenu(false);
+    setShowExamsMenu(false);
+  }, [pathname]);
+
+  const isFreeActive = FREE_ITEMS.some(i => pathname.startsWith(i.href.split("?")[0]));
+
   return (
     <header
       className="fixed top-0 left-0 right-0 h-14 bg-[var(--card)] z-50 flex items-center justify-between px-5"
       style={{ borderBottom: "1px solid var(--line-soft)" }}
     >
-      {/* Left — Logo + Nav */}
+      {/* ── Left: Logo + Nav ── */}
       <div className="flex items-center gap-7">
-        <Link href="/dashboard" className="flex items-center gap-2.5">
-          <div
-            className="w-7 h-7 rounded-[8px] flex items-center justify-center"
-            style={{
-              background: "linear-gradient(135deg, var(--blue) 0%, var(--cyan) 100%)",
-              boxShadow: "0 2px 8px -2px rgba(37,99,235,.35)",
-            }}
-          >
-            {/* Checkmark-in-shield icon */}
-            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M9 11l3 3L22 4" />
-              <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11" />
-            </svg>
-          </div>
-          <span className="font-bold text-[15px] tracking-tight" style={{ fontFamily: "var(--font-sora)" }}>
+        <Link href="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
+          <img src="/examnurture-logo.jpg" alt="ExamNurture" className="h-8 w-8 rounded-lg object-cover" />
+          <span className="font-bold text-[15px] tracking-tight hidden sm:block" style={{ fontFamily: "var(--font-sora)" }}>
             <span style={{ color: "var(--ink-1)" }}>Exam</span>
             <span style={{ color: "var(--cyan)" }}>Nurture</span>
           </span>
         </Link>
 
         <nav className="hidden md:flex items-center gap-1 ml-4">
-          {[
-            { href: "/dashboard", label: "Dashboard" },
-            { href: "/tests",     label: "Tests" },
-            { href: "/pyq",       label: "PYQ" },
-            { href: "/library",   label: "Library" },
-            { href: "/guides",    label: "Guides" },
-            { href: "/contests",  label: "Contests", hot: true },
-            { href: "/plans",     label: "Plans" },
-          ].map((item) => {
-            const isActive = pathname.startsWith(item.href);
+          {NAV_ITEMS.map((item) => {
+            const isActive =
+              item.href === "/dashboard"
+                ? pathname === "/dashboard"
+                : pathname.startsWith(item.href);
             return (
               <Link
                 key={item.href}
                 href={item.href}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-[13px] font-medium transition-all ${
-                  isActive 
-                    ? "bg-[var(--blue-soft)] text-[var(--blue)]" 
+                className={`px-3 py-1.5 rounded-[8px] text-[13px] font-medium transition-all whitespace-nowrap ${
+                  isActive
+                    ? "bg-[var(--blue-soft)] text-[var(--blue)]"
                     : "text-[var(--ink-3)] hover:bg-[var(--bg)] hover:text-[var(--ink-1)]"
                 }`}
               >
                 {item.label}
-                {item.hot && (
-                  <span className="text-[8px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider bg-red-100 text-red-600 dark:bg-red-900/30 dark:text-red-400">
-                    LIVE
-                  </span>
-                )}
               </Link>
             );
           })}
+
+          {/* Exams mega-menu — same as marketing header */}
+          <MegaMenu
+            show={showExamsMenu}
+            onMouseEnter={() => setShowExamsMenu(true)}
+            onMouseLeave={() => setShowExamsMenu(false)}
+          />
+
+          {/* ── Free dropdown ── */}
+          <div className="relative" ref={freeRef}>
+            <button
+              onClick={() => setShowFree(v => !v)}
+              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-[13px] font-semibold transition-all whitespace-nowrap ${
+                showFree || isFreeActive
+                  ? "bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400"
+                  : "text-amber-500 hover:bg-amber-50 hover:text-amber-600 dark:hover:bg-amber-900/20"
+              }`}
+            >
+              {/* Sparkle star SVG */}
+              <svg className="w-3 h-3 shrink-0 animate-[spin_4s_linear_infinite]" viewBox="0 0 16 16" fill="currentColor">
+                <path d="M8 0l1.6 5.6L16 8l-6.4 2.4L8 16l-1.6-5.6L0 8l6.4-2.4z"/>
+              </svg>
+              Free
+              <ChevronDown
+                size={12}
+                className={`transition-transform duration-200 ${showFree ? "rotate-180" : ""}`}
+              />
+            </button>
+
+            <AnimatePresence>
+              {showFree && (
+                <motion.div
+                  initial={{ opacity: 0, y: 6, scale: 0.97 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 6, scale: 0.97 }}
+                  transition={{ duration: 0.15, ease: "easeOut" }}
+                  className="absolute left-0 top-full mt-2 w-72 rounded-2xl shadow-2xl overflow-hidden z-50 py-2"
+                  style={{
+                    background: "var(--card)",
+                    border: "1px solid var(--line-soft)",
+                    boxShadow: "0 8px 32px -4px rgba(0,0,0,0.12)",
+                  }}
+                >
+                  {/* Header strip */}
+                  <div className="px-4 py-2.5 mb-1 flex items-center gap-2 border-b" style={{ borderColor: "var(--line-soft)" }}>
+                    <div className="w-6 h-6 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+                      <Sparkles size={13} className="text-amber-500" />
+                    </div>
+                    <div>
+                      <p className="text-[12px] font-bold" style={{ color: "var(--ink-1)" }}>Free Resources</p>
+                      <p className="text-[10px]" style={{ color: "var(--ink-4)" }}>No subscription needed — completely free</p>
+                    </div>
+                  </div>
+
+                  {FREE_ITEMS.map((item) => {
+                    const Icon = item.icon;
+                    const active = pathname.startsWith(item.href.split("?")[0]);
+                    return (
+                      <Link
+                        key={item.href}
+                        href={item.href}
+                        onClick={() => setShowFree(false)}
+                        className={`flex items-center gap-3 px-4 py-2.5 transition-colors group ${
+                          active ? "bg-[var(--bg)]" : "hover:bg-[var(--bg)]"
+                        }`}
+                      >
+                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${item.bg}`}>
+                          <Icon size={15} className={item.color} />
+                        </div>
+                        <div className="min-w-0">
+                          <p className="text-[13px] font-semibold leading-none truncate" style={{ color: "var(--ink-1)" }}>
+                            {item.label}
+                          </p>
+                          <p className="text-[11px] mt-0.5 truncate" style={{ color: "var(--ink-4)" }}>
+                            {item.desc}
+                          </p>
+                        </div>
+                        <span className="ml-auto text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400 shrink-0">
+                          FREE
+                        </span>
+                      </Link>
+                    );
+                  })}
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         </nav>
       </div>
 
-      {/* Right — Search + Bell + Avatar */}
+      {/* ── Right: Search + Bell + Avatar ── */}
       <div className="flex items-center gap-2.5">
         <div
           className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-[10px] w-56 transition-all"
@@ -99,20 +246,48 @@ export default function Topbar() {
           />
         </button>
 
-        <Link
-          href="/profile"
-          className="flex items-center gap-2 py-1 pl-0.5 pr-2.5 rounded-[10px] transition-all hover:bg-[var(--bg)]"
-          style={{ border: "1px solid var(--line-soft)" }}
-        >
-          <span
-            className="w-7 h-7 rounded-[7px] flex items-center justify-center text-white text-[11px] font-bold"
-            style={{ background: "linear-gradient(135deg, var(--blue), var(--cyan))" }}
-          >R</span>
-          <div className="text-left hidden sm:block">
-            <div className="text-[12px] font-semibold leading-tight" style={{ color: "var(--ink-1)" }}>Rahul S.</div>
-            <div className="text-[10px] leading-tight" style={{ color: "var(--ink-4)" }}>Free Plan</div>
-          </div>
-        </Link>
+        <div className="relative">
+          <button
+            onClick={() => setShowMenu(v => !v)}
+            className="flex items-center gap-2 py-1 pl-0.5 pr-2.5 rounded-[10px] transition-all hover:bg-[var(--bg)]"
+            style={{ border: "1px solid var(--line-soft)" }}
+          >
+            {user?.avatarUrl ? (
+              <img src={user.avatarUrl} alt={displayName} className="w-7 h-7 rounded-[7px] object-cover" />
+            ) : (
+              <span
+                className="w-7 h-7 rounded-[7px] flex items-center justify-center text-white text-[11px] font-bold"
+                style={{ background: "linear-gradient(135deg, var(--blue), var(--cyan))" }}
+              >
+                {initials}
+              </span>
+            )}
+            <div className="text-left hidden sm:block">
+              <div className="text-[12px] font-semibold leading-tight" style={{ color: "var(--ink-1)" }}>
+                {displayName.split(" ")[0]}{displayName.split(" ")[1]?.[0] ? " " + displayName.split(" ")[1][0] + "." : ""}
+              </div>
+              <div className="text-[10px] leading-tight" style={{ color: "var(--ink-4)" }}>{planLabel}</div>
+            </div>
+          </button>
+
+          {showMenu && (
+            <div
+              className="absolute right-0 top-full mt-2 w-48 rounded-xl shadow-lg overflow-hidden z-50"
+              style={{ background: "var(--card)", border: "1px solid var(--line-soft)" }}
+            >
+              <Link href="/profile" onClick={() => setShowMenu(false)}
+                className="flex items-center gap-3 px-4 py-3 text-sm text-[var(--ink-2)] hover:bg-[var(--bg)] transition-colors"
+              >
+                My Profile
+              </Link>
+              <button onClick={handleLogout}
+                className="w-full flex items-center gap-3 px-4 py-3 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 transition-colors"
+              >
+                <LogOut size={14} /> Sign Out
+              </button>
+            </div>
+          )}
+        </div>
       </div>
     </header>
   );

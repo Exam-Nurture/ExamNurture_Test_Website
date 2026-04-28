@@ -61,52 +61,54 @@ function StatCard({ label, value, sub, trend, trendUp = true, spark, accent }: S
 }
 
 import { motion } from "framer-motion";
+import { useAuth } from "@/lib/auth-context";
 
 const container = {
   hidden: { opacity: 0 },
-  show: {
-    opacity: 1,
-    transition: { staggerChildren: 0.04, delayChildren: 0.1 }
-  }
+  show: { opacity: 1, transition: { staggerChildren: 0.04, delayChildren: 0.1 } },
 };
 
 const item = {
   hidden: { opacity: 0, y: 16 },
-  show: { opacity: 1, y: 0, transition: { duration: 0.25 } }
+  show: { opacity: 1, y: 0, transition: { duration: 0.25 } },
 };
 
 export default function StatCards() {
+  const { user } = useAuth();
+  const attempts = user?.stats?.attempts ?? 0;
+  const streak = user?.stats?.streakCurrent ?? 0;
+  const longest = user?.stats?.streakLongest ?? 0;
+  const testSeries = user?.stats?.attendedTestSeries ?? 0;
+
   return (
     <motion.div variants={container} initial="hidden" animate="show" className="grid grid-cols-1 sm:grid-cols-3 gap-4">
       <motion.div variants={item}>
         <StatCard
           label="Tests Completed"
-          value="42"
-          sub="/ 120"
-          trend="+6 this week"
-          trendUp
-          spark={{ points: [0.3, 0.5, 0.4, 0.7, 0.6, 0.85, 0.9], color: "var(--blue)" }}
+          value={attempts}
+          trend={attempts > 0 ? `${testSeries} test series` : "Start your first test"}
+          trendUp={attempts > 0}
+          spark={{ points: [0.1, 0.2, 0.3, 0.4, 0.5, 0.7, Math.min(1, attempts / 50)], color: "var(--blue)" }}
         />
       </motion.div>
       <motion.div variants={item}>
         <StatCard
-          label="Average Score"
-          value="73"
-          sub="%"
-          trend="+8% vs last month"
-          trendUp
-          spark={{ points: [0.4, 0.35, 0.55, 0.5, 0.65, 0.7, 0.78], color: "var(--green)" }}
+          label="Test Series Attended"
+          value={testSeries}
+          trend={testSeries > 0 ? `${attempts} total attempts` : "Explore test series"}
+          trendUp={testSeries > 0}
+          spark={{ points: [0.1, 0.2, 0.3, 0.4, 0.5, 0.65, Math.min(1, testSeries / 10)], color: "var(--green)" }}
         />
       </motion.div>
       <motion.div variants={item}>
         <StatCard
           label="Current Streak"
-          value="12"
+          value={streak}
           sub={<span className="flicker">🔥</span>}
-          trend="Best: 18 days"
-          trendUp
+          trend={`Best: ${longest} days`}
+          trendUp={streak > 0}
           accent="var(--amber)"
-          spark={{ points: [0.2, 0.3, 0.5, 0.45, 0.6, 0.75, 0.85], color: "var(--amber)" }}
+          spark={{ points: [0.1, 0.2, 0.35, 0.4, 0.5, 0.65, Math.min(1, streak / 30)], color: "var(--amber)" }}
         />
       </motion.div>
     </motion.div>

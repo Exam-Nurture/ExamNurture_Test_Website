@@ -505,7 +505,6 @@ export const TIERS: Tier[] = [
       "Army GD & RPF Constable",
       "Unlimited PYQ practice with solutions",
       "AI weak area detection",
-      "State rank after every contest",
     ],
     exclusiveBoardIds: ["railway-group-d", "ssc-lower", "police-constable", "defence"],
     allBoardIds:       ["railway-group-d", "ssc-lower", "police-constable", "defence"],
@@ -531,7 +530,6 @@ export const TIERS: Tier[] = [
       "UP SI / Daroga, Bihar SI, JH SI",
       "Live class access — expert faculty",
       "Sectional cutoff analysis for banking",
-      "Weekly All India mock contests",
     ],
     exclusiveBoardIds: ["ssc-upper", "railway-ntpc", "banking-clerk", "police-si"],
     allBoardIds:       [

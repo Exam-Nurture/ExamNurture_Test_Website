@@ -1,0 +1,659 @@
+"use client";
+
+import { useEffect, useState, useCallback } from "react";
+import Link from "next/link";
+import { motion } from "framer-motion";
+import AuthModal from "@/components/auth/AuthModal";
+import {
+  ArrowRight,
+  BookOpen,
+  BarChart3,
+  Trophy,
+  Clock,
+  Users,
+  Zap,
+  CheckCircle,
+  Star,
+  ChevronRight,
+  FileText,
+  Target,
+  Calendar,
+  TrendingUp,
+} from "lucide-react";
+import { useAuth } from "@/lib/auth-context";
+
+const CONTENT_API = process.env.NEXT_PUBLIC_CONTENT_API_URL || "http://localhost:8000";
+
+/* ── animations ── */
+const fadeUp = {
+  hidden: { opacity: 0, y: 28 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.7, ease: "easeOut" as const } },
+};
+const stagger = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { staggerChildren: 0.1, delayChildren: 0.15 } },
+};
+
+/* ── static data ── */
+const features = [
+  {
+    icon: FileText,
+    title: "Full-Length Mock Tests",
+    desc: "CBT-style exams with real exam interface, auto-timer, and question palette — just like the actual test.",
+    color: "from-blue-500 to-blue-600",
+    bg: "bg-blue-50",
+    href: "/tests",
+  },
+  {
+    icon: BookOpen,
+    title: "Previous Year Papers",
+    desc: "Thousands of PYQ papers with detailed solutions across JPSC, Banking, SSC, Railway, and more.",
+    color: "from-emerald-500 to-emerald-600",
+    bg: "bg-emerald-50",
+    href: "/pyq",
+  },
+  {
+    icon: BarChart3,
+    title: "AI Analytics",
+    desc: "Detailed performance breakdown — weak areas, accuracy trends, percentile ranking, and improvement tips.",
+    color: "from-purple-500 to-purple-600",
+    bg: "bg-purple-50",
+    href: "/analytics",
+  },
+  {
+    icon: Target,
+    title: "Study Library",
+    desc: "Structured study materials, notes, and topic-wise resources curated by expert faculties.",
+    color: "from-amber-500 to-amber-600",
+    bg: "bg-amber-50",
+    href: "/library",
+  },
+
+  {
+    icon: Calendar,
+    title: "Exam Guides",
+    desc: "Syllabus, eligibility, exam pattern, admit card dates — everything in one place per exam.",
+    color: "from-cyan-500 to-cyan-600",
+    bg: "bg-cyan-50",
+    href: "/guides",
+  },
+];
+
+const examCategories = [
+  { name: "JPSC Prelims", tag: "State PSC", color: "bg-blue-100 text-blue-700" },
+  { name: "SBI PO", tag: "Banking", color: "bg-emerald-100 text-emerald-700" },
+  { name: "IBPS PO", tag: "Banking", color: "bg-emerald-100 text-emerald-700" },
+  { name: "SSC CGL", tag: "SSC", color: "bg-purple-100 text-purple-700" },
+  { name: "Railway NTPC", tag: "Railway", color: "bg-amber-100 text-amber-700" },
+  { name: "Daroga SI", tag: "Police", color: "bg-rose-100 text-rose-700" },
+  { name: "RBI Grade B", tag: "Banking", color: "bg-emerald-100 text-emerald-700" },
+  { name: "UET", tag: "Engineering", color: "bg-cyan-100 text-cyan-700" },
+];
+
+const testimonials = [
+  {
+    name: "Priya Sharma",
+    role: "JPSC Prelims 2024 — Cleared",
+    text: "ExamNurture's CBT interface and analytics helped me identify my weak areas. I improved from 45% to 78% in just 3 months.",
+    initials: "PS",
+    color: "from-blue-500 to-cyan-500",
+  },
+  {
+    name: "Rahul Kumar",
+    role: "SBI PO 2024 — Selected",
+    text: "The PYQ section is outstanding. Real exam papers with detailed solutions. This platform made my banking exam prep so much easier.",
+    initials: "RK",
+    color: "from-emerald-500 to-teal-500",
+  },
+  {
+    name: "Anjali Singh",
+    role: "SSC CGL 2024 — Tier 1 Qualified",
+    text: "The platform's interface and analytics helped me identify my weak areas. Being able to see my progress in real-time was game changing.",
+    initials: "AS",
+    color: "from-purple-500 to-pink-500",
+  },
+];
+
+const planHighlights = [
+  "Unlimited Mock Tests",
+  "Full PYQ Access",
+  "AI Weak Area Analysis",
+  "Real-time Percentile",
+  "Detailed Solutions",
+];
+
+/* ── stats ── */
+interface PlatformStats {
+  exams: number;
+  tests: number;
+  students: number;
+  pyqPapers: number;
+}
+
+function useStats(): { stats: PlatformStats | null; loading: boolean } {
+  const [stats, setStats] = useState<PlatformStats | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function load() {
+      try {
+        const [examsRes, tsRes] = await Promise.all([
+          fetch(`${CONTENT_API}/api/exams/`).then((r) => r.json()).catch(() => null),
+          fetch(`${CONTENT_API}/api/test-series/`).then((r) => r.json()).catch(() => null),
+        ]);
+        const examsArr = examsRes ? (examsRes.results || examsRes) : [];
+        const tsArr = tsRes ? (tsRes.results || tsRes) : [];
+        setStats({
+          exams: Array.isArray(examsArr) ? examsArr.length : 0,
+          tests: Array.isArray(tsArr) ? tsArr.length : 0,
+          students: 12000,
+          pyqPapers: 500,
+        });
+      } catch {
+        setStats({ exams: 20, tests: 150, students: 12000, pyqPapers: 500 });
+      } finally {
+        setLoading(false);
+      }
+    }
+    load();
+  }, []);
+
+  return { stats, loading };
+}
+
+/* ══════════════════════════════════════════════
+   HERO
+══════════════════════════════════════════════ */
+function HeroSection({ onLogin }: { onLogin: () => void }) {
+  const { user, loading: authLoading } = useAuth();
+  const { stats, loading } = useStats();
+
+  const statItems = [
+    { value: stats?.exams ? `${stats.exams}+` : "20+", label: "Exams" },
+    { value: stats?.tests ? `${stats.tests}+` : "150+", label: "Mock Tests" },
+    { value: stats?.pyqPapers ? `${stats.pyqPapers}+` : "500+", label: "PYQ Papers" },
+    { value: stats?.students ? `${(stats.students / 1000).toFixed(0)}K+` : "12K+", label: "Students" },
+  ];
+
+  return (
+    <section className="relative overflow-hidden bg-white">
+      {/* Background blobs */}
+      <div className="pointer-events-none absolute -top-40 -left-40 h-80 w-80 rounded-full bg-gradient-to-br from-blue-100/60 to-cyan-100/40 blur-3xl" />
+      <div className="pointer-events-none absolute -bottom-40 -right-40 h-80 w-80 rounded-full bg-gradient-to-tr from-purple-100/30 to-blue-100/40 blur-3xl" />
+
+      <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-20 lg:py-32">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
+
+          {/* Left */}
+          <div className="text-center lg:text-left">
+            <motion.div
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5 }}
+              className="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-50 border border-blue-100 rounded-full mb-6"
+            >
+              <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
+              <span className="text-sm font-semibold text-blue-700">India's #1 Competitive Exam Platform</span>
+            </motion.div>
+
+            <motion.h1
+              initial={{ opacity: 0, y: 24 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.1 }}
+              className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight text-gray-900"
+            >
+              Master Your
+              <span className="block bg-gradient-to-r from-blue-600 via-blue-500 to-cyan-500 bg-clip-text text-transparent">
+                Exam Dreams
+              </span>
+            </motion.h1>
+
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.2 }}
+              className="text-lg text-gray-600 mb-8 max-w-xl mx-auto lg:mx-0 leading-relaxed"
+            >
+              Full-length mock tests, PYQ papers, and AI analytics — everything you need to crack
+              <span className="font-semibold text-blue-600"> JPSC, Banking, SSC, Railway</span> and more.
+            </motion.p>
+
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.6, delay: 0.3 }}
+              className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"
+            >
+              {authLoading ? (
+                <div className="h-[56px] w-48 rounded-xl bg-blue-100 animate-pulse" />
+              ) : user ? (
+                <Link href="/dashboard">
+                  <button className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white rounded-xl font-semibold transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:shadow-blue-500/25">
+                    Go to Dashboard
+                    <ArrowRight className="w-5 h-5" />
+                  </button>
+                </Link>
+              ) : (
+                <>
+                  <button
+                    onClick={onLogin}
+                    className="w-full sm:w-auto px-8 py-4 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white rounded-xl font-semibold transition-all flex items-center justify-center gap-2 shadow-lg hover:shadow-xl hover:shadow-blue-500/25"
+                  >
+                    Start Free Today
+                    <ArrowRight className="w-5 h-5" />
+                  </button>
+                  <Link href="/series">
+                    <button className="w-full sm:w-auto px-8 py-4 border-2 border-gray-200 text-gray-700 hover:border-blue-300 hover:text-blue-600 hover:bg-blue-50 rounded-xl font-semibold transition-all flex items-center justify-center gap-2">
+                      Browse Tests
+                    </button>
+                  </Link>
+                </>
+              )}
+            </motion.div>
+
+            {/* Stats row */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.5, duration: 0.6 }}
+              className="flex items-center gap-6 mt-12 justify-center lg:justify-start flex-wrap"
+            >
+              {statItems.map((s, i) => (
+                <div key={s.label} className="flex items-center gap-6">
+                  <div className="text-center">
+                    <div className="text-2xl font-bold text-gray-900">
+                      {loading ? <span className="animate-pulse">—</span> : s.value}
+                    </div>
+                    <div className="text-sm text-gray-500">{s.label}</div>
+                  </div>
+                  {i < statItems.length - 1 && <div className="w-px h-8 bg-gray-200" />}
+                </div>
+              ))}
+            </motion.div>
+          </div>
+
+          {/* Right — feature preview cards */}
+          <motion.div
+            initial={{ opacity: 0, x: 32 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2, duration: 0.8 }}
+            className="relative hidden lg:block"
+          >
+            <div className="relative grid grid-cols-2 gap-4">
+              {/* Dashboard preview card */}
+              <div className="col-span-2 rounded-2xl border border-gray-100 bg-white shadow-xl p-5 space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-semibold text-gray-700">Your Progress</span>
+                  <span className="text-xs text-blue-600 font-medium bg-blue-50 px-2 py-0.5 rounded-full">Live</span>
+                </div>
+                <div className="space-y-3">
+                  {/* PYQs Attended */}
+                  <div>
+                    <div className="flex justify-between text-xs mb-1.5">
+                      <span className="text-gray-500 font-medium">PYQs Attended</span>
+                      <span className="font-bold text-blue-600">48 / 60</span>
+                    </div>
+                    <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-blue-500 to-cyan-400 rounded-full" style={{ width: "80%" }} />
+                    </div>
+                  </div>
+                  {/* Test Series Attended */}
+                  <div>
+                    <div className="flex justify-between text-xs mb-1.5">
+                      <span className="text-gray-500 font-medium">Test Series Attended</span>
+                      <span className="font-bold text-violet-600">14 / 20</span>
+                    </div>
+                    <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-violet-500 to-purple-400 rounded-full" style={{ width: "70%" }} />
+                    </div>
+                  </div>
+                  {/* Daily Streak */}
+                  <div>
+                    <div className="flex justify-between text-xs mb-1.5">
+                      <span className="text-gray-500 font-medium">Daily Streak</span>
+                      <span className="font-bold text-amber-600">🔥 12 day max</span>
+                    </div>
+                    <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                      <div className="h-full bg-gradient-to-r from-amber-400 to-orange-400 rounded-full" style={{ width: "60%" }} />
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Mini stat cards */}
+              <div className="rounded-2xl border border-gray-100 bg-white shadow-lg p-4 flex flex-col gap-1">
+                <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center mb-1">
+                  <TrendingUp className="w-4 h-4 text-emerald-600" />
+                </div>
+                <div className="text-xl font-bold text-gray-900">87%</div>
+                <div className="text-xs text-gray-500">Avg. Score</div>
+                <div className="text-xs text-emerald-600 font-medium">↑ +12% this week</div>
+              </div>
+
+              <div className="rounded-2xl border border-gray-100 bg-white shadow-lg p-4 flex flex-col gap-1">
+                <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center mb-1">
+                  <Clock className="w-4 h-4 text-blue-600" />
+                </div>
+                <div className="text-xl font-bold text-gray-900">24</div>
+                <div className="text-xs text-gray-500">Tests Done</div>
+                <div className="text-xs text-blue-600 font-medium">🔥 7-day streak</div>
+              </div>
+
+
+            </div>
+          </motion.div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ══════════════════════════════════════════════
+   FEATURES
+══════════════════════════════════════════════ */
+function FeaturesSection() {
+  return (
+    <section className="py-20 lg:py-28 bg-gray-50 border-t border-gray-100">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={fadeUp}
+          className="text-center mb-16"
+        >
+          <p className="text-sm font-semibold text-blue-600 uppercase tracking-wider mb-3">Everything You Need</p>
+          <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+            One Platform. Complete Prep.
+          </h2>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Every tool designed to help you prepare smarter and score higher.
+          </p>
+        </motion.div>
+
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={stagger}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
+        >
+          {features.map((f) => {
+            const Icon = f.icon;
+            return (
+              <motion.div key={f.title} variants={fadeUp}>
+                <Link href={f.href} className="group block h-full">
+                  <div className="h-full bg-white rounded-2xl border border-gray-100 p-6 hover:border-blue-200 hover:shadow-lg hover:shadow-blue-50 transition-all duration-300">
+                    <div className={`w-12 h-12 rounded-xl ${f.bg} flex items-center justify-center mb-4 group-hover:scale-110 transition-transform`}>
+                      <div className={`w-6 h-6 bg-gradient-to-br ${f.color} rounded-lg flex items-center justify-center`}>
+                        <Icon className="w-3.5 h-3.5 text-white" strokeWidth={2.5} />
+                      </div>
+                    </div>
+                    <h3 className="text-base font-bold text-gray-900 mb-2 group-hover:text-blue-600 transition-colors">{f.title}</h3>
+                    <p className="text-sm text-gray-500 leading-relaxed">{f.desc}</p>
+                    <div className="mt-4 flex items-center gap-1 text-sm font-semibold text-blue-600 opacity-0 group-hover:opacity-100 transition-opacity">
+                      Explore <ChevronRight className="w-4 h-4" />
+                    </div>
+                  </div>
+                </Link>
+              </motion.div>
+            );
+          })}
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+/* ══════════════════════════════════════════════
+   EXAM CATEGORIES
+══════════════════════════════════════════════ */
+function ExamCategoriesSection() {
+  return (
+    <section className="py-20 lg:py-28 bg-white border-t border-gray-100">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={fadeUp}
+          className="text-center mb-12"
+        >
+          <p className="text-sm font-semibold text-blue-600 uppercase tracking-wider mb-3">Exams Covered</p>
+          <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">Prepare for Any Exam</h2>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            From state PSC to banking to central government — comprehensive coverage for all major competitive exams.
+          </p>
+        </motion.div>
+
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={stagger}
+          className="flex flex-wrap gap-3 justify-center mb-12"
+        >
+          {examCategories.map((exam) => (
+            <motion.div key={exam.name} variants={fadeUp}>
+              <Link href="/series">
+                <div className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl hover:border-blue-300 hover:shadow-md transition-all cursor-pointer">
+                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${exam.color}`}>{exam.tag}</span>
+                  <span className="text-sm font-semibold text-gray-800">{exam.name}</span>
+                  <ChevronRight className="w-3.5 h-3.5 text-gray-400" />
+                </div>
+              </Link>
+            </motion.div>
+          ))}
+        </motion.div>
+
+        <div className="text-center">
+          <Link href="/series">
+            <button className="px-8 py-4 border-2 border-blue-500 text-blue-600 hover:bg-blue-50 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 mx-auto">
+              Browse All Tests
+              <ArrowRight className="w-4 h-4" />
+            </button>
+          </Link>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+/* ══════════════════════════════════════════════
+   HOW IT WORKS
+══════════════════════════════════════════════ */
+function HowItWorksSection() {
+  const steps = [
+    { num: "01", icon: Users, title: "Create Your Account", desc: "Sign up free in seconds with Google or email. No credit card required." },
+    { num: "02", icon: Target, title: "Choose Your Exam", desc: "Select your target exam and get a personalised test plan built for your schedule." },
+    { num: "03", icon: Zap, title: "Practice & Improve", desc: "Take mock tests, review solutions, and let AI analytics guide your weak areas." },
+    { num: "04", icon: Trophy, title: "Crack the Exam", desc: "Track your progress, improve your accuracy, and walk in confident on exam day." },
+  ];
+
+  return (
+    <section className="py-20 lg:py-28 bg-gradient-to-b from-blue-600 to-blue-700">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={fadeUp}
+          className="text-center mb-16"
+        >
+          <p className="text-sm font-semibold text-blue-200 uppercase tracking-wider mb-3">Simple Process</p>
+          <h2 className="text-4xl lg:text-5xl font-bold text-white mb-4">How It Works</h2>
+          <p className="text-lg text-blue-100 max-w-2xl mx-auto">Four steps from sign-up to success.</p>
+        </motion.div>
+
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={stagger}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+        >
+          {steps.map((step) => {
+            const Icon = step.icon;
+            return (
+              <motion.div key={step.num} variants={fadeUp}>
+                <div className="relative bg-white/10 backdrop-blur-sm border border-white/20 rounded-2xl p-6 text-center h-full">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2">
+                    <span className="bg-white text-blue-600 text-xs font-bold px-3 py-1 rounded-full shadow">{step.num}</span>
+                  </div>
+                  <div className="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center mx-auto mb-4 mt-2">
+                    <Icon className="w-6 h-6 text-white" />
+                  </div>
+                  <h3 className="text-base font-bold text-white mb-2">{step.title}</h3>
+                  <p className="text-sm text-blue-100 leading-relaxed">{step.desc}</p>
+                </div>
+              </motion.div>
+            );
+          })}
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+/* ══════════════════════════════════════════════
+   TESTIMONIALS
+══════════════════════════════════════════════ */
+function TestimonialsSection() {
+  return (
+    <section className="py-20 lg:py-28 bg-gray-50 border-t border-gray-100">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={fadeUp}
+          className="text-center mb-16"
+        >
+          <p className="text-sm font-semibold text-blue-600 uppercase tracking-wider mb-3">Student Success</p>
+          <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">Toppers Trust ExamNurture</h2>
+          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+            Thousands of students have cracked their dream exams with our platform.
+          </p>
+        </motion.div>
+
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={stagger}
+          className="grid grid-cols-1 md:grid-cols-3 gap-6"
+        >
+          {testimonials.map((t) => (
+            <motion.div key={t.name} variants={fadeUp}>
+              <div className="h-full bg-white rounded-2xl border border-gray-100 p-6 shadow-sm">
+                <div className="flex items-center gap-1 mb-4">
+                  {[1, 2, 3, 4, 5].map((s) => (
+                    <Star key={s} className="w-4 h-4 text-amber-400 fill-amber-400" />
+                  ))}
+                </div>
+                <p className="text-sm text-gray-600 leading-relaxed mb-6">"{t.text}"</p>
+                <div className="flex items-center gap-3">
+                  <span className={`w-10 h-10 rounded-xl flex items-center justify-center text-white text-xs font-bold bg-gradient-to-br ${t.color}`}>
+                    {t.initials}
+                  </span>
+                  <div>
+                    <div className="text-sm font-bold text-gray-900">{t.name}</div>
+                    <div className="text-xs text-gray-500">{t.role}</div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          ))}
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+/* ══════════════════════════════════════════════
+   CTA
+══════════════════════════════════════════════ */
+function CTASection() {
+  const { user } = useAuth();
+
+  return (
+    <section className="py-20 lg:py-28 bg-white border-t border-gray-100">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-12 text-center">
+        <motion.div
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={fadeUp}
+        >
+          <div className="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-50 border border-blue-100 rounded-full mb-6">
+            <Zap className="w-4 h-4 text-blue-600" />
+            <span className="text-sm font-semibold text-blue-700">Free to Start</span>
+          </div>
+
+          <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">
+            Ready to Start Preparing?
+          </h2>
+          <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
+            Join 12,000+ students already preparing smarter. Get access to mock tests, PYQ papers and analytics — free.
+          </p>
+
+          <ul className="flex flex-wrap justify-center gap-x-6 gap-y-2 mb-10">
+            {planHighlights.map((item) => (
+              <li key={item} className="flex items-center gap-1.5 text-sm text-gray-700 font-medium">
+                <CheckCircle className="w-4 h-4 text-emerald-500 flex-shrink-0" />
+                {item}
+              </li>
+            ))}
+          </ul>
+
+          <div className="flex flex-col sm:flex-row gap-4 justify-center">
+            {user ? (
+              <Link href="/dashboard">
+                <button className="px-10 py-4 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white rounded-xl font-bold transition-all shadow-lg hover:shadow-xl hover:shadow-blue-500/25 text-base flex items-center gap-2 mx-auto sm:mx-0">
+                  Open Dashboard
+                  <ArrowRight className="w-5 h-5" />
+                </button>
+              </Link>
+            ) : (
+              <>
+                <button
+                  onClick={() => (window as any).google?.accounts.id.prompt()}
+                  className="px-10 py-4 bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-700 hover:to-cyan-600 text-white rounded-xl font-bold transition-all shadow-lg hover:shadow-xl hover:shadow-blue-500/25 text-base flex items-center gap-2 mx-auto sm:mx-0"
+                >
+                  Get Started Free
+                  <ArrowRight className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={() => (window as any).google?.accounts.id.prompt()}
+                  className="px-10 py-4 border-2 border-gray-200 text-gray-700 hover:border-blue-300 hover:text-blue-600 hover:bg-blue-50 rounded-xl font-bold transition-all text-base mx-auto sm:mx-0"
+                >
+                  Sign In
+                </button>
+              </>
+            )}
+          </div>
+        </motion.div>
+      </div>
+    </section>
+  );
+}
+
+/* ══════════════════════════════════════════════
+   PAGE
+══════════════════════════════════════════════ */
+export default function LandingPage() {
+  const [showModal, setShowModal] = useState(false);
+  const openLogin = useCallback(() => setShowModal(true), []);
+
+  return (
+    <div className="min-h-screen bg-white">
+      {showModal && <AuthModal onClose={() => setShowModal(false)} next="/dashboard" />}
+      <HeroSection onLogin={openLogin} />
+      <FeaturesSection />
+      <ExamCategoriesSection />
+      <HowItWorksSection />
+      <TestimonialsSection />
+      <CTASection />
+    </div>
+  );
+}

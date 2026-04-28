@@ -1,10 +1,46 @@
 "use client";
 
 import { useState } from "react";
-import { CheckCircle2, Star, ChevronDown, ChevronRight, BookOpen, FileText, Flame } from "lucide-react";
+import { CheckCircle2, Star, ChevronDown, ChevronRight, BookOpen, FileText, Flame, Loader2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { TIERS, EXAM_BOARDS, getBoardsForTier, type Tier, type ExamBoard } from "@/lib/data/examData";
+import { apiCheckout, type CheckoutResponse } from "@/lib/api";
+
+declare const Razorpay: new (opts: object) => { open(): void };
+
+async function launchCheckout(tier: Tier, isYearly: boolean) {
+  const billingCycle = isYearly ? "YEARLY" : "MONTHLY";
+  const data: CheckoutResponse = await apiCheckout(tier.id, billingCycle);
+
+  return new Promise<void>((resolve, reject) => {
+    const rz = new Razorpay({
+      key: data.keyId ?? process.env.NEXT_PUBLIC_RAZORPAY_KEY_ID,
+      amount: data.amount,
+      currency: data.currency,
+      order_id: data.razorpayOrderId,
+      name: "ExamNurture",
+      description: `${tier.name} — ${billingCycle.toLowerCase()}`,
+      handler: async (resp: { razorpay_order_id: string; razorpay_payment_id: string; razorpay_signature: string }) => {
+        try {
+          const { apiVerifyPayment } = await import("@/lib/api");
+          await apiVerifyPayment({
+            razorpayOrderId: resp.razorpay_order_id,
+            razorpayPaymentId: resp.razorpay_payment_id,
+            razorpaySignature: resp.razorpay_signature,
+            tierLevel: data.tierLevel,
+            billingCycle,
+          });
+          resolve();
+        } catch (err) {
+          reject(err);
+        }
+      },
+      modal: { ondismiss: () => reject(new Error("Payment cancelled")) },
+    });
+    rz.open();
+  });
+}
 
 /* ─────────────────────────────────────────────
    Plans Page — Powered by examData.ts
@@ -117,6 +153,22 @@ function TierCard({ tier, isYearly }: { tier: Tier; isYearly: boolean }) {
   const price = isYearly ? tier.yearlyPrice : tier.monthlyPrice;
   const boards = getBoardsForTier(tier.id);
   const totalExams = boards.reduce((sum, b) => sum + b.exams.length, 0);
+  const [paying, setPaying] = useState(false);
+  const [payError, setPayError] = useState("");
+
+  const handleGetStarted = async () => {
+    setPaying(true);
+    setPayError("");
+    try {
+      await launchCheckout(tier, isYearly);
+      window.location.reload();
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "Payment failed";
+      if (msg !== "Payment cancelled") setPayError(msg);
+    } finally {
+      setPaying(false);
+    }
+  };
 
   return (
     <div
@@ -175,13 +227,18 @@ function TierCard({ tier, isYearly }: { tier: Tier; isYearly: boolean }) {
         </span>
       </div>
 
+      {payError && (
+        <p className="text-xs text-red-500 mb-2 text-center">{payError}</p>
+      )}
       <Button
         variant={tier.highlight ? "default" : "outline"}
         size="lg"
+        onClick={handleGetStarted}
+        disabled={paying}
         className={`w-full mb-6 rounded-xl ${tier.highlight ? "shadow-md" : ""}`}
         style={tier.highlight ? { background: tier.color } : undefined}
       >
-        Get Started
+        {paying ? <Loader2 size={16} className="animate-spin" /> : "Get Started"}
       </Button>
 
       {/* Perks */}

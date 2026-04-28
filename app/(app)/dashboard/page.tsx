@@ -5,7 +5,6 @@ import QuickActions from "@/components/dashboard/QuickActions";
 import ExamReadiness from "@/components/dashboard/ExamReadiness";
 import RecentTests from "@/components/dashboard/RecentTests";
 import TestSeriesCards from "@/components/dashboard/TestSeriesCards";
-import DailyPractice from "@/components/dashboard/DailyPractice";
 
 export const metadata = { title: "Dashboard — ExamNurture" };
 
@@ -23,10 +22,7 @@ export default function DashboardPage() {
           {/* Stat cards */}
           <StatCards />
 
-          {/* Daily Practice — 5 questions from weak areas */}
-          <DailyPractice />
-
-          {/* Exam Readiness — highlight card */}
+          {/* Your Progress */}
           <ExamReadiness />
 
           {/* Recent Tests */}
