@@ -40,14 +40,27 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       className={`${inter.variable} ${sora.variable} ${jetbrainsMono.variable} h-full`}
       style={{ fontFamily: "var(--font-inter), system-ui, sans-serif" }}
     >
-      <body className="min-h-full">
-        <Script src="https://accounts.google.com/gsi/client" strategy="beforeInteractive" />
-        <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
+      <body className="min-h-full" suppressHydrationWarning>
+        <script dangerouslySetInnerHTML={{
+          __html: `(function() {
+            try {
+              var theme = localStorage.getItem('theme') || 'system';
+              var supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+              if (theme === 'dark' || (theme === 'system' && supportDarkMode)) {
+                document.documentElement.classList.add('dark');
+              } else {
+                document.documentElement.classList.remove('dark');
+              }
+            } catch (e) {}
+          })();`
+        }} />
         <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
           <AuthProvider>
             {children}
           </AuthProvider>
         </ThemeProvider>
+        <Script src="https://accounts.google.com/gsi/client" strategy="afterInteractive" />
+        <Script src="https://checkout.razorpay.com/v1/checkout.js" strategy="lazyOnload" />
       </body>
     </html>
   );

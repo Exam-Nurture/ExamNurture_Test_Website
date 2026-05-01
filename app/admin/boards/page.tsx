@@ -3,17 +3,19 @@
 import { useEffect, useState } from "react";
 import {
   apiAdminGetBoards, apiAdminCreateBoard, apiAdminUpdateBoard, apiAdminDeleteBoard,
+  apiAdminGetStates,
   AdminBoard,
 } from "@/lib/api";
 import { AdminTable, Pagination, Modal, Field, SelectField, Toggle } from "@/components/admin/AdminTable";
 
 const empty = (): Partial<AdminBoard> => ({
   id: "", name: "", shortName: "", description: "", tint: "#2563EB", colorSoft: "#EFF6FF",
-  minTier: 0, logoUrl: "", website: "", isActive: true,
+  minTier: 0, logoUrl: "", website: "", isActive: true, stateId: undefined,
 });
 
 export default function AdminBoardsPage() {
   const [data, setData] = useState<{ items: AdminBoard[]; total: number } | null>(null);
+  const [states, setStates] = useState<{ id: number; name: string }[]>([]);
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [modal, setModal] = useState<"create" | "edit" | null>(null);
@@ -22,7 +24,14 @@ export default function AdminBoardsPage() {
 
   async function load(p = page) {
     setLoading(true);
-    try { setData(await apiAdminGetBoards({ page: p, limit: 20 })); }
+    try {
+      const [bData, sData] = await Promise.all([
+        apiAdminGetBoards({ page: p, limit: 20 }),
+        apiAdminGetStates()
+      ]);
+      setData(bData);
+      setStates(Array.isArray(sData) ? sData : (sData as any).items || []);
+    }
     finally { setLoading(false); }
   }
 
@@ -39,8 +48,15 @@ export default function AdminBoardsPage() {
     e.preventDefault();
     setSaving(true);
     try {
-      if (modal === "create") await apiAdminCreateBoard(form);
-      else await apiAdminUpdateBoard(form.id!, form);
+      const payload = {
+        ...form,
+        logoUrl: form.logoUrl || undefined,
+        website: form.website || undefined,
+        stateId: form.stateId || undefined,
+        minTier: form.minTier ?? 0,
+      };
+      if (modal === "create") await apiAdminCreateBoard(payload);
+      else await apiAdminUpdateBoard(form.id!, payload);
       setModal(null);
       load();
     } finally { setSaving(false); }
@@ -55,8 +71,12 @@ export default function AdminBoardsPage() {
   const cols = [
     { key: "id", label: "ID", width: "100px" },
     { key: "name", label: "Name" },
+    { 
+      key: "stateId", 
+      label: "State",
+      render: (b: AdminBoard) => <span>{states.find(s => s.id === b.stateId)?.name || "Central"}</span>
+    },
     { key: "shortName", label: "Short" },
-    { key: "minTier", label: "Min Tier", render: (b: AdminBoard) => `Tier ${b.minTier}` },
     {
       key: "isActive", label: "Active",
       render: (b: AdminBoard) => <span style={{ color: b.isActive ? "var(--green)" : "var(--red)" }}>{b.isActive ? "Yes" : "No"}</span>,
@@ -80,8 +100,22 @@ export default function AdminBoardsPage() {
             {modal === "create" && (
               <Field label="ID (slug, e.g. ssc)" name="id" value={form.id ?? ""} onChange={(v) => set("id", v)} required placeholder="ssc" />
             )}
-            <Field label="Name" name="name" value={form.name ?? ""} onChange={(v) => set("name", v)} required />
-            <Field label="Short Name" name="shortName" value={form.shortName ?? ""} onChange={(v) => set("shortName", v)} required />
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Name" name="name" value={form.name ?? ""} onChange={(v) => set("name", v)} required />
+              <Field label="Short Name" name="shortName" value={form.shortName ?? ""} onChange={(v) => set("shortName", v)} required />
+            </div>
+            
+            <SelectField 
+              name="stateId"
+              label="State / Division" 
+              value={form.stateId?.toString() || ""} 
+              onChange={(v) => set("stateId", v ? parseInt(v) : null)}
+              options={[
+                { value: "", label: "Central / All India" },
+                ...states.map(s => ({ value: s.id.toString(), label: s.name }))
+              ]}
+            />
+
             <div>
               <label className="block text-xs font-medium mb-1" style={{ color: "var(--ink-2)" }}>Description</label>
               <textarea
@@ -96,13 +130,6 @@ export default function AdminBoardsPage() {
               <Field label="Tint Color" name="tint" type="color" value={form.tint ?? "#2563EB"} onChange={(v) => set("tint", v)} />
               <Field label="Soft Color" name="colorSoft" type="color" value={form.colorSoft ?? "#EFF6FF"} onChange={(v) => set("colorSoft", v)} />
             </div>
-            <SelectField
-              label="Min Tier"
-              name="minTier"
-              value={String(form.minTier ?? 0)}
-              onChange={(v) => set("minTier", parseInt(v))}
-              options={[0, 1, 2, 3].map((n) => ({ value: n, label: n === 0 ? "Free" : `Tier ${n}` }))}
-            />
             <Field label="Logo URL" name="logoUrl" value={form.logoUrl ?? ""} onChange={(v) => set("logoUrl", v)} placeholder="https://…" />
             <Field label="Website" name="website" value={form.website ?? ""} onChange={(v) => set("website", v)} placeholder="https://…" />
             <Toggle label="Active" checked={form.isActive ?? true} onChange={(v) => set("isActive", v)} />

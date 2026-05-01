@@ -60,7 +60,7 @@ export default function PlansPage() {
           Choose your plan
         </h1>
         <p className="text-[var(--ink-3)] text-lg mb-8 leading-relaxed">
-          Pick the tier that matches your qualification and target exams.
+          Pick the tier that matches your qualification and goals.
           <br />
           Every tier unlocks all exams below it — no hidden fees, cancel anytime.
         </p>

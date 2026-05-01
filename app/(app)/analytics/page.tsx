@@ -8,7 +8,6 @@ export default function AnalyticsPage() {
     { label: "Overall Accuracy",    val: "68%",    delta: "+5%",   color: "var(--blue)"   },
     { label: "Tests This Month",    val: "22",     delta: "+7",    color: "var(--green)"  },
     { label: "Study Time Today",    val: "1h 48m", delta: "+24m",  color: "#F59E0B"       },
-    { label: "State Rank (Latest)", val: "~2,140", delta: "↑ 480", color: "#8B5CF6"       },
   ];
 
   const subjectStats = [
@@ -35,7 +34,7 @@ export default function AnalyticsPage() {
       </div>
 
       {/* Stat cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
         {stats.map((s, i) => (
           <motion.div
             initial={{ opacity: 0, y: 20 }}

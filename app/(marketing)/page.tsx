@@ -22,7 +22,82 @@ import {
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
-const CONTENT_API = process.env.NEXT_PUBLIC_CONTENT_API_URL || "http://localhost:8000";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:4000/api/v1";
+
+/* ══════════════════════════════════════════════
+   THREE-LAYER BACKGROUND
+   L1 → Mesh gradient   (base atmosphere)
+   L2 → Halftone dots   (low opacity grid)
+   L3 → Noise / grain   (very subtle texture)
+══════════════════════════════════════════════ */
+function MeshBackground() {
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none select-none" aria-hidden="true">
+
+      {/* ── Layer 1: Mesh gradient ── */}
+      <div
+        className="absolute inset-0"
+        style={{
+          background: [
+            /* top-left blue node */
+            "radial-gradient(ellipse 90% 55% at -5%  45%, rgba(59,130,246,0.22)  0%, transparent 60%)",
+            /* top-right cyan node */
+            "radial-gradient(ellipse 70% 45% at 105% 5%,  rgba(34,211,238,0.16)  0%, transparent 55%)",
+            /* center-right violet node */
+            "radial-gradient(ellipse 50% 40% at 95%  60%, rgba(139,92,246,0.10)  0%, transparent 50%)",
+            /* upper-center blue highlight */
+            "radial-gradient(ellipse 40% 30% at 35%  8%,  rgba(59,130,246,0.10)  0%, transparent 45%)",
+            /* bottom-left emerald note */
+            "radial-gradient(ellipse 35% 30% at 5%   95%, rgba(16,185,129,0.08)  0%, transparent 45%)",
+            /* bottom-right indigo whisper */
+            "radial-gradient(ellipse 30% 25% at 98%  98%, rgba(99,102,241,0.07)  0%, transparent 40%)",
+            /* center white bloom (keeps text readable) */
+            "radial-gradient(ellipse 55% 55% at 50%  50%, rgba(255,255,255,0.55) 0%, transparent 70%)",
+            /* base tint — pure white */
+            "#ffffff",
+          ].join(", "),
+        }}
+      />
+
+      {/* ── Layer 2: Halftone / dot grid (Corner Clustered) ── */}
+      <div
+        className="absolute inset-0"
+        style={{
+          opacity: 0.04, // Keeps the whitish, light aesthetic
+          backgroundImage:
+            "radial-gradient(circle, #1e3a8a 1.5px, transparent 1.5px)",
+          backgroundSize: "14px 14px", // Dense spacing
+          WebkitMaskImage:
+            "radial-gradient(ellipse 80% 80% at 0% 0%, black 0%, transparent 70%), radial-gradient(ellipse 80% 80% at 100% 100%, black 0%, transparent 70%)",
+          maskImage:
+            "radial-gradient(ellipse 80% 80% at 0% 0%, black 0%, transparent 70%), radial-gradient(ellipse 80% 80% at 100% 100%, black 0%, transparent 70%)",
+        }}
+      />
+
+      {/* ── Layer 3: Noise / grain texture ── */}
+      {/* Rendered as an inline SVG so no external asset is needed */}
+      <svg
+        className="absolute inset-0 w-full h-full"
+        style={{ opacity: 0.026 }}
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <defs>
+          <filter id="en-landing-noise" x="0%" y="0%" width="100%" height="100%"
+            colorInterpolationFilters="sRGB">
+            <feTurbulence
+              type="fractalNoise"
+              baseFrequency="0.68"
+              numOctaves="4"
+              stitchTiles="stitch"
+            />
+            <feColorMatrix type="saturate" values="0" />
+          </filter>
+        </defs>
+        <rect width="100%" height="100%" filter="url(#en-landing-noise)" />
+      </svg>
+    </div>
+  );
+}
 
 /* ── animations ── */
 const fadeUp = {
@@ -42,7 +117,7 @@ const features = [
     desc: "CBT-style exams with real exam interface, auto-timer, and question palette — just like the actual test.",
     color: "from-blue-500 to-blue-600",
     bg: "bg-blue-50",
-    href: "/tests",
+    href: "/series",
   },
   {
     icon: BookOpen,
@@ -124,10 +199,15 @@ const planHighlights = [
 
 /* ── stats ── */
 interface PlatformStats {
+  examBoards: number;
   exams: number;
+  languages: number;
   tests: number;
-  students: number;
+  testSeries: number;
   pyqPapers: number;
+  users: number;
+  states: number;
+  courses: number;
 }
 
 function useStats(): { stats: PlatformStats | null; loading: boolean } {
@@ -137,20 +217,12 @@ function useStats(): { stats: PlatformStats | null; loading: boolean } {
   useEffect(() => {
     async function load() {
       try {
-        const [examsRes, tsRes] = await Promise.all([
-          fetch(`${CONTENT_API}/api/exams/`).then((r) => r.json()).catch(() => null),
-          fetch(`${CONTENT_API}/api/test-series/`).then((r) => r.json()).catch(() => null),
-        ]);
-        const examsArr = examsRes ? (examsRes.results || examsRes) : [];
-        const tsArr = tsRes ? (tsRes.results || tsRes) : [];
-        setStats({
-          exams: Array.isArray(examsArr) ? examsArr.length : 0,
-          tests: Array.isArray(tsArr) ? tsArr.length : 0,
-          students: 12000,
-          pyqPapers: 500,
-        });
+        const res = await fetch(`${API_URL}/public/stats`);
+        if (!res.ok) throw new Error("Failed to fetch stats");
+        const data = await res.json();
+        setStats(data);
       } catch {
-        setStats({ exams: 20, tests: 150, students: 12000, pyqPapers: 500 });
+        setStats(null); // Ensure null on failure to show NA
       } finally {
         setLoading(false);
       }
@@ -164,42 +236,40 @@ function useStats(): { stats: PlatformStats | null; loading: boolean } {
 /* ══════════════════════════════════════════════
    HERO
 ══════════════════════════════════════════════ */
-function HeroSection({ onLogin }: { onLogin: () => void }) {
+function HeroSection({ onLogin, stats, loading }: { onLogin: () => void; stats: PlatformStats | null; loading: boolean }) {
   const { user, loading: authLoading } = useAuth();
-  const { stats, loading } = useStats();
+
+  const format = (val: number | undefined, isUsers = false) => {
+    if (val === undefined || val === null) return "NA";
+    if (isUsers) return val.toLocaleString(); // Show total exact count for users
+    if (val >= 1000) return `${(val / 1000).toFixed(0)}K+`;
+    return `${val}+`;
+  };
 
   const statItems = [
-    { value: stats?.exams ? `${stats.exams}+` : "20+", label: "Exams" },
-    { value: stats?.tests ? `${stats.tests}+` : "150+", label: "Mock Tests" },
-    { value: stats?.pyqPapers ? `${stats.pyqPapers}+` : "500+", label: "PYQ Papers" },
-    { value: stats?.students ? `${(stats.students / 1000).toFixed(0)}K+` : "12K+", label: "Students" },
+    { value: format(stats?.examBoards), label: "Exam Boards" },
+    { value: format(stats?.exams), label: "Exams" },
+    { value: format(stats?.states), label: "States" },
+    { value: format(stats?.courses), label: "Courses" },
+    { value: format(stats?.languages), label: "Language" },
+    { value: format(stats?.testSeries), label: "TestSeries" },
+    { value: format(stats?.pyqPapers), label: "PYQ Papers" },
+    { value: format(stats?.users, true), label: "Users" },
   ];
 
   return (
     <section className="relative overflow-hidden bg-white">
-      {/* Background blobs */}
-      <div className="pointer-events-none absolute -top-40 -left-40 h-80 w-80 rounded-full bg-gradient-to-br from-blue-100/60 to-cyan-100/40 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-40 -right-40 h-80 w-80 rounded-full bg-gradient-to-tr from-purple-100/30 to-blue-100/40 blur-3xl" />
+      <MeshBackground />
 
       <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-12 py-20 lg:py-32">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 lg:gap-16 items-center">
 
           {/* Left */}
           <div className="text-center lg:text-left">
-            <motion.div
-              initial={{ opacity: 0, y: 16 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5 }}
-              className="inline-flex items-center gap-2 px-4 py-1.5 bg-blue-50 border border-blue-100 rounded-full mb-6"
-            >
-              <span className="w-2 h-2 rounded-full bg-blue-500 animate-pulse" />
-              <span className="text-sm font-semibold text-blue-700">India's #1 Competitive Exam Platform</span>
-            </motion.div>
-
             <motion.h1
-              initial={{ opacity: 0, y: 24 }}
+              initial={{ opacity: 1, y: 18 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7, delay: 0.1 }}
+              transition={{ duration: 0.45, delay: 0.05 }}
               className="text-5xl md:text-6xl lg:text-7xl font-bold mb-6 leading-tight text-gray-900"
             >
               Master Your
@@ -209,9 +279,9 @@ function HeroSection({ onLogin }: { onLogin: () => void }) {
             </motion.h1>
 
             <motion.p
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 1, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
+              transition={{ duration: 0.4, delay: 0.1 }}
               className="text-lg text-gray-600 mb-8 max-w-xl mx-auto lg:mx-0 leading-relaxed"
             >
               Full-length mock tests, PYQ papers, and AI analytics — everything you need to crack
@@ -219,9 +289,9 @@ function HeroSection({ onLogin }: { onLogin: () => void }) {
             </motion.p>
 
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 1, y: 14 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: 0.3 }}
+              transition={{ duration: 0.4, delay: 0.15 }}
               className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"
             >
               {authLoading ? (
@@ -242,31 +312,31 @@ function HeroSection({ onLogin }: { onLogin: () => void }) {
                     Start Free Today
                     <ArrowRight className="w-5 h-5" />
                   </button>
-                  <Link href="/series">
+                  <Link href="/exams">
                     <button className="w-full sm:w-auto px-8 py-4 border-2 border-gray-200 text-gray-700 hover:border-blue-300 hover:text-blue-600 hover:bg-blue-50 rounded-xl font-semibold transition-all flex items-center justify-center gap-2">
-                      Browse Tests
+                      Browse Exams
                     </button>
                   </Link>
                 </>
               )}
             </motion.div>
 
-            {/* Stats row */}
+            {/* Aesthetic Stats Grid — 4x2 (4-4 layout) */}
             <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ delay: 0.5, duration: 0.6 }}
-              className="flex items-center gap-6 mt-12 justify-center lg:justify-start flex-wrap"
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.4 }}
+              className="mt-12 grid grid-cols-2 md:grid-cols-4 gap-3 lg:pr-10"
             >
-              {statItems.map((s, i) => (
-                <div key={s.label} className="flex items-center gap-6">
-                  <div className="text-center">
-                    <div className="text-2xl font-bold text-gray-900">
-                      {loading ? <span className="animate-pulse">—</span> : s.value}
-                    </div>
-                    <div className="text-sm text-gray-500">{s.label}</div>
+              {statItems.map((s) => (
+                <div key={s.label} className="relative overflow-hidden bg-white/55 backdrop-blur-lg border border-white/80 shadow-[0_2px_12px_-4px_rgba(59,130,246,0.12)] rounded-2xl p-4 sm:p-5 flex flex-col items-center justify-center group hover:border-blue-200/70 hover:bg-white/70 hover:shadow-md transition-all duration-300">
+                  <div className="absolute inset-0 bg-gradient-to-br from-blue-50/80 via-transparent to-cyan-50/80 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+                  <div className="relative z-10 text-xl sm:text-2xl font-extrabold text-gray-800 group-hover:text-blue-700 transition-colors duration-300">
+                    {loading ? <span className="animate-pulse text-gray-300">—</span> : s.value}
                   </div>
-                  {i < statItems.length - 1 && <div className="w-px h-8 bg-gray-200" />}
+                  <div className="relative z-10 text-[9px] font-bold text-gray-500 uppercase tracking-widest mt-1.5 text-center group-hover:text-blue-600/80 transition-colors duration-300">
+                    {s.label}
+                  </div>
                 </div>
               ))}
             </motion.div>
@@ -274,17 +344,16 @@ function HeroSection({ onLogin }: { onLogin: () => void }) {
 
           {/* Right — feature preview cards */}
           <motion.div
-            initial={{ opacity: 0, x: 32 }}
+            initial={{ opacity: 1, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2, duration: 0.8 }}
+            transition={{ delay: 0.1, duration: 0.5 }}
             className="relative hidden lg:block"
           >
             <div className="relative grid grid-cols-2 gap-4">
               {/* Dashboard preview card */}
-              <div className="col-span-2 rounded-2xl border border-gray-100 bg-white shadow-xl p-5 space-y-4">
+              <div className="col-span-2 rounded-2xl border border-white/70 bg-white/80 backdrop-blur-md shadow-xl shadow-blue-100/40 p-5 space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-semibold text-gray-700">Your Progress</span>
-                  <span className="text-xs text-blue-600 font-medium bg-blue-50 px-2 py-0.5 rounded-full">Live</span>
+                  <span className="text-sm font-semibold text-gray-700">Progress</span>
                 </div>
                 <div className="space-y-3">
                   {/* PYQs Attended */}
@@ -321,7 +390,7 @@ function HeroSection({ onLogin }: { onLogin: () => void }) {
               </div>
 
               {/* Mini stat cards */}
-              <div className="rounded-2xl border border-gray-100 bg-white shadow-lg p-4 flex flex-col gap-1">
+              <div className="rounded-2xl border border-white/70 bg-white/80 backdrop-blur-md shadow-lg shadow-blue-100/30 p-4 flex flex-col gap-1">
                 <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center mb-1">
                   <TrendingUp className="w-4 h-4 text-emerald-600" />
                 </div>
@@ -330,7 +399,7 @@ function HeroSection({ onLogin }: { onLogin: () => void }) {
                 <div className="text-xs text-emerald-600 font-medium">↑ +12% this week</div>
               </div>
 
-              <div className="rounded-2xl border border-gray-100 bg-white shadow-lg p-4 flex flex-col gap-1">
+              <div className="rounded-2xl border border-white/70 bg-white/80 backdrop-blur-md shadow-lg shadow-blue-100/30 p-4 flex flex-col gap-1">
                 <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center mb-1">
                   <Clock className="w-4 h-4 text-blue-600" />
                 </div>
@@ -465,9 +534,8 @@ function ExamCategoriesSection() {
 function HowItWorksSection() {
   const steps = [
     { num: "01", icon: Users, title: "Create Your Account", desc: "Sign up free in seconds with Google or email. No credit card required." },
-    { num: "02", icon: Target, title: "Choose Your Exam", desc: "Select your target exam and get a personalised test plan built for your schedule." },
-    { num: "03", icon: Zap, title: "Practice & Improve", desc: "Take mock tests, review solutions, and let AI analytics guide your weak areas." },
-    { num: "04", icon: Trophy, title: "Crack the Exam", desc: "Track your progress, improve your accuracy, and walk in confident on exam day." },
+    { num: "02", icon: Zap, title: "Practice & Improve", desc: "Take mock tests, review solutions, and let AI analytics guide your weak areas." },
+    { num: "03", icon: Trophy, title: "Crack the Exam", desc: "Track your progress, improve your accuracy, and walk in confident on exam day." },
   ];
 
   return (
@@ -490,7 +558,7 @@ function HowItWorksSection() {
           whileInView="visible"
           viewport={{ once: true }}
           variants={stagger}
-          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6"
         >
           {steps.map((step) => {
             const Icon = step.icon;
@@ -573,7 +641,7 @@ function TestimonialsSection() {
 /* ══════════════════════════════════════════════
    CTA
 ══════════════════════════════════════════════ */
-function CTASection() {
+function CTASection({ stats, loading }: { stats: PlatformStats | null; loading: boolean }) {
   const { user } = useAuth();
 
   return (
@@ -594,7 +662,7 @@ function CTASection() {
             Ready to Start Preparing?
           </h2>
           <p className="text-lg text-gray-600 mb-8 max-w-2xl mx-auto">
-            Join 12,000+ students already preparing smarter. Get access to mock tests, PYQ papers and analytics — free.
+            Join {stats?.users !== undefined ? stats.users.toLocaleString() : (loading ? "..." : "NA")} students already preparing smarter. Get access to mock tests, PYQ papers and analytics — free.
           </p>
 
           <ul className="flex flex-wrap justify-center gap-x-6 gap-y-2 mb-10">
@@ -644,16 +712,27 @@ function CTASection() {
 export default function LandingPage() {
   const [showModal, setShowModal] = useState(false);
   const openLogin = useCallback(() => setShowModal(true), []);
+  const { stats, loading } = useStats();
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white relative">
+      {/* Subtle page-wide grain overlay */}
+      <svg className="pointer-events-none fixed inset-0 w-full h-full z-0" style={{ opacity: 0.018 }} aria-hidden="true">
+        <defs>
+          <filter id="en-page-grain">
+            <feTurbulence type="fractalNoise" baseFrequency="0.72" numOctaves="4" stitchTiles="stitch" />
+            <feColorMatrix type="saturate" values="0" />
+          </filter>
+        </defs>
+        <rect width="100%" height="100%" filter="url(#en-page-grain)" />
+      </svg>
       {showModal && <AuthModal onClose={() => setShowModal(false)} next="/dashboard" />}
-      <HeroSection onLogin={openLogin} />
+      <HeroSection onLogin={openLogin} stats={stats} loading={loading} />
       <FeaturesSection />
       <ExamCategoriesSection />
       <HowItWorksSection />
       <TestimonialsSection />
-      <CTASection />
+      <CTASection stats={stats} loading={loading} />
     </div>
   );
 }

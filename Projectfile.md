@@ -28,7 +28,7 @@
 
 | Attribute | Value |
 |---|---|
-| Product | Online exam prep — mock tests, PYQs, guides, live contests |
+| Product | Online exam prep — mock tests, PYQs, guides |
 | Target Users | Students preparing for JPSC, Banking (SBI PO/IBPS PO), SSC CGL, Railway NTPC, Police SI, Army, UET and similar exams |
 | Subscription Model | 3 tiers based on **educational qualification** (not exam selection) — cumulative |
 | Geography | India (INR pricing, Razorpay payments, Hindi + English content) |
@@ -79,7 +79,6 @@ app/
 │   ├── tests/          → GET /api/v1/test-series
 │   ├── pyq/            → GET /api/v1/pyq
 │   ├── guides/         → GET /api/v1/guides
-│   ├── contests/       → GET /api/v1/contests
 │   ├── plans/          → GET /api/v1/tiers
 │   ├── analytics/      → GET /api/v1/user/analytics
 │   ├── schedule/       → GET /api/v1/user/schedule
@@ -213,7 +212,6 @@ model User {
   attempts      Attempt[]
   streaks       Streak[]
   bookmarks     Bookmark[]
-  contestEntries ContestEntry[]
   scheduleItems  ScheduleItem[]
 }
 
@@ -314,7 +312,6 @@ model Exam {
   testSeries   TestSeries[]
   pyqPapers    PYQPaper[]
   guideContent GuideContent?
-  contests     Contest[]
 }
 
 // ─── Test Series ─────────────────────────────────────────
@@ -503,57 +500,6 @@ enum TopicStatus {
   LOCKED
 }
 
-// ─── Contests ────────────────────────────────────────────
-
-model Contest {
-  id            String        @id @default(cuid())
-  examId        String
-  exam          Exam          @relation(fields: [examId], references: [id])
-  title         String
-  subtitle      String
-  duration      Int           // seconds
-  totalQuestions Int
-  prize         String?
-  scheduledAt   DateTime
-  endsAt        DateTime
-  status        ContestStatus @default(UPCOMING)
-  registeredCount Int         @default(0)
-  isActive      Boolean       @default(true)
-  createdAt     DateTime      @default(now())
-
-  entries       ContestEntry[]
-  questions     ContestQuestion[]
-}
-
-enum ContestStatus {
-  UPCOMING
-  LIVE
-  ENDED
-}
-
-model ContestEntry {
-  id         String   @id @default(cuid())
-  contestId  String
-  contest    Contest  @relation(fields: [contestId], references: [id])
-  userId     String
-  user       User     @relation(fields: [userId], references: [id])
-  score      Int?
-  rank       Int?
-  stateRank  Int?
-  timeTaken  Int?
-  submittedAt DateTime?
-  registeredAt DateTime @default(now())
-
-  @@unique([contestId, userId])
-}
-
-model ContestQuestion {
-  id         String   @id @default(cuid())
-  contestId  String
-  contest    Contest  @relation(fields: [contestId], references: [id])
-  questionId String
-  orderIndex Int
-}
 
 // ─── Live Events ─────────────────────────────────────────
 
@@ -702,8 +648,7 @@ Authorization: Bearer <accessToken>
   "name": "Rahul Sharma",
   "email": "rahul@example.com",
   "phone": "+919876543210",
-  "password": "SecurePass123!",
-  "targetExamId": "jpsc-prelims-2025"  // optional, from register page dropdown
+  "password": "SecurePass123!"
 }
 
 // Response 201
@@ -994,30 +939,6 @@ Returns list of exams with available guides (enriched with user's topic progress
 
 ---
 
-### 6.8 Contests
-
-#### `GET /contests`
-```
-Query: ?status=upcoming&examId=jpsc-prelims-2025
-```
-Returns Contest[] including user's registration status and scores for ended contests.
-
-#### `POST /contests/:contestId/register`
-Registers authenticated user for a contest.
-
-#### `GET /contests/:contestId/leaderboard`
-```json
-// Response 200
-{
-  "total": 4182,
-  "userRank": 214,
-  "userStateRank": 52,
-  "entries": [
-    { "rank": 1, "name": "Rohit K.", "score": 94, "state": "Jharkhand" },
-    { "rank": 2, "name": "Priya S.", "score": 92, "state": "Bihar" }
-  ]
-}
-```
 
 ---
 
@@ -1028,7 +949,7 @@ Single aggregated endpoint for the dashboard page.
 ```json
 // Response 200
 {
-  "greeting": { "name": "Rahul", "targetExams": [{ "name": "JPSC Prelims 2025", "daysLeft": 63 }] },
+  "greeting": { "name": "Rahul" },
   "stats": { "testsCount": 26, "streak": 12, "certificates": 2, "weeklyHours": 14 },
   "weeklyStreak": { "current": 12, "days": [{ "date": "Mon", "minutes": 42, "active": true }] },
   "examReadiness": [
@@ -1044,7 +965,6 @@ Single aggregated endpoint for the dashboard page.
   "recommendations": [
     { "type": "CHAPTER_TEST", "title": "Data Interpretation Drill", "examId": "..." }
   ],
-  "liveContests": [ /* upcoming/live Contest[] */ ],
   "liveEvents": [ /* LiveEvent[] */ ],
   "dailyPractice": {
     "date": "2026-04-26",
@@ -1080,7 +1000,7 @@ Single aggregated endpoint for the dashboard page.
     { "testTitle": "Mock #01", "score": 55, "date": "2026-02-10" }
   ],
   "rankHistory": [
-    { "contest": "All India JPSC Apr 2026", "rank": 214, "total": 5280 }
+    { "testTitle": "Mock #01", "rank": 214, "total": 5280 }
   ]
 }
 ```
@@ -1156,7 +1076,6 @@ function checkTierAccess(requiredTier: 1 | 2 | 3) {
 
 // Usage
 router.get("/exams/boards", checkTierAccess(1), getBoardsHandler);
-router.post("/contests/:id/register", checkTierAccess(examTier), registerHandler);
 ```
 
 ### JWT Payload
@@ -1177,7 +1096,7 @@ interface JWTPayload {
 
 ### Tier Access Rules
 - Tier is **cumulative**: Tier 2 includes all Tier 1 content, Tier 3 includes all.
-- Free users (tier 0) can: browse boards, view contest results (not attempt), view limited PYQs (first 10 questions only).
+- Free users (tier 0) can: browse boards, view results (not attempt), view limited PYQs (first 10 questions only).
 - Access check runs **server-side** — never trust client-sent tier level.
 
 ### Scoring
@@ -1186,7 +1105,7 @@ interface JWTPayload {
 - Score = correct - (wrong × negativeMarkingFactor)
 
 ### Percentile & Rank Calculation
-- Runs as a **background job** after each contest/test ends
+- Runs as a **background job** after each test ends
 - Percentile = (students who scored less than you / total students) × 100
 - State Rank = rank among users with same state in their profile
 - Store pre-computed percentile in `Attempt.percentile` field
@@ -1196,12 +1115,6 @@ interface JWTPayload {
 - Streak resets if user misses a day (check at midnight IST, cron job)
 - Track `lastActiveAt` in `Streak` table
 
-### Contest Status
-```
-UPCOMING → LIVE (when scheduledAt is reached, via cron job)
-LIVE → ENDED (when endsAt is reached)
-→ Background job: compute all ranks, update ContestEntry records
-```
 
 ---
 
@@ -1289,7 +1202,7 @@ ExamNurture_Test_Website/
 │   │   ├── tests/
 │   │   ├── pyq/
 │   │   ├── guides/
-│   │   ├── contests/
+
 │   │   ├── plans/
 │   │   ├── analytics/
 │   │   ├── schedule/
@@ -1337,7 +1250,6 @@ examnurture-backend/
 │   │   ├── pyq/            # PYQ papers
 │   │   ├── attempts/       # start, submit, results
 │   │   ├── guides/         # guide content, topic progress
-│   │   ├── contests/       # contests, registration, leaderboard
 │   │   ├── events/         # live events
 │   │   ├── user/           # profile, dashboard, analytics
 │   │   ├── subscription/   # plans, checkout, verify
@@ -1345,7 +1257,6 @@ examnurture-backend/
 │   │   ├── library/        # articles, notes
 │   │   └── daily-practice/ # daily questions, submit
 │   ├── jobs/               # Cron jobs
-│   │   ├── contestStatus.ts   # UPCOMING→LIVE→ENDED
 │   │   ├── rankCompute.ts     # Percentile calculation
 │   │   └── streakReset.ts     # Midnight IST streak check
 │   └── app.ts
@@ -1372,10 +1283,8 @@ When the backend is ready, update the frontend:
 - [ ] **Add** `middleware.ts` in Next.js root — redirect to `/login` if no token
 - [ ] **Wire** profile page `Subscribe →` button to `/subscription/checkout`
 - [ ] **Wire** exam attempt `Attempt` button to `POST /attempts/start`
-- [ ] **Wire** contest `Register Free` button to `POST /contests/:id/register`
 - [ ] **Wire** daily practice answers to `POST /daily-practice/submit`
 - [ ] **Wire** guide topic `Done` / `Continue` buttons to `PATCH /guides/:examId/topics/:name/progress`
-- [ ] **Replace** mock leaderboard in Contests page with `GET /contests/:id/leaderboard`
 - [ ] **Replace** mock analytics data with `GET /user/analytics`
 
 ---
@@ -1390,7 +1299,7 @@ You are a senior full-stack Node.js/TypeScript engineer. I need you to build the
 ## What ExamNurture does
 - Students prepare for JPSC, IBPS PO, SBI PO, SSC CGL, Railway NTPC, Police SI, Army GD, etc.
 - Subscription model: 3 tiers based on educational qualification (10th / 12th / Graduation). Tiers are cumulative — Tier 3 users get access to all 11 exam boards.
-- Core features: Mock tests, Previous Year Questions (PYQ), Leveled study guides, Live contests (competitive quiz), Daily practice sets, Live events/webinars, Analytics/streak tracking.
+- Core features: Mock tests, Previous Year Questions (PYQ), Leveled study guides, Daily practice sets, Live events/webinars, Analytics/streak tracking.
 
 ## Tech stack to build
 - **Runtime:** Node.js 20+ LTS
@@ -1421,7 +1330,6 @@ model User {
   subscription  Subscription?
   refreshTokens RefreshToken[]
   attempts      Attempt[]
-  contestEntries ContestEntry[]
   bookmarks     Bookmark[]
   streak        Streak?
   topicProgress UserTopicProgress[]
@@ -1501,7 +1409,6 @@ model Exam {
   daysLeft     Int?
   testSeries   TestSeries[]
   pyqPapers    PYQPaper[]
-  contests     Contest[]
 }
 
 model TestSeries {
@@ -1609,58 +1516,17 @@ model UserTopicProgress {
 
 enum TopicStatus { DONE IN_PROGRESS AVAILABLE LOCKED }
 
-model Contest {
-  id              String        @id @default(cuid())
-  examId          String
-  exam            Exam          @relation(fields: [examId], references: [id])
-  title           String
-  subtitle        String
-  duration        Int
-  totalQuestions  Int
-  prize           String?
-  scheduledAt     DateTime
-  endsAt          DateTime
-  status          ContestStatus @default(UPCOMING)
-  registeredCount Int           @default(0)
-  isActive        Boolean       @default(true)
-  createdAt       DateTime      @default(now())
-  entries         ContestEntry[]
-  questions       ContestQuestion[]
-}
-
-enum ContestStatus { UPCOMING LIVE ENDED }
-
-model ContestEntry {
-  id         String   @id @default(cuid())
-  contestId  String
-  contest    Contest  @relation(fields: [contestId], references: [id])
-  userId     String
-  user       User     @relation(fields: [userId], references: [id])
-  score      Int      @default(0)
-  rank       Int?
-  answers    Json?
-  submittedAt DateTime?
-  @@unique([contestId, userId])
-}
-
-model ContestQuestion {
-  contestId  String
-  questionId String
-  order      Int
-  @@id([contestId, questionId])
-}
-
 model LiveEvent {
-  id          String   @id @default(cuid())
-  title       String
-  host        String
-  hostRole    String
-  scheduledAt DateTime
-  durationMin Int
-  isLive      Boolean  @default(false)
-  registeredCount Int  @default(0)
-  meetUrl     String?
-  isActive    Boolean  @default(true)
+  id              String   @id @default(cuid())
+  title           String
+  host            String
+  hostRole        String
+  scheduledAt     DateTime
+  durationMin     Int
+  isLive          Boolean  @default(false)
+  registeredCount Int      @default(0)
+  meetUrl         String?
+  isActive        Boolean  @default(true)
 }
 
 model Streak {
@@ -1739,7 +1605,7 @@ GET  /api/v1/test-series/:id
 GET  /api/v1/tests/:id
 POST /api/v1/attempts/start       body: { testId }
 POST /api/v1/attempts/:id/submit  body: { answers: { questionId: number }[] }
-GET  /api/v1/attempts/:id/result  → { score, totalMarks, rank?, analysis[] }
+GET  /api/v1/attempts/:id/result  → { score, totalMarks, analysis[] }
 GET  /api/v1/attempts             ?userId=  (own history)
 ```
 
@@ -1755,15 +1621,6 @@ GET /api/v1/pyq/:paperId/questions
 GET   /api/v1/guides              ?examId=
 GET   /api/v1/guides/:examId      → { levels: [{ level, topics: [{ name, notes, pyqs, strength, status }] }] }
 PATCH /api/v1/guides/:examId/topics/:topicName/progress   body: { status }
-```
-
-### Contests
-```
-GET  /api/v1/contests             ?status=UPCOMING|LIVE|ENDED&examId=
-GET  /api/v1/contests/:id
-POST /api/v1/contests/:id/register
-GET  /api/v1/contests/:id/leaderboard  → [{ rank, userId, name, score, timeTakenSec }]
-POST /api/v1/contests/:id/submit       body: { answers }
 ```
 
 ### Daily Practice
@@ -1808,7 +1665,6 @@ examnurture-api/
 │   │   ├── attempts.ts
 │   │   ├── pyq.ts
 │   │   ├── guides.ts
-│   │   ├── contests.ts
 │   │   ├── dailyPractice.ts
 │   │   ├── library.ts
 │   │   ├── schedule.ts
@@ -1859,10 +1715,9 @@ PORT=4000
 2. **Subscription check on every protected route:** `requireTier(n)` middleware must verify `subscription.status === ACTIVE` and `subscription.tierLevel >= n` before serving test, PYQ, or guide content.
 3. **Attempt scoring:** `score = correct × 1 − wrong × 0.25` (configurable per test). Return rank among all users who attempted same test.
 4. **Streak logic:** Increment `streak.current` if last activity was yesterday. Reset to 1 if more than 1 day gap. Run a cron at midnight IST to detect resets.
-5. **Contest timing:** Auto-transition contest status: `UPCOMING → LIVE` at `scheduledAt`, `LIVE → ENDED` at `endsAt`. Use a cron or Redis TTL trigger.
-6. **Daily practice:** Generate 5 questions/day from the user's weakest topics (lowest `UserTopicProgress.strength`). Cache per user per day in Redis.
-7. **Razorpay webhook:** Verify signature. On `payment.captured` → activate/extend subscription. On `subscription.cancelled` → set status to CANCELLED.
-8. **Refresh token rotation:** Issue a new refresh token on every `/auth/refresh`. Revoke old token. Store tokens in DB with expiry.
+5. **Daily practice:** Generate 5 questions/day from the user's weakest topics (lowest `UserTopicProgress.strength`). Cache per user per day in Redis.
+6. **Razorpay webhook:** Verify signature. On `payment.captured` → activate/extend subscription. On `subscription.cancelled` → set status to CANCELLED.
+7. **Refresh token rotation:** Issue a new refresh token on every `/auth/refresh`. Revoke old token. Store tokens in DB with expiry.
 
 ## Task for you
 Build this backend step by step:
@@ -1874,7 +1729,7 @@ Build this backend step by step:
 6. Implement Exams + Boards + Tiers routes (these are mostly read-only)
 7. Implement Subscription + Razorpay checkout + webhook
 8. Implement Tests + Attempts with scoring
-9. Implement remaining routes (PYQ, Guides, Contests, Daily Practice, etc.)
+9. Implement remaining routes (PYQ, Guides, Daily Practice, etc.)
 
 Start with step 1. Ask me before moving to each new step so I can review.
 ````

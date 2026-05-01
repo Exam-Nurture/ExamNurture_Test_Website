@@ -93,7 +93,7 @@ export default function TestSeriesCards() {
           subtitle="20 full mocks + 40 subject tests"
           done={4} total={20} daysLeft={63}
           tint="var(--violet)"
-          nextTest="Full Mock #05 — All State Rank Test"
+          nextTest="Full Mock #05"
           href="/series"
         />
         <SeriesCard

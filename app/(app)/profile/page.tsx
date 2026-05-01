@@ -216,6 +216,51 @@ export default function ProfilePage() {
         </div>
 
         <div className="flex flex-col gap-3">
+          {/* Free Plan row */}
+          {(() => {
+            const isFree = !user?.subscription || user.subscription.status !== "ACTIVE";
+            return (
+              <div
+                className="rounded-[12px] overflow-hidden"
+                style={{
+                  border: isFree ? "1.5px solid var(--green)" : "1px solid var(--line-soft)",
+                  boxShadow: isFree ? "0 0 0 3px rgba(34,197,94,0.07)" : "none",
+                }}
+              >
+                <div className="flex items-center justify-between px-4 py-3.5">
+                  <div className="flex items-center gap-3">
+                    <span className="w-2.5 h-2.5 rounded-full flex-shrink-0" style={{ background: "var(--green)" }} />
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[14px] font-semibold" style={{ color: "var(--ink-1)" }}>Free Plan</span>
+                        <span className="text-[10px] font-bold px-2 py-0.5 rounded-full" style={{ background: "rgba(34,197,94,0.12)", color: "var(--green)" }}>
+                          Always Free
+                        </span>
+                        {isFree && (
+                          <span className="text-[9px] font-bold px-2 py-0.5 rounded-full text-white" style={{ background: "var(--green)" }}>
+                            ACTIVE
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-[11px] mt-0.5" style={{ color: "var(--ink-4)" }}>
+                        Limited access — free forever, no credit card needed
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex-shrink-0 ml-3">
+                    {isFree ? (
+                      <span className="px-4 py-2 rounded-[9px] text-[12px] font-semibold" style={{ background: "rgba(34,197,94,0.12)", color: "var(--green)" }}>
+                        Current Plan
+                      </span>
+                    ) : (
+                      <span className="text-[13px] font-semibold" style={{ color: "var(--ink-4)" }}>₹0</span>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
+
           {TIERS.map((tier) => {
             const isOpen = openTier === tier.id;
             const exclusiveExams = getExclusiveExamNames(tier.id);

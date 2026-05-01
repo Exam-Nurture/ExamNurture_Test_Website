@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 
 const PROTECTED = [
   "/dashboard",
+  "/series",
   "/tests",
   "/pyq",
   "/guides",
@@ -10,12 +11,13 @@ const PROTECTED = [
   "/analytics",
   "/schedule",
   "/library",
+  "/mentorship",
   "/profile",
   "/exam",
   "/results",
 ];
 
-export function proxy(req: NextRequest) {
+export default function middleware(req: NextRequest) {
   const { pathname } = req.nextUrl;
   const token = req.cookies.get("en_token")?.value;
 
@@ -43,6 +45,6 @@ export function proxy(req: NextRequest) {
 
 export const config = {
   matcher: [
-    "/((?!_next/static|_next/image|favicon.ico|api/).*)",
+    "/((?!_next/static|_next/image|favicon\\.ico|api/|.*\\.(?:jpg|jpeg|png|gif|svg|webp|ico|woff|woff2|ttf|otf|eot|css|js|map)$).*)",
   ],
 };

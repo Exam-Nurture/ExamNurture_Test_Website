@@ -57,7 +57,15 @@ export default function AdminTestSeriesPage() {
 
   const cols = [
     { key: "title", label: "Title" },
-    { key: "examId", label: "Exam ID", width: "120px" },
+    { 
+      key: "examId", 
+      label: "Exam", 
+      render: (s: AdminTestSeries) => (
+        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-blue-50 text-blue-700 border border-blue-100 uppercase">
+          {exams.find(e => e.id === s.examId)?.shortName || s.examId}
+        </span>
+      )
+    },
     { key: "totalTests", label: "Tests" },
     { key: "tierRequired", label: "Tier", render: (s: AdminTestSeries) => `Tier ${s.tierRequired}` },
     { key: "price", label: "Price", render: (s: AdminTestSeries) => s.isPaid ? `₹${s.price}` : "Free" },

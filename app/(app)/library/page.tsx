@@ -1,471 +1,574 @@
 "use client";
 
-import { useState, useMemo, useCallback, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef, useCallback } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
-  Search, Clock, Bookmark, BookmarkCheck, X,
-  BookOpen, Filter, ChevronRight,
+  Search, Clock, X, ArrowRight, BookOpen, Zap,
+  RotateCcw, TrendingUp, Sparkles, Flame, Check,
+  ChevronRight, Filter, SortDesc,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import {
-  ARTICLES, BOARD_OPTIONS, SUBJECT_OPTIONS,
-  DIFFICULTY_OPTIONS, TYPE_OPTIONS,
+  ARTICLES, SUBJECT_OPTIONS, EXAM_OPTIONS, TYPE_META, DIFF_COLOR,
+  ARTICLE_POPULARITY, getExamTags,
   type Article,
 } from "./data";
-import { EXAM_BOARDS } from "@/lib/data/examData";
 
-/* ─────────────────────────────────────────────
-   Constants
-───────────────────────────────────────────── */
-const TABS = ["All", "By Exam", "By Subject", "By Topic"] as const;
-type Tab = (typeof TABS)[number];
-
-const DIFF_DOT: Record<string, string> = {
-  Easy: "var(--green)", Medium: "var(--amber)", Hard: "var(--red)",
+/* ── Icons ── */
+const TYPE_ICONS: Record<Article["type"], React.ReactNode> = {
+  Concept:  <BookOpen size={13} />,
+  Formula:  <Zap size={13} />,
+  Revision: <RotateCcw size={13} />,
+  Strategy: <TrendingUp size={13} />,
 };
 
-const TYPE_LABEL: Record<string, string> = {
-  Concept: "CONCEPT", Formula: "FORMULA", Revision: "REVISION", Strategy: "STRATEGY",
-};
+/* ── Highlight matched text ── */
+function Highlight({ text, query }: { text: string; query: string }) {
+  if (!query) return <>{text}</>;
+  const parts = text.split(new RegExp(`(${query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})`, "ig"));
+  return (
+    <>{parts.map((p, i) =>
+      p.toLowerCase() === query.toLowerCase()
+        ? <mark key={i} className="bg-transparent" style={{ color: "var(--blue)", fontWeight: 700 }}>{p}</mark>
+        : <span key={i}>{p}</span>
+    )}</>
+  );
+}
 
-const PAGE_SIZE = 8;
-
-function formatDate(iso: string) {
-  const d = new Date(iso);
-  return d.toLocaleDateString("en-IN", { month: "short", day: "numeric", year: "numeric" });
+/* ── Filter pill button ── */
+function FilterPill({
+  label, active, color, bg, onClick, count,
+}: {
+  label: React.ReactNode; active: boolean; color: string; bg: string;
+  onClick: () => void; count?: number;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-[12px] font-semibold transition-all shrink-0"
+      style={{
+        background: active ? color : "var(--card)",
+        color: active ? "#fff" : "var(--ink-3)",
+        border: `1.5px solid ${active ? color : "var(--line-soft)"}`,
+        boxShadow: active ? `0 2px 10px -3px ${color}66` : "none",
+      }}
+    >
+      {label}
+      {count !== undefined && (
+        <span className="text-[10px] font-normal opacity-75">{count}</span>
+      )}
+    </button>
+  );
 }
 
 /* ─────────────────────────────────────────────
    Page
 ───────────────────────────────────────────── */
 export default function LibraryPage() {
-  const [tab, setTab] = useState<Tab>("All");
-  const [query, setQuery] = useState("");
-  const [selectedBoards, setSelectedBoards] = useState<string[]>([]);
-  const [selectedSubjects, setSelectedSubjects] = useState<string[]>([]);
-  const [selectedDifficulty, setSelectedDifficulty] = useState<string[]>([]);
-  const [selectedType, setSelectedType] = useState<string[]>([]);
-  const [showFilters, setShowFilters] = useState(false);
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const router = useRouter();
 
-  // Bookmarks
-  const [bookmarks, setBookmarks] = useState<Set<string>>(new Set());
+  /* Search state */
+  const [query, setQuery]         = useState("");
+  const [focused, setFocused]     = useState(false);
+  const [activeIdx, setActiveIdx] = useState(0);
+
+  /* Browse filters */
+  const [activeType,    setActiveType]    = useState<Article["type"] | null>(null);
+  const [activeSubject, setActiveSubject] = useState<string | null>(null);
+  const [activeExam,    setActiveExam]    = useState<string | null>(null);
+
+  /* Read tracking */
+  const [readSlugs, setReadSlugs] = useState<Set<string>>(new Set());
+
+  const inputRef   = useRef<HTMLInputElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+
+  /* Load read slugs from localStorage */
   useEffect(() => {
     try {
-      const saved = localStorage.getItem("library-bookmarks");
-      if (saved) setBookmarks(new Set(JSON.parse(saved)));
+      const raw = localStorage.getItem("en_lib_read");
+      if (raw) setReadSlugs(new Set<string>(JSON.parse(raw)));
     } catch { /* ignore */ }
   }, []);
-  const toggleBookmark = useCallback((id: string) => {
-    setBookmarks((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id); else next.add(id);
-      localStorage.setItem("library-bookmarks", JSON.stringify([...next]));
-      return next;
-    });
-  }, []);
 
-  // Toggle helper
-  const toggle = (arr: string[], val: string, setter: (v: string[]) => void) => {
-    setter(arr.includes(val) ? arr.filter((v) => v !== val) : [...arr, val]);
-  };
-
-  const hasAnyFilter = selectedBoards.length + selectedSubjects.length + selectedDifficulty.length + selectedType.length > 0;
-  const clearAll = () => {
-    setSelectedBoards([]); setSelectedSubjects([]); setSelectedDifficulty([]); setSelectedType([]);
-  };
-
-  // Filtering
-  const filtered = useMemo(() => {
+  /* Live search matches */
+  const matches = useMemo(() => {
     const q = query.toLowerCase().trim();
+    if (!q) return [];
+    return ARTICLES.filter((a) =>
+      a.title.toLowerCase().includes(q) ||
+      a.description.toLowerCase().includes(q) ||
+      a.topic_tags.some((t) => t.toLowerCase().includes(q)) ||
+      a.subject_tags.some((s) => s.toLowerCase().includes(q)) ||
+      getExamTags(a.boardIds).some((e) => e.toLowerCase().includes(q))
+    ).slice(0, 8);
+  }, [query]);
+
+  /* Browse filter results */
+  const browsed = useMemo(() => {
+    if (!activeType && !activeSubject && !activeExam) return [];
     return ARTICLES.filter((a) => {
-      if (q && !a.title.toLowerCase().includes(q) && !a.description.toLowerCase().includes(q) && !a.topic_tags.some((t) => t.toLowerCase().includes(q))) return false;
-      if (selectedBoards.length > 0 && !a.boardIds.some((b) => selectedBoards.includes(b))) return false;
-      if (selectedSubjects.length > 0 && !a.subject_tags.some((s) => selectedSubjects.includes(s))) return false;
-      if (selectedDifficulty.length > 0 && !selectedDifficulty.includes(a.difficulty)) return false;
-      if (selectedType.length > 0 && !selectedType.includes(a.type)) return false;
+      if (activeType    && a.type !== activeType)                         return false;
+      if (activeSubject && !a.subject_tags.includes(activeSubject))       return false;
+      if (activeExam    && !getExamTags(a.boardIds).includes(activeExam)) return false;
       return true;
     }).sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime());
-  }, [query, selectedBoards, selectedSubjects, selectedDifficulty, selectedType]);
+  }, [activeType, activeSubject, activeExam]);
 
-  // Continue reading
-  const continueReading = ARTICLES.filter((a) => a.progress && a.progress > 0 && a.progress < 100);
+  /* Popular = top 6 by monthly reads */
+  const popular = useMemo(() =>
+    [...ARTICLES]
+      .filter((a) => (ARTICLE_POPULARITY[a.slug] ?? 0) > 0)
+      .sort((a, b) => (ARTICLE_POPULARITY[b.slug] ?? 0) - (ARTICLE_POPULARITY[a.slug] ?? 0))
+      .slice(0, 6),
+  []);
 
-  // Grouped views
-  const groupBy = (key: "boardIds" | "subject_tags" | "topic_tags") => {
-    const groups: Record<string, Article[]> = {};
-    filtered.forEach((a) => {
-      const tags = a[key];
-      tags.forEach((t) => {
-        const label = key === "boardIds" ? (EXAM_BOARDS.find((b) => b.id === t)?.shortName ?? t) : t;
-        (groups[label] ??= []).push(a);
-      });
-    });
-    return Object.entries(groups).sort(([a], [b]) => a.localeCompare(b));
-  };
+  /* Latest = newest 8 */
+  const latest = useMemo(() =>
+    [...ARTICLES]
+      .sort((a, b) => new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime())
+      .slice(0, 8),
+  []);
 
-  const visible = filtered.slice(0, visibleCount);
-  const hasMore = visibleCount < filtered.length;
+  /* Keyboard nav in dropdown */
+  const handleKey = useCallback((e: React.KeyboardEvent) => {
+    if (matches.length === 0) return;
+    if (e.key === "ArrowDown")  { e.preventDefault(); setActiveIdx((i) => (i + 1) % matches.length); }
+    else if (e.key === "ArrowUp")   { e.preventDefault(); setActiveIdx((i) => (i - 1 + matches.length) % matches.length); }
+    else if (e.key === "Enter") {
+      e.preventDefault();
+      const target = matches[activeIdx];
+      if (target) router.push(`/library/${target.slug}`);
+    }
+    else if (e.key === "Escape") { inputRef.current?.blur(); setFocused(false); }
+  }, [matches, activeIdx, router]);
+
+  /* Close dropdown on outside click */
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(e.target as Node))
+        setFocused(false);
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  useEffect(() => { setActiveIdx(0); }, [query]);
+
+  const showDropdown = focused && (matches.length > 0 || query.length > 0);
+  const isBrowsing   = !!(activeType || activeSubject || activeExam);
+  const clearFilters = () => { setActiveType(null); setActiveSubject(null); setActiveExam(null); };
 
   return (
-    <div className="flex flex-col gap-0 fade-up" style={{ maxWidth: 720, margin: "0 auto" }}>
+    <div className="flex flex-col fade-up" style={{ maxWidth: 900, margin: "0 auto" }}>
 
-      {/* ── Hero ── */}
-      <div className="pt-2 pb-8" style={{ borderBottom: "1px solid var(--line-soft)" }}>
-        <h1
-          className="text-4xl font-bold tracking-tight leading-tight"
-          style={{ fontFamily: "var(--font-sora)", color: "var(--ink-1)" }}
-        >
-          Library
+      {/* ── HERO ── */}
+      <div className="pt-4 pb-8 text-center" ref={dropdownRef}>
+        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-widest mb-4"
+          style={{ background: "var(--blue-soft)", color: "var(--blue)" }}>
+          <Sparkles size={11} /> Nurture Library
+        </div>
+
+        <h1 className="text-[32px] sm:text-[38px] font-bold tracking-tight leading-tight"
+          style={{ fontFamily: "var(--font-sora)", color: "var(--ink-1)" }}>
+          The knowledge base for govt exams
         </h1>
-        <p className="mt-3 text-base leading-relaxed" style={{ color: "var(--ink-3)" }}>
-          Curated articles, formulas, strategies & revision notes to sharpen your preparation.
+        <p className="mt-2.5 text-[14px]" style={{ color: "var(--ink-3)" }}>
+          Concepts · Strategies · Formulas · Revision notes — searchable, free for everyone.
         </p>
-      </div>
 
-      {/* ── Search ── */}
-      <div className="py-5" style={{ borderBottom: "1px solid var(--line-soft)" }}>
-        <div className="flex items-center gap-3">
-          <Search size={16} style={{ color: "var(--ink-4)", flexShrink: 0 }} />
-          <input
-            type="text"
-            placeholder="Search articles…"
-            value={query}
-            onChange={(e) => { setQuery(e.target.value); setVisibleCount(PAGE_SIZE); }}
-            className="flex-1 bg-transparent border-none outline-none text-base"
-            style={{ color: "var(--ink-1)" }}
-          />
-          {query && (
-            <button onClick={() => setQuery("")} className="p-1 rounded-md hover:bg-[var(--line-soft)]">
-              <X size={14} style={{ color: "var(--ink-4)" }} />
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* ── Tabs + Filter Toggle ── */}
-      <div className="flex items-center justify-between py-4" style={{ borderBottom: "1px solid var(--line-soft)" }}>
-        <div className="flex items-center gap-1">
-          {TABS.map((t) => (
-            <button
-              key={t}
-              onClick={() => { setTab(t); setVisibleCount(PAGE_SIZE); }}
-              className="px-3 py-1.5 rounded-md text-[13px] font-medium transition-all"
-              style={{
-                color: tab === t ? "var(--ink-1)" : "var(--ink-4)",
-                background: tab === t ? "var(--line-soft)" : "transparent",
-              }}
-            >
-              {t}
-            </button>
-          ))}
-        </div>
-        <button
-          onClick={() => setShowFilters(!showFilters)}
-          className="flex items-center gap-1.5 text-[13px] font-medium transition-all px-3 py-1.5 rounded-md"
-          style={{
-            color: showFilters || hasAnyFilter ? "var(--blue)" : "var(--ink-4)",
-            background: showFilters || hasAnyFilter ? "var(--blue-soft)" : "transparent",
-          }}
-        >
-          <Filter size={13} />
-          Filters
-          {hasAnyFilter && (
-            <span
-              className="ml-0.5 w-[18px] h-[18px] rounded-full text-[9px] font-bold text-white flex items-center justify-center"
-              style={{ background: "var(--blue)" }}
-            >
-              {selectedBoards.length + selectedSubjects.length + selectedDifficulty.length + selectedType.length}
-            </span>
-          )}
-        </button>
-      </div>
-
-      {/* ── Filter Panel ── */}
-      <AnimatePresence>
-        {showFilters && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="overflow-hidden"
+        {/* Big search */}
+        <div className="relative mt-7 max-w-[620px] mx-auto">
+          <div
+            className="flex items-center gap-3 px-5 py-3.5 rounded-[14px] transition-all cursor-text"
+            style={{
+              background: "var(--card)",
+              border: focused ? "1.5px solid var(--blue)" : "1.5px solid var(--line-soft)",
+              boxShadow: focused ? "0 6px 20px -6px rgba(59,130,246,0.3)" : "var(--shadow-xs)",
+            }}
+            onClick={() => inputRef.current?.focus()}
           >
-            <div className="py-5 flex flex-col gap-5" style={{ borderBottom: "1px solid var(--line-soft)" }}>
-              <PillGroup label="Exam Board" options={BOARD_OPTIONS.map((b) => b.label)} selected={selectedBoards.map((id) => BOARD_OPTIONS.find((b) => b.id === id)?.label ?? id)} onToggle={(label) => { const opt = BOARD_OPTIONS.find((b) => b.label === label); if (opt) toggle(selectedBoards, opt.id, setSelectedBoards); }} />
-              <PillGroup label="Subject" options={SUBJECT_OPTIONS} selected={selectedSubjects} onToggle={(v) => toggle(selectedSubjects, v, setSelectedSubjects)} />
-              <PillGroup label="Difficulty" options={DIFFICULTY_OPTIONS} selected={selectedDifficulty} onToggle={(v) => toggle(selectedDifficulty, v, setSelectedDifficulty)} />
-              <PillGroup label="Type" options={TYPE_OPTIONS} selected={selectedType} onToggle={(v) => toggle(selectedType, v, setSelectedType)} />
-              {hasAnyFilter && (
-                <button onClick={clearAll} className="self-start text-[12px] font-medium" style={{ color: "var(--red)" }}>
-                  Clear all filters
-                </button>
-              )}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+            <Search size={17} style={{ color: focused ? "var(--blue)" : "var(--ink-4)" }} />
+            <input
+              ref={inputRef}
+              type="text"
+              placeholder="Search any topic, exam, concept…"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              onFocus={() => setFocused(true)}
+              onKeyDown={handleKey}
+              className="flex-1 bg-transparent border-none outline-none text-[14.5px]"
+              style={{ color: "var(--ink-1)" }}
+            />
+            {query && (
+              <button onClick={(e) => { e.stopPropagation(); setQuery(""); inputRef.current?.focus(); }}
+                className="p-1 rounded-md hover:bg-[var(--bg)]">
+                <X size={13} style={{ color: "var(--ink-4)" }} />
+              </button>
+            )}
+            <kbd className="hidden sm:inline-block text-[10px] font-medium px-1.5 py-0.5 rounded-[4px]"
+              style={{ background: "var(--bg)", border: "1px solid var(--line)", color: "var(--ink-4)" }}>
+              ⌘K
+            </kbd>
+          </div>
 
-      {/* ── Applied chips (when panel closed) ── */}
-      {hasAnyFilter && !showFilters && (
-        <div className="flex flex-wrap gap-2 items-center py-4" style={{ borderBottom: "1px solid var(--line-soft)" }}>
-          {[...selectedBoards.map((id) => BOARD_OPTIONS.find((b) => b.id === id)?.label ?? id), ...selectedSubjects, ...selectedDifficulty, ...selectedType].map((chip) => (
-            <span
-              key={chip}
-              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium cursor-pointer transition-opacity hover:opacity-70"
-              style={{ background: "var(--line-soft)", color: "var(--ink-2)" }}
-              onClick={() => {
-                const boardOpt = BOARD_OPTIONS.find((b) => b.label === chip);
-                if (boardOpt && selectedBoards.includes(boardOpt.id)) toggle(selectedBoards, boardOpt.id, setSelectedBoards);
-                else if (selectedSubjects.includes(chip)) toggle(selectedSubjects, chip, setSelectedSubjects);
-                else if (selectedDifficulty.includes(chip)) toggle(selectedDifficulty, chip, setSelectedDifficulty);
-                else if (selectedType.includes(chip)) toggle(selectedType, chip, setSelectedType);
-              }}
-            >
-              {chip} <X size={10} />
-            </span>
-          ))}
-          <button onClick={clearAll} className="text-[11px] ml-1" style={{ color: "var(--ink-4)" }}>Clear</button>
-        </div>
-      )}
-
-      {/* ── Continue Reading ── */}
-      {tab === "All" && !query && !hasAnyFilter && continueReading.length > 0 && (
-        <div className="py-6" style={{ borderBottom: "1px solid var(--line-soft)" }}>
-          <h2 className="text-[11px] font-semibold uppercase tracking-wider mb-5" style={{ color: "var(--ink-4)" }}>
-            Continue reading
-          </h2>
-          <div className="flex flex-col gap-0">
-            {continueReading.map((a, i) => (
+          {/* Search dropdown */}
+          <AnimatePresence>
+            {showDropdown && (
               <motion.div
-                key={a.id}
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: i * 0.04, duration: 0.25 }}
+                initial={{ opacity: 0, y: -4 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -4 }}
+                transition={{ duration: 0.12 }}
+                className="absolute top-full left-0 right-0 mt-2 rounded-[14px] overflow-hidden z-30 text-left"
+                style={{
+                  background: "var(--card)",
+                  border: "1px solid var(--line-soft)",
+                  boxShadow: "0 12px 32px -8px rgba(0,0,0,0.18)",
+                }}
               >
-                <ArticleRow article={a} bookmarks={bookmarks} onToggleBookmark={toggleBookmark} showProgress />
+                {matches.length > 0 ? (
+                  <>
+                    <div className="px-4 py-2 text-[10px] font-bold uppercase tracking-wider"
+                      style={{ color: "var(--ink-4)", borderBottom: "1px solid var(--line-soft)" }}>
+                      {matches.length} result{matches.length !== 1 ? "s" : ""}
+                    </div>
+                    {matches.map((a, i) => {
+                      const meta = TYPE_META[a.type];
+                      const isActive = i === activeIdx;
+                      const isRead   = readSlugs.has(a.slug);
+                      return (
+                        <Link key={a.id} href={`/library/${a.slug}`}
+                          onMouseEnter={() => setActiveIdx(i)}
+                          className="flex items-start gap-3 px-4 py-3 transition-colors"
+                          style={{
+                            background: isActive ? "var(--bg)" : "transparent",
+                            borderBottom: i < matches.length - 1 ? "1px solid var(--line-soft)" : "none",
+                          }}>
+                          <div className="w-8 h-8 rounded-[8px] flex items-center justify-center shrink-0 mt-0.5"
+                            style={{ background: meta.bg, color: meta.color }}>
+                            {TYPE_ICONS[a.type]}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-[13px] font-semibold leading-snug truncate" style={{ color: "var(--ink-1)" }}>
+                              <Highlight text={a.title} query={query} />
+                            </p>
+                            <p className="text-[11px] mt-0.5 truncate" style={{ color: "var(--ink-4)" }}>
+                              {a.subject_tags[0]} · {a.type} · {a.readTime}
+                            </p>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0 mt-1">
+                            {isRead && (
+                              <span className="w-4 h-4 rounded-full flex items-center justify-center"
+                                style={{ background: "var(--green)" }}>
+                                <Check size={9} className="text-white" />
+                              </span>
+                            )}
+                            <ArrowRight size={13} style={{ color: isActive ? "var(--blue)" : "var(--ink-4)" }} />
+                          </div>
+                        </Link>
+                      );
+                    })}
+                  </>
+                ) : (
+                  <div className="px-4 py-6 text-center">
+                    <p className="text-[13px]" style={{ color: "var(--ink-3)" }}>
+                      No results for &quot;<span className="font-semibold">{query}</span>&quot;
+                    </p>
+                    <p className="text-[11px] mt-1" style={{ color: "var(--ink-4)" }}>
+                      Try a different topic or browse by filters below
+                    </p>
+                  </div>
+                )}
               </motion.div>
-            ))}
+            )}
+          </AnimatePresence>
+        </div>
+      </div>
+
+      {/* ── FILTER BAR (only when not searching) ── */}
+      {!query && (
+        <div className="mb-8 space-y-3">
+          {/* Type pills */}
+          <div className="flex items-center justify-center gap-2 flex-wrap">
+            {(Object.keys(TYPE_META) as Article["type"][]).map((t) => {
+              const meta  = TYPE_META[t];
+              const count = ARTICLES.filter((a) => a.type === t).length;
+              return (
+                <FilterPill key={t}
+                  label={<>{TYPE_ICONS[t]}{t}</>}
+                  active={activeType === t}
+                  color={meta.color} bg={meta.bg}
+                  count={count}
+                  onClick={() => { setActiveType(activeType === t ? null : t); setActiveSubject(null); setActiveExam(null); }}
+                />
+              );
+            })}
+          </div>
+
+          {/* Subject + Exam in one row */}
+          <div className="flex items-center justify-center gap-2 flex-wrap">
+            <span className="text-[10px] font-bold uppercase tracking-widest px-1" style={{ color: "var(--ink-5, var(--ink-4))" }}>
+              Subject:
+            </span>
+            {SUBJECT_OPTIONS.map((s) => {
+              const count = ARTICLES.filter((a) => a.subject_tags.includes(s)).length;
+              if (!count) return null;
+              return (
+                <FilterPill key={s}
+                  label={s}
+                  active={activeSubject === s}
+                  color="var(--ink-1)" bg="var(--bg)"
+                  count={count}
+                  onClick={() => { setActiveSubject(activeSubject === s ? null : s); setActiveType(null); setActiveExam(null); }}
+                />
+              );
+            })}
+          </div>
+
+          <div className="flex items-center justify-center gap-2 flex-wrap">
+            <span className="text-[10px] font-bold uppercase tracking-widest px-1" style={{ color: "var(--ink-5, var(--ink-4))" }}>
+              Exam:
+            </span>
+            {EXAM_OPTIONS.slice(0, 8).map((e) => {
+              const count = ARTICLES.filter((a) => getExamTags(a.boardIds).includes(e)).length;
+              if (!count) return null;
+              return (
+                <FilterPill key={e}
+                  label={e}
+                  active={activeExam === e}
+                  color="var(--violet)" bg="rgba(139,92,246,0.08)"
+                  count={count}
+                  onClick={() => { setActiveExam(activeExam === e ? null : e); setActiveType(null); setActiveSubject(null); }}
+                />
+              );
+            })}
           </div>
         </div>
       )}
 
-      {/* ── Result count ── */}
-      <div className="pt-6 pb-2">
-        <span className="text-[11px] font-semibold uppercase tracking-wider" style={{ color: "var(--ink-4)" }}>
-          {tab === "All" ? (query || hasAnyFilter ? "Results" : "All articles") : tab.replace("By ", "")}
-          {" "}
-          <span className="font-normal">— {filtered.length}</span>
-        </span>
-      </div>
-
-      {/* ── Content ── */}
-      {tab === "All" ? (
-        filtered.length === 0 ? (
-          <EmptyState query={query} />
-        ) : (
-          <>
-            <motion.div
-              initial="hidden" animate="show"
-              variants={{ hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.04 } } }}
-              className="flex flex-col"
-            >
-              {visible.map((a) => (
-                <motion.div key={a.id} variants={{ hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0, transition: { duration: 0.25 } } }}>
-                  <ArticleRow article={a} bookmarks={bookmarks} onToggleBookmark={toggleBookmark} />
-                </motion.div>
-              ))}
-            </motion.div>
-            {hasMore && (
-              <div className="py-8 flex justify-center">
-                <button
-                  onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
-                  className="text-[13px] font-medium transition-all hover:underline"
-                  style={{ color: "var(--blue)" }}
-                >
-                  Show more articles ↓
-                </button>
+      {/* ── ACTIVE FILTER RESULT ── */}
+      <AnimatePresence>
+        {!query && isBrowsing && (
+          <motion.section
+            initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0 }}
+            className="mb-10"
+          >
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Filter size={13} style={{ color: "var(--ink-4)" }} />
+                <span className="text-[13px] font-bold" style={{ color: "var(--ink-1)" }}>
+                  {browsed.length} article{browsed.length !== 1 ? "s" : ""}
+                </span>
+                {activeType && (
+                  <span className="text-[12px] px-2 py-0.5 rounded-full font-medium"
+                    style={{ background: TYPE_META[activeType].bg, color: TYPE_META[activeType].color }}>
+                    {activeType}
+                  </span>
+                )}
+                {activeSubject && (
+                  <span className="text-[12px] px-2 py-0.5 rounded-full font-medium"
+                    style={{ background: "var(--bg)", color: "var(--ink-3)", border: "1px solid var(--line-soft)" }}>
+                    {activeSubject}
+                  </span>
+                )}
+                {activeExam && (
+                  <span className="text-[12px] px-2 py-0.5 rounded-full font-medium"
+                    style={{ background: "rgba(139,92,246,0.08)", color: "var(--violet)", border: "1px solid rgba(139,92,246,0.2)" }}>
+                    {activeExam}
+                  </span>
+                )}
               </div>
-            )}
-          </>
-        )
-      ) : (
-        <GroupedView
-          entries={groupBy(tab === "By Exam" ? "boardIds" : tab === "By Subject" ? "subject_tags" : "topic_tags")}
-          bookmarks={bookmarks}
-          onToggleBookmark={toggleBookmark}
-        />
+              <button onClick={clearFilters}
+                className="text-[11px] font-medium flex items-center gap-1 px-2.5 py-1 rounded-full hover:bg-[var(--bg)] transition-colors"
+                style={{ color: "var(--ink-4)" }}>
+                <X size={11} /> Clear
+              </button>
+            </div>
+            <ArticleList articles={browsed} readSlugs={readSlugs} />
+          </motion.section>
+        )}
+      </AnimatePresence>
+
+      {/* ── HOME VIEW (no search, no filter) ── */}
+      {!query && !isBrowsing && (
+        <>
+          {/* 🔥 Popular this month */}
+          <section className="mb-10">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <Flame size={14} style={{ color: "var(--amber)" }} />
+                <h2 className="text-[13px] font-bold" style={{ color: "var(--ink-1)" }}>Popular this month</h2>
+              </div>
+              <Link href="/library/all?sort=popular"
+                className="text-[11.5px] font-semibold flex items-center gap-1 hover:underline"
+                style={{ color: "var(--blue)" }}>
+                View all <ArrowRight size={11} />
+              </Link>
+            </div>
+
+            {/* Horizontal scroll cards */}
+            <div className="flex gap-3 overflow-x-auto pb-2 -mx-1 px-1"
+              style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}>
+              {popular.map((a) => {
+                const meta    = TYPE_META[a.type];
+                const reads   = ARTICLE_POPULARITY[a.slug] ?? 0;
+                const isRead  = readSlugs.has(a.slug);
+                return (
+                  <Link
+                    key={a.id}
+                    href={`/library/${a.slug}`}
+                    className="shrink-0 w-[210px] flex flex-col gap-2.5 p-4 rounded-[14px] group relative transition-all"
+                    style={{
+                      background: "var(--card)",
+                      border: "1px solid var(--line-soft)",
+                    }}
+                  >
+                    {/* Read badge */}
+                    {isRead && (
+                      <span className="absolute top-3 right-3 w-4.5 h-4.5 flex items-center justify-center rounded-full"
+                        style={{ background: "var(--green)", width: 18, height: 18 }}>
+                        <Check size={10} className="text-white" />
+                      </span>
+                    )}
+
+                    {/* Monthly reads */}
+                    <div className="flex items-center gap-1 text-[10px] font-semibold"
+                      style={{ color: "var(--amber)" }}>
+                      <Flame size={10} />
+                      {reads.toLocaleString("en-IN")} reads/mo
+                    </div>
+
+                    {/* Type badge */}
+                    <span className="inline-flex items-center gap-1 text-[10.5px] font-bold px-2 py-0.5 rounded-full w-fit"
+                      style={{ background: meta.bg, color: meta.color }}>
+                      {TYPE_ICONS[a.type]} {a.type}
+                    </span>
+
+                    {/* Title */}
+                    <h3 className="text-[13px] font-bold leading-snug line-clamp-2 flex-1 group-hover:text-[var(--blue)] transition-colors"
+                      style={{ color: "var(--ink-1)" }}>
+                      {a.title}
+                    </h3>
+
+                    {/* Meta */}
+                    <div className="flex items-center gap-1.5 text-[10.5px] flex-wrap mt-auto"
+                      style={{ color: "var(--ink-4)" }}>
+                      <span>{a.subject_tags[0]}</span>
+                      <span>·</span>
+                      <span className="inline-flex items-center gap-0.5">
+                        <Clock size={9} /> {a.readTime}
+                      </span>
+                      <span>·</span>
+                      <span className="inline-flex items-center gap-0.5">
+                        <span className="w-1.5 h-1.5 rounded-full" style={{ background: DIFF_COLOR[a.difficulty] }} />
+                        {a.difficulty}
+                      </span>
+                    </div>
+                  </Link>
+                );
+              })}
+
+              {/* View all card */}
+              <Link href="/library/all?sort=popular"
+                className="shrink-0 w-[150px] flex flex-col items-center justify-center gap-3 p-4 rounded-[14px] transition-all hover:border-[var(--blue)] group"
+                style={{ background: "var(--card)", border: "1px solid var(--line-soft)" }}>
+                <div className="w-11 h-11 rounded-full flex items-center justify-center transition-colors group-hover:bg-[var(--blue-soft)]"
+                  style={{ background: "var(--bg)" }}>
+                  <ArrowRight size={16} className="group-hover:text-[var(--blue)] transition-colors" style={{ color: "var(--ink-3)" }} />
+                </div>
+                <p className="text-[11.5px] font-semibold text-center leading-snug" style={{ color: "var(--ink-3)" }}>
+                  View all<br />
+                  <span style={{ color: "var(--blue)" }}>{ARTICLES.length} articles</span>
+                </p>
+              </Link>
+            </div>
+          </section>
+
+          {/* 🕐 Recently Added */}
+          <section className="mb-10">
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <SortDesc size={14} style={{ color: "var(--ink-3)" }} />
+                <h2 className="text-[13px] font-bold" style={{ color: "var(--ink-1)" }}>Recently added</h2>
+              </div>
+              <Link href="/library/all"
+                className="text-[11.5px] font-semibold flex items-center gap-1 hover:underline"
+                style={{ color: "var(--blue)" }}>
+                View all <ArrowRight size={11} />
+              </Link>
+            </div>
+            <ArticleList articles={latest} readSlugs={readSlugs} />
+
+            {/* All articles CTA */}
+            <div className="mt-6 flex justify-center">
+              <Link href="/library/all"
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-[10px] text-[13px] font-semibold transition-all hover:brightness-105"
+                style={{ background: "var(--bg)", color: "var(--ink-2)", border: "1px solid var(--line-soft)" }}>
+                <Filter size={13} /> Browse all {ARTICLES.length} articles
+              </Link>
+            </div>
+          </section>
+        </>
       )}
 
-      {/* Bottom spacer */}
       <div className="h-12" />
     </div>
   );
 }
 
-/* ─────────────────────────────────────────────
-   Pill Group (filter row)
-───────────────────────────────────────────── */
-function PillGroup({ label, options, selected, onToggle }: {
-  label: string; options: string[]; selected: string[]; onToggle: (v: string) => void;
-}) {
-  return (
-    <div>
-      <div className="text-[10px] font-semibold uppercase tracking-wider mb-2.5" style={{ color: "var(--ink-4)" }}>{label}</div>
-      <div className="flex flex-wrap gap-1.5">
-        {options.map((opt) => {
-          const on = selected.includes(opt);
-          return (
-            <button
-              key={opt}
-              onClick={() => onToggle(opt)}
-              className="px-3 py-1.5 rounded-full text-[12px] font-medium transition-all"
-              style={{
-                background: on ? "var(--ink-1)" : "transparent",
-                color: on ? "var(--card)" : "var(--ink-3)",
-                border: `1px solid ${on ? "var(--ink-1)" : "var(--line)"}`,
-              }}
-            >
-              {opt}
-            </button>
-          );
-        })}
-      </div>
-    </div>
-  );
-}
-
-/* ─────────────────────────────────────────────
-   Article Row — Medium-style
-───────────────────────────────────────────── */
-function ArticleRow({ article: a, bookmarks, onToggleBookmark, showProgress }: {
-  article: Article; bookmarks: Set<string>; onToggleBookmark: (id: string) => void; showProgress?: boolean;
-}) {
-  const isMarked = bookmarks.has(a.id);
-
-  return (
-    <article
-      className="group flex flex-col gap-2 py-6 cursor-pointer transition-colors"
-      style={{ borderBottom: "1px solid var(--line-soft)" }}
-    >
-      {/* Meta line */}
-      <div className="flex items-center gap-2 text-[11px] font-medium" style={{ color: "var(--ink-4)" }}>
-        <span className="uppercase tracking-wider font-semibold" style={{ color: "var(--ink-3)" }}>
-          {a.subject_tags[0]}
-        </span>
-        <span>·</span>
-        <span>{TYPE_LABEL[a.type]}</span>
-        <span>·</span>
-        <span className="inline-flex items-center gap-1">
-          <span className="w-1.5 h-1.5 rounded-full" style={{ background: DIFF_DOT[a.difficulty] }} />
-          {a.difficulty}
-        </span>
-        <span>·</span>
-        <span>{formatDate(a.publishedAt)}</span>
-      </div>
-
-      {/* Title */}
-      <h3
-        className="text-[18px] font-bold leading-snug group-hover:text-[var(--blue)] transition-colors"
-        style={{ fontFamily: "var(--font-sora)", color: "var(--ink-1)" }}
-      >
-        {a.title}
-      </h3>
-
-      {/* Description */}
-      <p className="text-[14px] leading-relaxed line-clamp-2" style={{ color: "var(--ink-3)" }}>
-        {a.description}
-      </p>
-
-      {/* Footer */}
-      <div className="flex items-center gap-3 mt-1">
-        {/* Tags */}
-        <div className="flex items-center gap-1.5">
-          {a.boardIds.slice(0, 3).map((bid) => {
-            const board = EXAM_BOARDS.find((b) => b.id === bid);
-            return (
-              <span
-                key={bid}
-                className="text-[10px] font-medium px-2 py-0.5 rounded-full"
-                style={{ background: "var(--line-soft)", color: "var(--ink-3)" }}
-              >
-                {board?.shortName ?? bid}
-              </span>
-            );
-          })}
-        </div>
-
-        <span className="text-[12px] inline-flex items-center gap-1" style={{ color: "var(--ink-4)" }}>
-          <Clock size={12} /> {a.readTime}
-        </span>
-
-        {/* Progress */}
-        {showProgress && a.progress !== undefined && a.progress > 0 && (
-          <div className="flex items-center gap-2">
-            <div className="w-16 h-1 rounded-full" style={{ background: "var(--line-soft)" }}>
-              <div className="h-full rounded-full" style={{ width: `${a.progress}%`, background: "var(--blue)" }} />
-            </div>
-            <span className="text-[10px] font-semibold tabular-nums" style={{ color: "var(--blue)" }}>{a.progress}%</span>
-          </div>
-        )}
-
-        {/* Spacer + Bookmark */}
-        <div className="flex-1" />
-        <button
-          onClick={(e) => { e.stopPropagation(); onToggleBookmark(a.id); }}
-          className="opacity-0 group-hover:opacity-100 p-1.5 rounded-md transition-all hover:bg-[var(--line-soft)]"
-          title={isMarked ? "Remove bookmark" : "Save for later"}
-        >
-          {isMarked ? (
-            <BookmarkCheck size={16} style={{ color: "var(--blue)" }} />
-          ) : (
-            <Bookmark size={16} style={{ color: "var(--ink-4)" }} />
-          )}
-        </button>
-
-        <ChevronRight size={14} className="opacity-0 group-hover:opacity-50 transition-opacity" style={{ color: "var(--ink-4)" }} />
-      </div>
-    </article>
-  );
-}
-
-/* ─────────────────────────────────────────────
-   Grouped View
-───────────────────────────────────────────── */
-function GroupedView({ entries, bookmarks, onToggleBookmark }: {
-  entries: [string, Article[]][]; bookmarks: Set<string>; onToggleBookmark: (id: string) => void;
-}) {
-  if (entries.length === 0) return <EmptyState />;
-
+/* ─── Article list (single column) ─── */
+function ArticleList({ articles, readSlugs }: { articles: Article[]; readSlugs: Set<string> }) {
   return (
     <div className="flex flex-col">
-      {entries.map(([group, articles]) => (
-        <div key={group}>
-          <div className="flex items-center gap-3 pt-8 pb-2" style={{ borderBottom: "1px solid var(--line)" }}>
-            <h2 className="text-[15px] font-bold" style={{ color: "var(--ink-1)", fontFamily: "var(--font-sora)" }}>{group}</h2>
-            <span className="text-[11px] font-medium" style={{ color: "var(--ink-4)" }}>{articles.length}</span>
-          </div>
-          {articles.map((a) => (
-            <ArticleRow key={a.id} article={a} bookmarks={bookmarks} onToggleBookmark={onToggleBookmark} />
-          ))}
-        </div>
-      ))}
-    </div>
-  );
-}
+      {articles.map((a, i) => {
+        const meta   = TYPE_META[a.type];
+        const isRead = readSlugs.has(a.slug);
+        return (
+          <Link key={a.id} href={`/library/${a.slug}`}
+            className="flex items-start gap-4 py-4 group transition-colors"
+            style={{ borderBottom: i < articles.length - 1 ? "1px solid var(--line-soft)" : "none" }}>
 
-/* ─────────────────────────────────────────────
-   Empty State
-───────────────────────────────────────────── */
-function EmptyState({ query }: { query?: string }) {
-  return (
-    <div className="py-20 flex flex-col items-center gap-4 text-center">
-      <BookOpen size={32} style={{ color: "var(--ink-4)" }} />
-      <p className="text-[15px] font-medium" style={{ color: "var(--ink-3)" }}>
-        {query ? `No articles matching "${query}"` : "No articles found"}
-      </p>
-      <p className="text-[13px] max-w-sm" style={{ color: "var(--ink-4)" }}>
-        Try adjusting your search or filters.
-      </p>
+            {/* Type icon */}
+            <div className="w-10 h-10 rounded-[10px] flex items-center justify-center shrink-0 mt-0.5"
+              style={{ background: meta.bg, color: meta.color }}>
+              {TYPE_ICONS[a.type]}
+            </div>
+
+            <div className="flex-1 min-w-0">
+              <div className="flex items-start gap-2">
+                <h3 className="text-[15px] font-bold leading-snug group-hover:text-[var(--blue)] transition-colors flex-1"
+                  style={{ fontFamily: "var(--font-sora)", color: "var(--ink-1)" }}>
+                  {a.title}
+                </h3>
+                {isRead && (
+                  <span className="shrink-0 inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-full mt-0.5"
+                    style={{ background: "rgba(34,197,94,0.12)", color: "var(--green)" }}>
+                    <Check size={9} /> Read
+                  </span>
+                )}
+              </div>
+              <p className="text-[13px] mt-1 leading-relaxed line-clamp-2" style={{ color: "var(--ink-3)" }}>
+                {a.description}
+              </p>
+              <div className="flex items-center gap-2 mt-2 text-[11px] flex-wrap" style={{ color: "var(--ink-4)" }}>
+                <span className="font-semibold" style={{ color: meta.color }}>{a.type}</span>
+                <span>·</span>
+                <span>{a.subject_tags[0]}</span>
+                <span>·</span>
+                <span className="inline-flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full" style={{ background: DIFF_COLOR[a.difficulty] }} />
+                  {a.difficulty}
+                </span>
+                <span>·</span>
+                <span className="inline-flex items-center gap-0.5"><Clock size={10} /> {a.readTime}</span>
+              </div>
+            </div>
+
+            <ChevronRight size={15} className="shrink-0 mt-3 opacity-0 group-hover:opacity-100 transition-opacity"
+              style={{ color: "var(--blue)" }} />
+          </Link>
+        );
+      })}
     </div>
   );
 }

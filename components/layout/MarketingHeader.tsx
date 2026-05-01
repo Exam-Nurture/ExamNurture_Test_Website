@@ -43,8 +43,7 @@ const moreNav = [
 function SearchParamsReader({ onNext }: { onNext: (next: string | null) => void }) {
   const searchParams = useSearchParams();
   const next = searchParams.get("next");
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  useEffect(() => { onNext(next); }, [next]);
+  useEffect(() => { onNext(next); }, [next, onNext]);
   return null;
 }
 

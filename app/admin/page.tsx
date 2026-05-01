@@ -10,7 +10,6 @@ const STAT_LABELS: Record<string, string> = {
   exams: "Exams",
   testSeries: "Test Series",
   tests: "Tests",
-  questions: "Questions",
   pyqPapers: "PYQ Papers",
   events: "Live Events",
   payments: "Payments",
@@ -24,7 +23,6 @@ const STAT_COLORS: Record<string, string> = {
   exams: "var(--cyan)",
   testSeries: "var(--green)",
   tests: "var(--indigo)",
-  questions: "var(--amber)",
 };
 
 export default function AdminDashboard() {
@@ -128,7 +126,6 @@ export default function AdminDashboard() {
             { label: "Add Board", href: "/admin/boards" },
             { label: "Add Exam", href: "/admin/exams" },
             { label: "Add Test Series", href: "/admin/test-series" },
-            { label: "Add Question", href: "/admin/questions" },
             { label: "Add PYQ Paper", href: "/admin/pyq" },
             { label: "Add Study Material", href: "/admin/study-materials" },
           ].map((a) => (

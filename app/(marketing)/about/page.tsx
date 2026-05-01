@@ -70,9 +70,9 @@ export default function AboutPage() {
 
         <div className="max-w-4xl mx-auto text-center">
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 1, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
+            transition={{ duration: 0.45 }}
           >
             <h1 className="text-5xl sm:text-6xl font-bold text-gray-900 mb-6 leading-tight">
               Building India's
@@ -259,7 +259,7 @@ export default function AboutPage() {
               <p className="text-gray-600 mt-4 font-medium">Loading team members...</p>
             </div>
           ) : error || teamMembers.length === 0 ? (
-            <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="relative">
+            <motion.div initial={{ opacity: 1, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="relative">
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
                 {[1, 2, 3, 4].map((i) => (
                   <div key={i} className="rounded-xl bg-gradient-to-br from-gray-50 to-white border border-gray-200 overflow-hidden">

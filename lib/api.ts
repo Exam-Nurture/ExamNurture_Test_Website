@@ -68,7 +68,9 @@ export async function apiFetch<T = unknown>(
     const ok = await refreshing;
     if (ok) return apiFetch<T>(path, options, false);
     clearToken();
-    if (typeof window !== "undefined") window.location.href = "/login";
+    if (typeof window !== "undefined") {
+      window.location.href = `/?next=${encodeURIComponent(window.location.pathname)}`;
+    }
     throw new Error("Session expired");
   }
 
@@ -298,7 +300,39 @@ export async function apiSubmitAttempt(
   });
 }
 
+/* ── PYQ Papers ─────────────────────────────────── */
 
+export async function apiGetPYQPapers(params?: { examId?: string; year?: number; page?: number; limit?: number }) {
+  const qs = new URLSearchParams();
+  if (params?.examId) qs.set("examId", params.examId);
+  if (params?.year) qs.set("year", String(params.year));
+  if (params?.page) qs.set("page", String(params.page));
+  if (params?.limit) qs.set("limit", String(params.limit));
+  const s = qs.toString();
+  return apiFetch(`/pyq${s ? `?${s}` : ""}`);
+}
+
+export async function apiStartPYQAttempt(paperId: string) {
+  return apiFetch(`/pyq/attempts/start`, {
+    method: "POST",
+    body: JSON.stringify({ paperId }),
+  });
+}
+
+export async function apiSubmitPYQAttempt(paperId: string, answers: Record<string, number>, timeTakenSec: number) {
+  return apiFetch(`/pyq/attempts/${paperId}/submit`, {
+    method: "POST",
+    body: JSON.stringify({ paperId, answers, timeTakenSec }),
+  });
+}
+
+export async function apiGetPYQAttempts() {
+  return apiFetch("/pyq/attempts");
+}
+
+export async function apiGetPYQAttemptResult(attemptId: string) {
+  return apiFetch(`/pyq/attempts/${attemptId}/result`);
+}
 
 /* ── Daily Practice ─────────────────────────────── */
 
@@ -457,8 +491,10 @@ export async function apiAdminDeleteTestSeries(id: string) {
 
 // Tests
 export interface AdminTest {
-  id: string; seriesId: string; title: string; durationSec: number;
-  totalMarks: number; negMarks: number; tierRequired: number; isActive: boolean;
+  id: string; seriesId: string; title: string; description?: string;
+  testType: string; subjects?: string; durationSec: number;
+  totalMarks: number; negMarks: number; tierRequired: number;
+  isLocked: boolean; isActive: boolean;
 }
 export async function apiAdminGetTests(params?: { page?: number; seriesId?: string }) {
   return apiFetch<PaginatedResponse<AdminTest>>(`/admin/tests${buildQS(params ?? {})}`);
@@ -472,15 +508,24 @@ export async function apiAdminUpdateTest(id: string, body: Partial<AdminTest>) {
 export async function apiAdminDeleteTest(id: string) {
   return apiFetch(`/admin/tests/${id}`, { method: "DELETE" });
 }
-export async function apiAdminAddQuestionsToTest(testId: string, questionIds: string[]) {
-  return apiFetch(`/admin/tests/${testId}/questions`, { method: "POST", body: JSON.stringify({ questionIds }) });
+export async function apiAdminBulkUploadQuestions(testId: string, questions: Record<string, unknown>[]) {
+  return apiFetch<{ added: number; testId: string }>(
+    `/admin/tests/${testId}/questions/bulk`,
+    { method: "POST", body: JSON.stringify(questions) }
+  );
+}
+export async function apiAdminBulkUploadPYQQuestions(paperId: string, questions: Record<string, unknown>[]) {
+  return apiFetch<{ added: number; paperId: string }>(
+    `/admin/pyq/${paperId}/questions/bulk`,
+    { method: "POST", body: JSON.stringify(questions) }
+  );
 }
 
 // Questions
 export interface AdminQuestion {
   id: string; text: string; textHindi?: string; options: string; correctIndex: number;
-  explanation?: string; subject?: string; topic?: string; difficulty: string;
-  language: string; source?: string; year?: number; examId?: string;
+  explanation?: string; subjectSuperset?: string; subject?: string; chapter?: string;
+  topic?: string; difficulty: string; language: string; source?: string; year?: number; examId?: string;
 }
 export async function apiAdminGetQuestions(params?: { page?: number; limit?: number; subject?: string; examId?: string }) {
   return apiFetch<PaginatedResponse<AdminQuestion>>(`/admin/questions${buildQS(params ?? {})}`);

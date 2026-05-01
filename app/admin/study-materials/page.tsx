@@ -56,6 +56,15 @@ export default function AdminStudyMaterialsPage() {
 
   const cols = [
     { key: "title", label: "Title" },
+    { 
+      key: "examId", 
+      label: "Exam", 
+      render: (m: AdminStudyMaterial) => (
+        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-100 uppercase">
+          {exams.find(e => e.id === m.examId)?.shortName || m.examId}
+        </span>
+      )
+    },
     { key: "subject", label: "Subject" },
     { key: "language", label: "Language" },
     { key: "tierRequired", label: "Tier", render: (m: AdminStudyMaterial) => `Tier ${m.tierRequired}` },

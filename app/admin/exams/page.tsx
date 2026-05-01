@@ -45,7 +45,12 @@ export default function AdminExamsPage() {
     ev.preventDefault();
     setSaving(true);
     try {
-      const payload = { ...form, tier: Number(form.tier ?? 0) };
+      const payload = {
+        ...form,
+        tier: Number(form.tier ?? 0),
+        notificationUrl: form.notificationUrl || undefined,
+        bannerUrl: (form as any).bannerUrl || undefined,
+      };
       if (modal === "create") await apiAdminCreateExam(payload);
       else await apiAdminUpdateExam(form.id!, payload);
       setModal(null);
@@ -62,6 +67,15 @@ export default function AdminExamsPage() {
   const cols = [
     { key: "id", label: "ID", width: "100px" },
     { key: "name", label: "Name" },
+    { 
+      key: "boardId", 
+      label: "Board", 
+      render: (e: AdminExam) => (
+        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-700 border border-amber-100 uppercase">
+          {boards.find(b => b.id === e.boardId)?.shortName || e.boardId}
+        </span>
+      )
+    },
     { key: "shortName", label: "Short" },
     { key: "tier", label: "Tier", render: (e: AdminExam) => `Tier ${e.tier}` },
     {

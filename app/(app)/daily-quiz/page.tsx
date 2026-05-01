@@ -250,130 +250,261 @@ export default function DailyQuizPage() {
     );
   }
 
+  /* ── mock data ── */
+  const toppers = [
+    { rank: 1, name: "Priya S.", score: 5, time: "4:12", badge: "🥇" },
+    { rank: 2, name: "Rahul K.", score: 5, time: "5:44", badge: "🥈" },
+    { rank: 3, name: "Anjali M.", score: 4, time: "6:01", badge: "🥉" },
+    { rank: 4, name: "Vikram T.", score: 4, time: "7:22", badge: "4" },
+    { rank: 5, name: "Sneha R.", score: 3, time: "8:15", badge: "5" },
+  ];
+  const pastResults = [
+    { day: "Wednesday", date: "Apr 29", score: 4, total: 5, pct: 80, subjects: ["GEOGRAPHY", "Environment"] },
+    { day: "Tuesday", date: "Apr 28", score: 3, total: 5, pct: 60, subjects: ["ECONOMY", "REASONING"] },
+    { day: "Monday", date: "Apr 27", score: 5, total: 5, pct: 100, subjects: ["SCIENCE", "Environment"] },
+  ];
+
   /* ── Intro ── */
   if (gameState === "intro") {
     return (
-      <div className="max-w-4xl mx-auto py-4 space-y-8">
-        {/* Header card */}
-        <div className="rounded-2xl overflow-hidden" style={{ background: "var(--card)", border: "1px solid var(--line-soft)" }}>
-          <div
-            className="px-8 py-10 relative overflow-hidden"
-            style={{ background: "linear-gradient(135deg, var(--blue) 0%, #06b6d4 100%)" }}
-          >
-            <div className="absolute top-0 right-0 w-64 h-64 rounded-full bg-white/10 -translate-y-1/2 translate-x-1/2" />
-            <div className="relative z-10">
-              <div className="flex items-center gap-2 mb-4">
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 text-white text-xs font-bold">
+      <div className="max-w-5xl mx-auto py-8 space-y-10">
+
+        {/* ── HERO BANNER ── */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="relative rounded-3xl overflow-hidden"
+          style={{ background: "linear-gradient(135deg, #1d4ed8 0%, #0891b2 60%, #0e7490 100%)" }}
+        >
+          {/* decorative blobs */}
+          <div className="absolute -top-16 -right-16 w-72 h-72 rounded-full bg-white/10" />
+          <div className="absolute -bottom-12 -left-12 w-56 h-56 rounded-full bg-white/5" />
+
+          <div className="relative z-10 px-8 md:px-12 py-10 flex flex-col md:flex-row md:items-center gap-8">
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-5">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/20 text-white text-xs font-bold backdrop-blur-sm">
                   <Flame size={12} /> Daily Challenge
                 </span>
-                <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/20 text-white text-xs font-bold">
+                <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-white/20 text-white text-xs font-bold backdrop-blur-sm">
                   <Calendar size={12} /> {todaySchedule.day}
                 </span>
               </div>
-              <h1 className="text-3xl md:text-4xl font-bold text-white mb-2" style={{ fontFamily: "var(--font-sora)" }}>
-                Today's Quiz
+              <h1 className="text-4xl md:text-5xl font-extrabold text-white mb-3 leading-tight">
+                Today's Daily Quiz
               </h1>
-              <p className="text-white/80 text-sm">
+              <p className="text-white/75 text-base mb-5">
                 {totalQ} questions · {quizData?.time_limit ?? 10} minutes · Test your knowledge
               </p>
-              <div className="flex flex-wrap gap-2 mt-4">
+              <div className="flex flex-wrap gap-2 mb-7">
                 {todaySchedule.subjects.map((s) => (
-                  <span key={s} className="px-2.5 py-1 rounded-lg bg-white/20 text-white text-xs font-semibold">{s}</span>
+                  <span key={s} className="px-3 py-1.5 rounded-xl bg-white/20 text-white text-xs font-bold backdrop-blur-sm border border-white/20">{s}</span>
                 ))}
               </div>
-            </div>
-          </div>
-
-          {/* Start panel */}
-          <div className="px-8 py-6 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-            <div className="flex items-center gap-6 text-sm" style={{ color: "var(--ink-3)" }}>
-              <span className="flex items-center gap-1.5"><Clock size={14} /> {quizData?.time_limit ?? 10} min</span>
-              <span className="flex items-center gap-1.5"><Target size={14} /> {totalQ} questions</span>
-              <span className="flex items-center gap-1.5"><Zap size={14} /> +1 streak on completion</span>
-            </div>
-
-            {errorMsg ? (
-              <div
-                className="flex items-center gap-2 px-4 py-2.5 rounded-xl text-sm font-medium"
-                style={{ background: "var(--red-soft)", color: "var(--red)", border: "1px solid var(--red)" }}
-              >
-                <AlertCircle size={14} /> {errorMsg}
-              </div>
-            ) : (
-              <button
-                onClick={handleStart}
-                className="flex items-center gap-2 px-6 py-3 rounded-xl text-sm font-bold text-white transition-all hover:brightness-110 hover:-translate-y-0.5 hover:shadow-lg"
-                style={{ background: "var(--blue)" }}
-              >
-                Start Challenge <ArrowRight size={16} />
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* Weekly schedule */}
-        <div>
-          <div className="mb-4">
-            <div className="text-sm font-semibold" style={{ color: "var(--ink-1)" }}>Your Weekly Schedule</div>
-            <div className="text-xs mt-0.5" style={{ color: "var(--ink-4)" }}>Consistent daily practice builds exam-ready habits</div>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-            {Object.entries(WEEKLY_SCHEDULE)
-              .sort(([a], [b]) => {
-                const order = [1, 2, 3, 4, 5, 6, 0];
-                return order.indexOf(Number(a)) - order.indexOf(Number(b));
-              })
-              .map(([key, sched]) => {
-                const isToday = Number(key) === today;
-                return (
-                  <div
-                    key={key}
-                    className="rounded-xl p-4 transition-all"
-                    style={
-                      isToday
-                        ? { background: "var(--blue-soft)", border: "2px solid var(--blue)" }
-                        : { background: "var(--card)", border: "1px solid var(--line-soft)" }
-                    }
-                  >
-                    <div className="flex items-center justify-between mb-2">
-                      <span className="text-xl">{sched.emoji}</span>
-                      {isToday && (
-                        <span
-                          className="text-[9px] font-bold px-2 py-0.5 rounded-full text-white"
-                          style={{ background: "var(--blue)" }}
-                        >TODAY</span>
-                      )}
-                    </div>
-                    <div
-                      className="text-xs font-bold mb-2"
-                      style={{ color: isToday ? "var(--blue)" : "var(--ink-2)" }}
-                    >
-                      {sched.day}
-                    </div>
-                    <div className="flex flex-wrap gap-1">
-                      {sched.subjects.slice(0, 3).map((s) => (
-                        <span
-                          key={s}
-                          className="text-[9px] font-semibold px-1.5 py-0.5 rounded-md"
-                          style={{ background: "var(--bg)", color: "var(--ink-3)" }}
-                        >{s}</span>
-                      ))}
-                      {sched.subjects.length > 3 && (
-                        <span className="text-[9px] font-semibold px-1.5 py-0.5 rounded-md" style={{ color: "var(--ink-4)" }}>
-                          +{sched.subjects.length - 3}
-                        </span>
-                      )}
-                    </div>
+              <div className="flex items-center gap-4">
+                {errorMsg ? (
+                  <div className="flex items-center gap-2 px-5 py-3 rounded-2xl bg-red-500/20 text-white text-sm font-medium border border-red-300/30">
+                    <AlertCircle size={16} /> {errorMsg}
                   </div>
-                );
-              })}
+                ) : (
+                  <button
+                    onClick={handleStart}
+                    className="inline-flex items-center gap-2.5 px-8 py-4 rounded-2xl bg-white text-blue-700 font-extrabold text-base shadow-2xl shadow-black/20 hover:shadow-white/20 hover:scale-105 transition-all duration-200"
+                  >
+                    <Zap size={18} /> Start Today's Quiz
+                  </button>
+                )}
+                <div className="flex items-center gap-5 text-white/70 text-sm">
+                  <span className="flex items-center gap-1.5"><Clock size={14} /> {quizData?.time_limit ?? 10} min</span>
+                  <span className="flex items-center gap-1.5"><Target size={14} /> {totalQ} Qs</span>
+                  <span className="flex items-center gap-1.5"><Flame size={14} /> +1 streak</span>
+                </div>
+              </div>
+            </div>
+            {/* right stats box */}
+            <div className="shrink-0 bg-white/10 backdrop-blur-md border border-white/20 rounded-3xl p-6 w-full md:w-52 flex flex-col gap-5">
+              {[
+                { label: "Questions", value: totalQ, icon: "📝" },
+                { label: "Time Limit", value: `${quizData?.time_limit ?? 10}m`, icon: "⏱️" },
+                { label: "Streak Reward", value: "+1 🔥", icon: "⚡" },
+              ].map((s) => (
+                <div key={s.label}>
+                  <div className="text-white/50 text-xs font-medium mb-0.5">{s.label}</div>
+                  <div className="text-white text-xl font-extrabold">{s.value}</div>
+                </div>
+              ))}
+            </div>
           </div>
+        </motion.div>
+
+        {/* ── SCHEDULE + TOPPERS row ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+          {/* Weekly Schedule table — spans 2 cols */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.1 }}
+            className="lg:col-span-2 overflow-hidden rounded-3xl border shadow-sm"
+            style={{ background: "var(--card)", borderColor: "var(--line-soft)" }}
+          >
+            <div className="px-6 py-5 border-b flex items-center justify-between" style={{ borderColor: "var(--line-soft)" }}>
+              <div>
+                <h2 className="font-bold text-base" style={{ color: "var(--ink-1)" }}>Weekly Schedule</h2>
+                <p className="text-xs mt-0.5" style={{ color: "var(--ink-4)" }}>Daily quiz subjects by day</p>
+              </div>
+              <Calendar size={18} style={{ color: "var(--ink-4)" }} />
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr style={{ background: "var(--bg)", borderBottom: "1px solid var(--line-soft)" }}>
+                    <th className="px-6 py-3.5 text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--ink-4)" }}>Day</th>
+                    <th className="px-6 py-3.5 text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--ink-4)" }}>Subjects</th>
+                    <th className="px-6 py-3.5 text-[10px] font-bold uppercase tracking-widest text-right" style={{ color: "var(--ink-4)" }}>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Object.entries(WEEKLY_SCHEDULE)
+                    .sort(([a], [b]) => [1,2,3,4,5,6,0].indexOf(Number(a)) - [1,2,3,4,5,6,0].indexOf(Number(b)))
+                    .map(([key, sched]) => {
+                      const isToday = Number(key) === today;
+                      return (
+                        <tr key={key} style={{
+                          borderBottom: "1px solid var(--line-soft)",
+                          background: isToday ? "var(--blue-soft)" : "transparent"
+                        }}>
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-3">
+                              <span className="text-xl">{sched.emoji}</span>
+                              <span className="font-bold text-sm" style={{ color: isToday ? "var(--blue)" : "var(--ink-1)" }}>{sched.day}</span>
+                            </div>
+                          </td>
+                          <td className="px-6 py-4">
+                            <div className="flex flex-wrap gap-1.5">
+                              {sched.subjects.slice(0, 4).map((sub) => (
+                                <span key={sub} className="px-2.5 py-0.5 text-[9px] font-bold rounded-full uppercase tracking-tight border"
+                                  style={isToday
+                                    ? { color: "var(--blue)", background: "var(--card)", borderColor: "var(--blue)" }
+                                    : { color: "var(--ink-3)", background: "var(--bg)", borderColor: "var(--line-soft)" }}>
+                                  {sub}
+                                </span>
+                              ))}
+                              {sched.subjects.length > 4 && <span className="text-[9px] font-bold" style={{ color: "var(--ink-4)" }}>+{sched.subjects.length - 4}</span>}
+                            </div>
+                          </td>
+                          <td className="px-6 py-4 text-right">
+                            {isToday ? (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-600 text-white text-[9px] font-bold rounded-full">
+                                <Flame size={9} /> TODAY
+                              </span>
+                            ) : (
+                              <span className="text-[10px]" style={{ color: "var(--ink-4)" }}>Scheduled</span>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                </tbody>
+              </table>
+            </div>
+          </motion.div>
+
+          {/* Today's Toppers */}
+          <motion.div
+            initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.15 }}
+            className="rounded-3xl border shadow-sm overflow-hidden"
+            style={{ background: "var(--card)", borderColor: "var(--line-soft)" }}
+          >
+            <div className="px-6 py-5 border-b flex items-center justify-between" style={{ borderColor: "var(--line-soft)" }}>
+              <div>
+                <h2 className="font-bold text-base" style={{ color: "var(--ink-1)" }}>Today's Toppers</h2>
+                <p className="text-xs mt-0.5" style={{ color: "var(--ink-4)" }}>Live leaderboard</p>
+              </div>
+              <Trophy size={18} style={{ color: "var(--ink-4)" }} />
+            </div>
+            <div className="divide-y" style={{ borderColor: "var(--line-soft)" }}>
+              {toppers.map((t) => (
+                <div key={t.rank} className="px-6 py-4 flex items-center gap-4 hover:opacity-90 transition-opacity">
+                  <span className="text-xl w-7 text-center">{t.rank <= 3 ? t.badge : <span className="text-xs font-bold" style={{ color: "var(--ink-4)" }}>{t.rank}</span>}</span>
+                  <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
+                    {t.name.charAt(0)}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="text-sm font-bold truncate" style={{ color: "var(--ink-1)" }}>{t.name}</div>
+                    <div className="text-xs" style={{ color: "var(--ink-4)" }}>{t.score}/{totalQ} correct</div>
+                  </div>
+                  <div className="text-xs font-bold" style={{ color: "var(--ink-3)" }}>{t.time}</div>
+                </div>
+              ))}
+            </div>
+          </motion.div>
         </div>
+
+        {/* ── PAST RESULTS ── */}
+        <motion.div
+          initial={{ opacity: 0, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.2 }}
+          className="rounded-3xl border shadow-sm overflow-hidden"
+          style={{ background: "var(--card)", borderColor: "var(--line-soft)" }}
+        >
+          <div className="px-6 py-5 border-b flex items-center justify-between" style={{ borderColor: "var(--line-soft)" }}>
+            <div>
+              <h2 className="font-bold text-base" style={{ color: "var(--ink-1)" }}>Your Past Results</h2>
+              <p className="text-xs mt-0.5" style={{ color: "var(--ink-4)" }}>Your recent quiz performance</p>
+            </div>
+            <LayoutDashboard size={18} style={{ color: "var(--ink-4)" }} />
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-left border-collapse">
+              <thead>
+                <tr style={{ background: "var(--bg)", borderBottom: "1px solid var(--line-soft)" }}>
+                  {["Date", "Topics", "Score", "Accuracy"].map((h) => (
+                    <th key={h} className="px-6 py-3.5 text-[10px] font-bold uppercase tracking-widest" style={{ color: "var(--ink-4)" }}>{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {pastResults.map((r) => (
+                  <tr key={r.date} style={{ borderBottom: "1px solid var(--line-soft)" }}>
+                    <td className="px-6 py-4">
+                      <div className="font-bold text-sm" style={{ color: "var(--ink-1)" }}>{r.day}</div>
+                      <div className="text-xs" style={{ color: "var(--ink-4)" }}>{r.date}</div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex flex-wrap gap-1.5">
+                        {r.subjects.map((s) => (
+                          <span key={s} className="px-2.5 py-0.5 text-[9px] font-bold rounded-full uppercase border"
+                            style={{ color: "var(--ink-3)", background: "var(--bg)", borderColor: "var(--line-soft)" }}>{s}</span>
+                        ))}
+                      </div>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className="text-sm font-extrabold" style={{ color: "var(--ink-1)" }}>{r.score}/{r.total}</span>
+                    </td>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="flex-1 h-1.5 rounded-full bg-gray-100 overflow-hidden" style={{ background: "var(--line)" }}>
+                          <div className="h-full rounded-full" style={{
+                            width: `${r.pct}%`,
+                            background: r.pct === 100 ? "#10b981" : r.pct >= 60 ? "var(--blue)" : "#f59e0b"
+                          }} />
+                        </div>
+                        <span className="text-xs font-bold w-10 text-right" style={{
+                          color: r.pct === 100 ? "#10b981" : r.pct >= 60 ? "var(--blue)" : "#f59e0b"
+                        }}>{r.pct}%</span>
+                      </div>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </motion.div>
+
       </div>
     );
   }
 
   /* ── Playing ── */
+
   if (gameState === "playing" && q && quizData) {
     const progress = ((currentIdx + 1) / totalQ) * 100;
     return (

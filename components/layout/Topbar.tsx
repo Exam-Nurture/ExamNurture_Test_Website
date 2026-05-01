@@ -31,7 +31,7 @@ const FREE_ITEMS = [
   },
   {
     label: "Free Courses",
-    href:  "/tests?filter=free",
+    href:  "/series?filter=free",
     icon:  BookOpen,
     desc:  "Structured courses, no paywall",
     color: "text-emerald-600",
@@ -47,14 +47,38 @@ const FREE_ITEMS = [
   },
 ];
 
-const NAV_ITEMS = [
-  { href: "/dashboard",  label: "Dashboard"            },
-  { href: "/series",     label: "Test Series"          },
+const NAV_BEFORE_EXAMS = [
+  { href: "/dashboard", label: "Dashboard"   },
+  { href: "/series",    label: "Test Series" },
+];
+
+const NAV_AFTER_EXAMS = [
   { href: "/pyq",        label: "Previous Year Papers" },
   { href: "/mentorship", label: "Mentorship"           },
 ];
 
-export default function Topbar() {
+/** Map routes → human-readable page titles for breadcrumb */
+const PAGE_TITLES: Record<string, string> = {
+  "/dashboard":  "Dashboard",
+  "/series":     "Test Series",
+  "/pyq":        "Previous Year Papers",
+  "/mentorship": "Mentorship",
+  "/analytics":  "Analytics",
+  "/schedule":   "Schedule",
+  "/exams":      "Browse Exams",
+  "/library":    "Nurture Library",
+  "/plans":      "Upgrade Plan",
+  "/profile":    "My Profile",
+};
+
+function getPageTitle(pathname: string): string {
+  for (const [key, val] of Object.entries(PAGE_TITLES)) {
+    if (pathname === key || pathname.startsWith(key + "/")) return val;
+  }
+  return "ExamNurture";
+}
+
+export default function Topbar({ hideSidebarItems = false }: { hideSidebarItems?: boolean }) {
   const pathname = usePathname();
   const router   = useRouter();
   const { user, logout } = useAuth();
@@ -70,7 +94,6 @@ export default function Topbar() {
 
   const handleLogout = async () => { await logout(); router.push("/"); };
 
-  // Close free dropdown on outside click
   useEffect(() => {
     const handler = (e: MouseEvent) => {
       if (freeRef.current && !freeRef.current.contains(e.target as Node))
@@ -80,7 +103,6 @@ export default function Topbar() {
     return () => document.removeEventListener("mousedown", handler);
   }, []);
 
-  // Close everything on route change
   useEffect(() => {
     setShowFree(false);
     setShowMenu(false);
@@ -91,133 +113,157 @@ export default function Topbar() {
 
   return (
     <header
-      className="fixed top-0 left-0 right-0 h-14 bg-[var(--card)] z-50 flex items-center justify-between px-5"
-      style={{ borderBottom: "1px solid var(--line-soft)" }}
+      className="sticky top-0 h-14 z-30 flex items-center justify-between px-4 md:px-5 shrink-0"
+      style={{
+        background: "var(--card)",
+        borderBottom: "1px solid var(--line-soft)",
+      }}
     >
-      {/* ── Left: Logo + Nav ── */}
-      <div className="flex items-center gap-7">
-        <Link href="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity">
-          <img src="/examnurture-logo.jpg" alt="ExamNurture" className="h-8 w-8 rounded-lg object-cover" />
-          <span className="font-bold text-[15px] tracking-tight hidden sm:block" style={{ fontFamily: "var(--font-sora)" }}>
-            <span style={{ color: "var(--ink-1)" }}>Exam</span>
-            <span style={{ color: "var(--cyan)" }}>Nurture</span>
-          </span>
-        </Link>
+      {/* ── Left ── */}
+      <div className="flex items-center gap-4 min-w-0">
+        {/* Logo — only on mobile (sidebar has it on desktop) OR when no sidebar */}
+        {(!hideSidebarItems) && (
+          <Link href="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity shrink-0">
+            <img src="/examnurture-logo.jpg" alt="ExamNurture" className="h-8 w-8 rounded-lg object-cover" />
+            <span className="font-bold text-[15px] tracking-tight hidden sm:block" style={{ fontFamily: "var(--font-sora)" }}>
+              <span style={{ color: "var(--ink-1)" }}>Exam</span>
+              <span style={{ color: "var(--cyan)" }}>Nurture</span>
+            </span>
+          </Link>
+        )}
 
-        <nav className="hidden md:flex items-center gap-1 ml-4">
-          {NAV_ITEMS.map((item) => {
-            const isActive =
-              item.href === "/dashboard"
+        {/* Mobile logo when sidebar is hidden on mobile */}
+        {hideSidebarItems && (
+          <Link href="/" className="flex items-center gap-2 hover:opacity-90 transition-opacity shrink-0 md:hidden">
+            <img src="/examnurture-logo.jpg" alt="ExamNurture" className="h-8 w-8 rounded-lg object-cover" />
+            <span className="font-bold text-[15px] tracking-tight" style={{ fontFamily: "var(--font-sora)" }}>
+              <span style={{ color: "var(--ink-1)" }}>Exam</span>
+              <span style={{ color: "var(--cyan)" }}>Nurture</span>
+            </span>
+          </Link>
+        )}
+
+        {/* Page title breadcrumb — desktop, when sidebar is present */}
+        {hideSidebarItems && (
+          <div className="hidden md:flex items-center gap-2 min-w-0">
+            <span
+              className="text-[14px] font-semibold truncate"
+              style={{ color: "var(--ink-1)" }}
+            >
+              {getPageTitle(pathname)}
+            </span>
+          </div>
+        )}
+
+        {/* Horizontal nav — only when no sidebar (standalone topbar mode) */}
+        {!hideSidebarItems && (
+          <nav className="hidden md:flex items-center gap-1 ml-4">
+            {NAV_BEFORE_EXAMS.map((item) => {
+              const isActive = item.href === "/dashboard"
                 ? pathname === "/dashboard"
                 : pathname.startsWith(item.href);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className={`px-3 py-1.5 rounded-[8px] text-[13px] font-medium transition-all whitespace-nowrap ${
-                  isActive
-                    ? "bg-[var(--blue-soft)] text-[var(--blue)]"
-                    : "text-[var(--ink-3)] hover:bg-[var(--bg)] hover:text-[var(--ink-1)]"
+              return (
+                <Link key={item.href} href={item.href}
+                  className={`px-3 py-1.5 rounded-[8px] text-[13px] font-medium transition-all whitespace-nowrap ${
+                    isActive
+                      ? "bg-[var(--blue-soft)] text-[var(--blue)]"
+                      : "text-[var(--ink-3)] hover:bg-[var(--bg)] hover:text-[var(--ink-1)]"
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+
+            <MegaMenu
+              show={showExamsMenu}
+              onMouseEnter={() => setShowExamsMenu(true)}
+              onMouseLeave={() => setShowExamsMenu(false)}
+            />
+
+            {NAV_AFTER_EXAMS.map((item) => {
+              const isActive = pathname.startsWith(item.href);
+              return (
+                <Link key={item.href} href={item.href}
+                  className={`px-3 py-1.5 rounded-[8px] text-[13px] font-medium transition-all whitespace-nowrap ${
+                    isActive
+                      ? "bg-[var(--blue-soft)] text-[var(--blue)]"
+                      : "text-[var(--ink-3)] hover:bg-[var(--bg)] hover:text-[var(--ink-1)]"
+                  }`}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+
+            {/* Free dropdown */}
+            <div className="relative" ref={freeRef}>
+              <button
+                onClick={() => setShowFree(v => !v)}
+                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-[13px] font-semibold transition-all whitespace-nowrap ${
+                  showFree || isFreeActive
+                    ? "bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400"
+                    : "text-amber-500 hover:bg-amber-50 hover:text-amber-600 dark:hover:bg-amber-900/20"
                 }`}
               >
-                {item.label}
-              </Link>
-            );
-          })}
+                <svg className="w-3 h-3 shrink-0 animate-[spin_4s_linear_infinite]" viewBox="0 0 16 16" fill="currentColor">
+                  <path d="M8 0l1.6 5.6L16 8l-6.4 2.4L8 16l-1.6-5.6L0 8l6.4-2.4z"/>
+                </svg>
+                Free
+                <ChevronDown size={12} className={`transition-transform duration-200 ${showFree ? "rotate-180" : ""}`} />
+              </button>
 
-          {/* Exams mega-menu — same as marketing header */}
-          <MegaMenu
-            show={showExamsMenu}
-            onMouseEnter={() => setShowExamsMenu(true)}
-            onMouseLeave={() => setShowExamsMenu(false)}
-          />
-
-          {/* ── Free dropdown ── */}
-          <div className="relative" ref={freeRef}>
-            <button
-              onClick={() => setShowFree(v => !v)}
-              className={`flex items-center gap-1.5 px-3 py-1.5 rounded-[8px] text-[13px] font-semibold transition-all whitespace-nowrap ${
-                showFree || isFreeActive
-                  ? "bg-amber-50 text-amber-600 dark:bg-amber-900/20 dark:text-amber-400"
-                  : "text-amber-500 hover:bg-amber-50 hover:text-amber-600 dark:hover:bg-amber-900/20"
-              }`}
-            >
-              {/* Sparkle star SVG */}
-              <svg className="w-3 h-3 shrink-0 animate-[spin_4s_linear_infinite]" viewBox="0 0 16 16" fill="currentColor">
-                <path d="M8 0l1.6 5.6L16 8l-6.4 2.4L8 16l-1.6-5.6L0 8l6.4-2.4z"/>
-              </svg>
-              Free
-              <ChevronDown
-                size={12}
-                className={`transition-transform duration-200 ${showFree ? "rotate-180" : ""}`}
-              />
-            </button>
-
-            <AnimatePresence>
-              {showFree && (
-                <motion.div
-                  initial={{ opacity: 0, y: 6, scale: 0.97 }}
-                  animate={{ opacity: 1, y: 0, scale: 1 }}
-                  exit={{ opacity: 0, y: 6, scale: 0.97 }}
-                  transition={{ duration: 0.15, ease: "easeOut" }}
-                  className="absolute left-0 top-full mt-2 w-72 rounded-2xl shadow-2xl overflow-hidden z-50 py-2"
-                  style={{
-                    background: "var(--card)",
-                    border: "1px solid var(--line-soft)",
-                    boxShadow: "0 8px 32px -4px rgba(0,0,0,0.12)",
-                  }}
-                >
-                  {/* Header strip */}
-                  <div className="px-4 py-2.5 mb-1 flex items-center gap-2 border-b" style={{ borderColor: "var(--line-soft)" }}>
-                    <div className="w-6 h-6 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
-                      <Sparkles size={13} className="text-amber-500" />
+              <AnimatePresence>
+                {showFree && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 6, scale: 0.97 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 6, scale: 0.97 }}
+                    transition={{ duration: 0.15, ease: "easeOut" }}
+                    className="absolute left-0 top-full mt-2 w-72 rounded-2xl shadow-2xl overflow-hidden z-50 py-2"
+                    style={{ background: "var(--card)", border: "1px solid var(--line-soft)", boxShadow: "0 8px 32px -4px rgba(0,0,0,0.12)" }}
+                  >
+                    <div className="px-4 py-2.5 mb-1 flex items-center gap-2 border-b" style={{ borderColor: "var(--line-soft)" }}>
+                      <div className="w-6 h-6 rounded-lg bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+                        <Sparkles size={13} className="text-amber-500" />
+                      </div>
+                      <div>
+                        <p className="text-[12px] font-bold" style={{ color: "var(--ink-1)" }}>Free Resources</p>
+                        <p className="text-[10px]" style={{ color: "var(--ink-4)" }}>No subscription needed — completely free</p>
+                      </div>
                     </div>
-                    <div>
-                      <p className="text-[12px] font-bold" style={{ color: "var(--ink-1)" }}>Free Resources</p>
-                      <p className="text-[10px]" style={{ color: "var(--ink-4)" }}>No subscription needed — completely free</p>
-                    </div>
-                  </div>
-
-                  {FREE_ITEMS.map((item) => {
-                    const Icon = item.icon;
-                    const active = pathname.startsWith(item.href.split("?")[0]);
-                    return (
-                      <Link
-                        key={item.href}
-                        href={item.href}
-                        onClick={() => setShowFree(false)}
-                        className={`flex items-center gap-3 px-4 py-2.5 transition-colors group ${
-                          active ? "bg-[var(--bg)]" : "hover:bg-[var(--bg)]"
-                        }`}
-                      >
-                        <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${item.bg}`}>
-                          <Icon size={15} className={item.color} />
-                        </div>
-                        <div className="min-w-0">
-                          <p className="text-[13px] font-semibold leading-none truncate" style={{ color: "var(--ink-1)" }}>
-                            {item.label}
-                          </p>
-                          <p className="text-[11px] mt-0.5 truncate" style={{ color: "var(--ink-4)" }}>
-                            {item.desc}
-                          </p>
-                        </div>
-                        <span className="ml-auto text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400 shrink-0">
-                          FREE
-                        </span>
-                      </Link>
-                    );
-                  })}
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        </nav>
+                    {FREE_ITEMS.map((item) => {
+                      const Icon = item.icon;
+                      const active = pathname.startsWith(item.href.split("?")[0]);
+                      return (
+                        <Link key={item.href} href={item.href} onClick={() => setShowFree(false)}
+                          className={`flex items-center gap-3 px-4 py-2.5 transition-colors group ${active ? "bg-[var(--bg)]" : "hover:bg-[var(--bg)]"}`}
+                        >
+                          <div className={`w-8 h-8 rounded-xl flex items-center justify-center shrink-0 ${item.bg}`}>
+                            <Icon size={15} className={item.color} />
+                          </div>
+                          <div className="min-w-0">
+                            <p className="text-[13px] font-semibold leading-none truncate" style={{ color: "var(--ink-1)" }}>{item.label}</p>
+                            <p className="text-[11px] mt-0.5 truncate" style={{ color: "var(--ink-4)" }}>{item.desc}</p>
+                          </div>
+                          <span className="ml-auto text-[9px] font-bold px-1.5 py-0.5 rounded-full bg-emerald-100 text-emerald-600 dark:bg-emerald-900/30 dark:text-emerald-400 shrink-0">
+                            FREE
+                          </span>
+                        </Link>
+                      );
+                    })}
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
+          </nav>
+        )}
       </div>
 
       {/* ── Right: Search + Bell + Avatar ── */}
-      <div className="flex items-center gap-2.5">
+      <div className="flex items-center gap-2 shrink-0">
         <div
-          className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-[10px] w-56 transition-all"
+          className="hidden lg:flex items-center gap-2 px-3 py-1.5 rounded-[10px] w-52 transition-all"
           style={{ background: "var(--bg)", border: "1px solid var(--line-soft)" }}
         >
           <Search size={13} style={{ color: "var(--ink-4)" }} />

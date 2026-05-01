@@ -516,7 +516,7 @@ export const TIERS: Tier[] = [
     qualification: "Passed Class XII (Intermediate)",
     tagline: "Compete for the best 12th-pass posts",
     description:
-      "Designed for students who have completed Class 12 and aspire for high-value government posts like SSC CGL, RRB NTPC, Banking Clerk, and Police SI. Includes everything in Tier 1 plus all 12th-pass level exams.",
+      "Designed for students who have completed Class 12 and want to prepare for high-value government posts like SSC CGL, RRB NTPC, Banking Clerk, and Police SI. Includes everything in Tier 1 plus all 12th-pass level exams.",
     monthlyPrice: 249,
     yearlyPrice: 1699,
     highlight: true,
@@ -544,7 +544,7 @@ export const TIERS: Tier[] = [
     qualification: "Bachelor's Degree (any discipline)",
     tagline: "Crack the most prestigious govt. exams",
     description:
-      "The ultimate plan for graduates targeting State PSC officers (JPSC, BPSC, UPPSC), Bank PO (SBI PO, IBPS PO, RBI Grade B), and university entrances. Includes all Tier 1 & 2 exams plus all graduation-level boards.",
+      "The ultimate plan for graduates preparing for State PSC officers (JPSC, BPSC, UPPSC), Bank PO (SBI PO, IBPS PO, RBI Grade B), and university entrances. Includes all Tier 1 & 2 exams plus all graduation-level boards.",
     monthlyPrice: 349,
     yearlyPrice: 2499,
     highlight: false,

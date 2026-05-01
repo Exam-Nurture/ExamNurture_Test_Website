@@ -57,6 +57,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const clientId = process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID;
     if (!clientId) return;
 
+    hasInitializedGoogle.current = true; // Set early to prevent concurrent init calls
+
     const initGoogle = () => {
       if (typeof google === "undefined") {
         setTimeout(initGoogle, 500);
@@ -79,9 +81,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           },
           auto_select: false,
         });
-        hasInitializedGoogle.current = true;
       } catch (e) {
         console.error("Google One Tap Init Error:", e);
+        hasInitializedGoogle.current = false; // Reset on error
       }
     };
 

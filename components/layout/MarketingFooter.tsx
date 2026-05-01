@@ -5,10 +5,10 @@ import { Mail } from "lucide-react";
 
 const footerLinks = {
   platform: [
-    { name: "Mock Tests", href: "/series" },
+    { name: "All Courses", href: "/courses" },
+    { name: "Test Series", href: "/series" },
     { name: "PYQ Papers", href: "/pyq" },
-    { name: "Study Library", href: "/library" },
-    { name: "Exam Guides", href: "/guides" },
+    { name: "Nurture Library", href: "/library" }
   ],
   account: [
     { name: "Dashboard", href: "/dashboard" },
@@ -18,13 +18,13 @@ const footerLinks = {
   ],
   company: [
     { name: "About Us", href: "/about" },
-    { name: "Contact", href: "#" },
-    { name: "Careers", href: "#" },
+    { name: "Contact", href: "/contact" },
+    { name: "Careers", href: "/careers" },
   ],
   legal: [
-    { name: "Privacy Policy", href: "#" },
-    { name: "Terms of Service", href: "#" },
-    { name: "Refund Policy", href: "#" },
+    { name: "Privacy Policy", href: "/privacy" },
+    { name: "Terms of Service", href: "/terms" },
+    { name: "Refund Policy", href: "/refund" },
   ],
 };
 

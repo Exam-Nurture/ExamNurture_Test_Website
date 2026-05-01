@@ -42,10 +42,20 @@ const socials = [
   },
 ];
 
+import { useAuth } from "@/lib/auth-context";
+import { useEffect } from "react";
+
 export default function ContactPage() {
+  const { user } = useAuth();
   const [form, setForm]     = useState({ name: "", email: "", subject: "", message: "" });
   const [status, setStatus] = useState<"idle" | "sending" | "success" | "error">("idle");
   const [errorMsg, setErrorMsg] = useState("");
+
+  useEffect(() => {
+    if (user) {
+      setForm(f => ({ ...f, name: user.name || "", email: user.email || "" }));
+    }
+  }, [user]);
 
   const set = (k: keyof typeof form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) =>
     setForm(f => ({ ...f, [k]: e.target.value }));
@@ -55,6 +65,7 @@ export default function ContactPage() {
     setStatus("sending");
     setErrorMsg("");
     try {
+      console.log('[contact] submitting form:', form);
       await apiSubmitContact(form);
       setStatus("success");
       setForm({ name: "", email: "", subject: "", message: "" });
@@ -213,7 +224,7 @@ export default function ContactPage() {
 
                 <div>
                   <label className="block text-xs font-semibold text-gray-400 uppercase tracking-wider mb-1.5">Message</label>
-                  <textarea required rows={5} value={form.message} onChange={set("message")} placeholder="Tell us how we can help…"
+                  <textarea required minLength={10} rows={5} value={form.message} onChange={set("message")} placeholder="Tell us how we can help…"
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 text-sm text-gray-900 placeholder-gray-300 outline-none focus:border-blue-400 focus:ring-4 focus:ring-blue-50 transition-all resize-none" />
                 </div>
 

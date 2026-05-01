@@ -58,7 +58,15 @@ export default function AdminPYQPage() {
   const cols = [
     { key: "title", label: "Title" },
     { key: "year", label: "Year" },
-    { key: "examId", label: "Exam", width: "100px" },
+    { 
+      key: "examId", 
+      label: "Exam", 
+      render: (p: AdminPYQPaper) => (
+        <span className="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-50 text-purple-700 border border-purple-100 uppercase">
+          {exams.find(e => e.id === p.examId)?.shortName || p.examId}
+        </span>
+      )
+    },
     { key: "totalQs", label: "Questions" },
     { key: "type", label: "Type" },
     { key: "tierRequired", label: "Tier", render: (p: AdminPYQPaper) => `Tier ${p.tierRequired}` },

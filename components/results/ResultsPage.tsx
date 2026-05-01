@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import {
-  Trophy, TrendingUp, Target, Clock,
+  Trophy, TrendingUp, Clock,
   CheckCircle, XCircle, MinusCircle,
   ChevronDown, ChevronUp, RotateCcw, LayoutDashboard,
 } from "lucide-react";
@@ -113,7 +113,6 @@ export default function ResultsPage({ resultId }: { resultId: string }) {
               </div>
               <div className="flex flex-wrap gap-3 mt-4">
                 <Chip icon={<TrendingUp size={14} />} label="Percentile" val="81.4"    color="#10B981" />
-                <Chip icon={<Target size={14} />}     label="State Rank" val="~2,140"  color="#06B6D4" />
                 <Chip icon={<Clock size={14} />}      label="Time taken" val="1h 44m"  color="#F59E0B" />
               </div>
             </div>
