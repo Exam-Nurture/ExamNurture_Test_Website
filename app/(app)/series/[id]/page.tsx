@@ -1,266 +1,172 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
-import { notFound } from "next/navigation";
-import type { ReactNode } from "react";
-import { ArrowLeft, BarChart3, CheckCircle2, Clock, FileText, Lock, Play, Star, Users, Zap } from "lucide-react";
+import { 
+  ChevronLeft, Clock, FileText, Lock, Play, 
+  CheckCircle2, AlertCircle, Info, Calendar
+} from "lucide-react";
+import { apiFetch } from "@/lib/api";
 
-const SERIES = [
-  {
-    id: "ssc-cgl-complete",
-    title: "SSC CGL Complete Series 2025",
-    category: "SSC",
-    tests: 40,
-    pyqs: 10,
-    duration: "120 min / test",
-    students: "61K",
-    rating: 4.8,
-    tint: "#2563EB",
-    free: false,
-    enrolled: true,
-    progress: { done: 12, total: 40 },
-    tags: ["GK", "Reasoning", "English", "Quant"],
-  },
-  {
-    id: "ibps-po-complete",
-    title: "IBPS PO Complete Series 2025",
-    category: "Banking",
-    tests: 25,
-    pyqs: 8,
-    duration: "60 min / test",
-    students: "34K",
-    rating: 4.7,
-    tint: "#7C3AED",
-    free: false,
-    enrolled: true,
-    progress: { done: 8, total: 25 },
-    tags: ["Reasoning", "English", "Quant", "GA"],
-  },
-  {
-    id: "jpsc-prelims-series",
-    title: "JPSC Prelims Mock Series 2025",
-    category: "State PSC",
-    tests: 20,
-    pyqs: 5,
-    duration: "120 min / test",
-    students: "18K",
-    rating: 4.6,
-    tint: "#059669",
-    free: false,
-    enrolled: true,
-    progress: { done: 4, total: 20 },
-    tags: ["GS", "CSAT", "Jharkhand GK"],
-  },
-  {
-    id: "ssc-chsl-series",
-    title: "SSC CHSL Full Length Series",
-    category: "SSC",
-    tests: 30,
-    pyqs: 7,
-    duration: "60 min / test",
-    students: "28K",
-    rating: 4.5,
-    tint: "#2563EB",
-    free: true,
-    enrolled: false,
-    progress: null,
-    tags: ["English", "Quant", "GK", "Reasoning"],
-  },
-  {
-    id: "rrc-group-d",
-    title: "RRC Group D Practice Series",
-    category: "Railways",
-    tests: 15,
-    pyqs: 5,
-    duration: "90 min / test",
-    students: "42K",
-    rating: 4.4,
-    tint: "#DC2626",
-    free: true,
-    enrolled: false,
-    progress: null,
-    tags: ["Maths", "Reasoning", "GS", "Science"],
-  },
-  {
-    id: "sbi-clerk-series",
-    title: "SBI Clerk Prelims + Mains",
-    category: "Banking",
-    tests: 22,
-    pyqs: 6,
-    duration: "60 min / test",
-    students: "25K",
-    rating: 4.6,
-    tint: "#0891B2",
-    free: false,
-    enrolled: false,
-    progress: null,
-    tags: ["English", "Reasoning", "Quant", "GA"],
-  },
-  {
-    id: "up-tgt-series",
-    title: "UP TGT / PGT Complete Series",
-    category: "Teaching",
-    tests: 18,
-    pyqs: 4,
-    duration: "120 min / test",
-    students: "9K",
-    rating: 4.3,
-    tint: "#D97706",
-    free: false,
-    enrolled: false,
-    progress: null,
-    tags: ["Subject", "Hindi", "Pedagogy"],
-  },
-  {
-    id: "agneepath-series",
-    title: "Agniveer Agneepath Series",
-    category: "Defence",
-    tests: 20,
-    pyqs: 5,
-    duration: "60 min / test",
-    students: "31K",
-    rating: 4.5,
-    tint: "#15803D",
-    free: true,
-    enrolled: false,
-    progress: null,
-    tags: ["Maths", "Physics", "GK", "Reasoning"],
-  },
-];
+export default function SeriesDetailPage() {
+  const { id } = useParams<{ id: string }>();
+  const router = useRouter();
+  const [series, setSeries] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-const TESTS = [
-  { id: "demo", title: "Full Mock Test 01", questions: 100, duration: "120 min", status: "available" },
-  { id: "jpsc-mock-04", title: "Sectional Drill: Reasoning", questions: 35, duration: "40 min", status: "available" },
-  { id: "di-drill", title: "Data Interpretation Sprint", questions: 30, duration: "35 min", status: "available" },
-  { id: "jpsc-mock-05", title: "Full Mock Test 02", questions: 100, duration: "120 min", status: "locked" },
-];
+  useEffect(() => {
+    if (!id) return;
+    setLoading(true);
+    apiFetch(`/test-series/${id}`)
+      .then(setSeries)
+      .catch(e => setError(e.message || "Failed to load series"))
+      .finally(() => setLoading(false));
+  }, [id]);
 
-export function generateStaticParams() {
-  return SERIES.map((series) => ({ id: series.id }));
-}
+  if (loading) {
+    return (
+      <div className="py-20 text-center">
+        <div className="w-8 h-8 rounded-full border-2 border-blue-600/20 border-t-blue-600 animate-spin mx-auto mb-4" />
+        <p className="text-sm text-[var(--ink-4)]">Loading series details…</p>
+      </div>
+    );
+  }
 
-export default async function SeriesDetailPage({ params }: { params: Promise<{ id: string }> }) {
-  const { id } = await params;
-  const series = SERIES.find((item) => item.id === id);
-  if (!series) notFound();
-
-  const progress = series.progress ? Math.round((series.progress.done / series.progress.total) * 100) : 0;
+  if (error || !series) {
+    return (
+      <div className="py-20 text-center max-w-sm mx-auto">
+        <AlertCircle className="w-10 h-10 text-red-400 mx-auto mb-4" />
+        <p className="text-red-500 font-bold mb-4">{error || "Series not found"}</p>
+        <button onClick={() => router.back()} className="px-4 py-2 rounded-xl bg-blue-600 text-white text-sm font-bold">
+          Go Back
+        </button>
+      </div>
+    );
+  }
 
   return (
-    <div className="fade-up flex flex-col gap-6">
-      <Link href="/series" className="inline-flex items-center gap-2 text-sm font-semibold w-fit" style={{ color: "var(--ink-3)" }}>
-        <ArrowLeft size={16} /> Back to series
-      </Link>
+    <div className="flex flex-col gap-8 fade-up max-w-4xl">
+      
+      {/* Breadcrumb / Back */}
+      <button 
+        onClick={() => router.back()}
+        className="flex items-center gap-1.5 text-sm font-semibold transition-colors hover:text-blue-600 w-fit"
+        style={{ color: "var(--ink-3)" }}
+      >
+        <ChevronLeft size={16} /> Back to Test Series
+      </button>
 
-      <section className="card overflow-hidden">
-        <div className="h-1.5" style={{ background: series.tint }} />
-        <div className="p-6 md:p-8 grid gap-6 lg:grid-cols-[1fr_320px]">
-          <div>
-            <div className="flex flex-wrap items-center gap-2 mb-4">
-              <span className="text-[10px] font-bold tracking-widest px-2.5 py-1 rounded" style={{ background: `${series.tint}18`, color: series.tint }}>
-                {series.category.toUpperCase()}
+      {/* Hero Header */}
+      <div className="flex flex-col md:flex-row gap-6 items-start">
+        <div className="flex-1">
+          <div className="flex items-center gap-2 mb-3">
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider bg-blue-50 text-blue-600">
+              {series.exam?.shortName}
+            </span>
+            {series.isPaid ? (
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider bg-amber-50 text-amber-600">
+                Premium
               </span>
-              <span className="inline-flex items-center gap-1 text-[11px] font-semibold" style={{ color: "var(--amber)" }}>
-                <Star size={12} className="fill-current" /> {series.rating}
+            ) : (
+              <span className="text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-wider bg-emerald-50 text-emerald-600">
+                Free Series
               </span>
-              {series.free && (
-                <span className="inline-flex items-center gap-1 text-[11px] font-semibold" style={{ color: "var(--green)" }}>
-                  <Zap size={12} /> Free access
-                </span>
-              )}
-            </div>
-
-            <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-3" style={{ fontFamily: "var(--font-sora)", color: "var(--ink-1)" }}>
-              {series.title}
-            </h1>
-            <p className="text-sm md:text-base max-w-2xl" style={{ color: "var(--ink-3)", lineHeight: 1.7 }}>
-              Continue a structured practice path with full mocks, PYQ-style drills, timed review, and topic coverage matched to the exam pattern.
-            </p>
-
-            <div className="flex flex-wrap gap-2 mt-5">
-              {series.tags.map((tag) => (
-                <span key={tag} className="px-2.5 py-1 rounded-lg text-xs font-medium" style={{ background: "var(--bg)", color: "var(--ink-3)" }}>
-                  {tag}
-                </span>
-              ))}
-            </div>
-          </div>
-
-          <div className="rounded-xl p-5" style={{ background: "var(--bg)", border: "1px solid var(--line-soft)" }}>
-            <div className="grid grid-cols-2 gap-3 text-sm">
-              <Metric icon={<FileText size={15} />} label="Tests" value={String(series.tests)} />
-              <Metric icon={<Clock size={15} />} label="Duration" value={series.duration} />
-              <Metric icon={<Users size={15} />} label="Students" value={series.students} />
-              <Metric icon={<BarChart3 size={15} />} label="PYQs" value={String(series.pyqs)} />
-            </div>
-
-            {series.progress && (
-              <div className="mt-5">
-                <div className="flex justify-between text-xs mb-2">
-                  <span style={{ color: "var(--ink-3)" }}>Progress</span>
-                  <strong style={{ color: "var(--ink-1)" }}>{progress}%</strong>
-                </div>
-                <div className="h-2 rounded-full overflow-hidden" style={{ background: "var(--line)" }}>
-                  <div className="h-full rounded-full" style={{ width: `${progress}%`, background: series.tint }} />
-                </div>
-              </div>
             )}
-
-            <Link href="/exam/demo" className="mt-5 h-11 rounded-[10px] inline-flex items-center justify-center gap-2 w-full text-white text-sm font-semibold" style={{ background: series.tint }}>
-              <Play size={14} fill="white" stroke="none" />
-              {series.enrolled ? "Continue Practice" : series.free ? "Start Free" : "Enroll Now"}
-            </Link>
+          </div>
+          <h1 className="text-3xl font-extrabold mb-3" style={{ fontFamily: "var(--font-sora)", color: "var(--ink-1)" }}>
+            {series.title}
+          </h1>
+          <p className="text-sm leading-relaxed" style={{ color: "var(--ink-3)" }}>
+            {series.description || "Comprehensive mock test series designed by experts to help you excel in your exams."}
+          </p>
+        </div>
+        
+        {/* Quick Stats */}
+        <div className="w-full md:w-64 p-5 rounded-2xl border bg-gray-50/50" style={{ borderColor: "var(--line-soft)" }}>
+          <div className="space-y-4">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-[var(--ink-4)]">Total Tests</span>
+              <span className="text-sm font-bold text-[var(--ink-1)]">{series.totalTests}</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-[var(--ink-4)]">Valid Till</span>
+              <span className="text-sm font-bold text-[var(--ink-1)]">31 Dec 2025</span>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-medium text-[var(--ink-4)]">Language</span>
+              <span className="text-sm font-bold text-[var(--ink-1)]">English, Hindi</span>
+            </div>
           </div>
         </div>
-      </section>
+      </div>
 
+      {/* Tests List */}
       <section>
-        <div className="flex items-end justify-between gap-3 mb-4">
-          <div>
-            <h2 className="text-lg font-bold" style={{ color: "var(--ink-1)" }}>Available tests</h2>
-            <p className="text-xs mt-1" style={{ color: "var(--ink-4)" }}>Start with the first unlocked test and review after submission.</p>
+        <div className="flex items-center justify-between mb-5">
+          <h2 className="text-lg font-bold" style={{ color: "var(--ink-1)" }}>
+            Included Tests
+          </h2>
+          <div className="text-xs font-medium text-[var(--ink-4)]">
+            {series.tests?.length || 0} tests available
           </div>
         </div>
 
-        <div className="grid gap-3">
-          {TESTS.map((test, index) => {
-            const locked = test.status === "locked" && !series.enrolled && !series.free;
-            return (
-              <div key={test.id} className="card p-4 flex flex-col sm:flex-row sm:items-center gap-4">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center text-sm font-bold" style={{ background: `${series.tint}14`, color: series.tint }}>
-                  {index + 1}
+        <div className="flex flex-col gap-3">
+          {series.tests?.map((test: any, idx: number) => (
+            <div 
+              key={test.id}
+              className="card group flex items-center justify-between p-4 transition-all hover:border-blue-200"
+            >
+              <div className="flex items-start gap-4">
+                <div className="w-10 h-10 rounded-xl bg-gray-50 flex items-center justify-center shrink-0 border border-gray-100 group-hover:bg-blue-50 transition-colors">
+                  <FileText className="w-5 h-5 text-gray-400 group-hover:text-blue-500" />
                 </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-semibold" style={{ color: "var(--ink-1)" }}>{test.title}</div>
-                  <div className="text-xs mt-1 flex flex-wrap gap-3" style={{ color: "var(--ink-4)" }}>
-                    <span>{test.questions} questions</span>
-                    <span>{test.duration}</span>
-                    <span>Detailed solutions</span>
+                <div>
+                  <h3 className="text-[15px] font-bold mb-1" style={{ color: "var(--ink-1)" }}>
+                    {test.title}
+                  </h3>
+                  <div className="flex items-center gap-3 text-[11px]" style={{ color: "var(--ink-4)" }}>
+                    <span className="flex items-center gap-1">
+                      <Clock size={11} /> {Math.floor(test.durationSec / 60)} mins
+                    </span>
+                    <span className="flex items-center gap-1">
+                      <Info size={11} /> {test.totalMarks} Marks
+                    </span>
+                    {test.scheduledAt && (
+                      <span className="flex items-center gap-1 text-blue-600">
+                        <Calendar size={11} /> {new Date(test.scheduledAt).toLocaleDateString()}
+                      </span>
+                    )}
                   </div>
                 </div>
-                {locked ? (
-                  <button className="h-10 px-4 rounded-[10px] inline-flex items-center justify-center gap-2 text-sm font-semibold" style={{ background: "var(--line-soft)", color: "var(--ink-4)" }}>
-                    <Lock size={14} /> Locked
-                  </button>
+              </div>
+
+              <div className="flex items-center gap-3">
+                {test.isLocked ? (
+                  <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gray-100 text-[11px] font-bold text-gray-400 border border-gray-200">
+                    <Lock size={12} /> LOCKED
+                  </div>
                 ) : (
-                  <Link href={`/exam/${test.id}`} className="h-10 px-4 rounded-[10px] inline-flex items-center justify-center gap-2 text-sm font-semibold text-white" style={{ background: series.tint }}>
-                    <CheckCircle2 size={14} /> Start
+                  <Link
+                    href={`/tests/${test.id}`}
+                    className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 text-white text-[13px] font-bold shadow-md shadow-blue-500/20 hover:bg-blue-700 transition-all active:scale-95"
+                  >
+                    <Play size={12} fill="white" stroke="none" /> Start Test
                   </Link>
                 )}
               </div>
-            );
-          })}
+            </div>
+          ))}
+
+          {(!series.tests || series.tests.length === 0) && (
+            <div className="py-12 text-center border-2 border-dashed rounded-3xl" style={{ borderColor: "var(--line-soft)" }}>
+              <p className="text-sm text-[var(--ink-4)]">No tests have been added to this series yet.</p>
+            </div>
+          )}
         </div>
       </section>
-    </div>
-  );
-}
-
-function Metric({ icon, label, value }: { icon: ReactNode; label: string; value: string }) {
-  return (
-    <div className="rounded-lg p-3" style={{ background: "var(--card)", border: "1px solid var(--line-soft)" }}>
-      <div className="flex items-center gap-1.5 text-[11px]" style={{ color: "var(--ink-4)" }}>
-        {icon} {label}
-      </div>
-      <div className="text-sm font-bold mt-1" style={{ color: "var(--ink-1)" }}>{value}</div>
     </div>
   );
 }

@@ -42,16 +42,25 @@ export default function PYQPage() {
     <div className="fade-up" style={{ maxWidth: 1200 }}>
 
       {/* Page header */}
-      <div className="mb-7">
-        <h1
-          className="text-3xl font-bold tracking-tight leading-none"
-          style={{ fontFamily: "var(--font-sora)", color: "var(--ink-1)" }}
+      <div className="flex items-start justify-between flex-wrap gap-4 mb-7">
+        <div>
+          <h1
+            className="text-3xl font-bold tracking-tight leading-none"
+            style={{ fontFamily: "var(--font-sora)", color: "var(--ink-1)" }}
+          >
+            PYQ Papers
+          </h1>
+          <p className="text-[12px] mt-2" style={{ color: "var(--ink-4)", letterSpacing: "0.01em" }}>
+            Past year question papers with detailed solutions and analytics.
+          </p>
+        </div>
+        <Link
+          href="/pyq/all"
+          className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold border transition-all hover:bg-[var(--bg)]"
+          style={{ color: "var(--blue)", borderColor: "var(--blue)", borderWidth: 1.5 }}
         >
-          PYQ Papers
-        </h1>
-        <p className="text-[12px] mt-2" style={{ color: "var(--ink-4)", letterSpacing: "0.01em" }}>
-          Past year question papers with detailed solutions and analytics.
-        </p>
+          Browse All PYQs
+        </Link>
       </div>
 
       {/* Filter bar & Tabs */}
@@ -186,7 +195,7 @@ function PaperCard({ paper: p }: { paper: any }) {
       {/* Actions */}
       <div className="flex items-center gap-2">
         <Link
-          href={`/exam/${p.id}?type=pyq`}
+          href={`/pyq/${p.id}`}
           className="flex-1 inline-flex items-center justify-center gap-2 rounded-[10px] text-[13px] font-semibold text-white transition-all duration-150 hover:brightness-110 active:scale-[0.98]"
           style={{ background: "var(--blue)", height: 38 }}
         >
@@ -266,7 +275,7 @@ function AttemptCard({ attempt: a }: { attempt: any }) {
       <div className="mt-5 mb-4" style={{ borderTop: "1px solid var(--line-soft)" }} />
 
       <Link
-        href={`/exam/${a.paperId}/result?attemptId=${a.id}`}
+        href={`/pyq/${a.paperId}?attemptId=${a.id}`}
         className="inline-flex items-center justify-center rounded-[10px] text-[13px] font-semibold transition-all duration-150 hover:brightness-95 w-full"
         style={{ background: "var(--line-soft)", color: "var(--ink-1)", height: 38 }}
       >

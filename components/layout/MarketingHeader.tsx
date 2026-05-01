@@ -5,9 +5,9 @@ import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   LogIn, LayoutDashboard, LogOut, Smartphone, ChevronDown,
-  Search, BookOpen, BarChart3, Library, X,
-  User, FileText, TrendingUp, CreditCard, Zap,
-  GraduationCap, Newspaper, BookMarked, Users, Mail,
+  Search, Library, X, Zap, Newspaper, BookMarked,
+  User, FileText, TrendingUp, CreditCard,
+  GraduationCap, Users, Mail, BarChart3,
   Home, MoreHorizontal,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -19,7 +19,7 @@ const PLAYSTORE_URL = "https://play.google.com/store/apps/details?id=com.kvebrk.
 
 /* ── Nav data ── */
 const examsNav = [
-  { name: "Courses",               href: "/series",   icon: GraduationCap, desc: "Structured exam-wise course series"   },
+  { name: "Courses",               href: "/courses/all",   icon: GraduationCap, desc: "Structured exam-wise course series"   },
   { name: "Study Material",        href: "/library",  icon: Library,       desc: "Notes, PDFs & topic resources"        },
   { name: "Previous Year Papers",  href: "/pyq",      icon: FileText,      desc: "Solved PYQs with explanations"        },
 ];
@@ -74,14 +74,13 @@ export default function MarketingHeader() {
   const [isHidden,       setIsHidden]       = useState(false);
   const [showUserMenu,   setShowUserMenu]   = useState(false);
   const [showExamsMenu,  setShowExamsMenu]  = useState(false);
-  const [showLearnMenu,  setShowLearnMenu]  = useState(false);
   const [showSearch,     setShowSearch]     = useState(false);
   const [searchQuery,    setSearchQuery]    = useState("");
   const [showAuthModal,  setShowAuthModal]  = useState(false);
   const [nextParam,      setNextParam]      = useState("/dashboard");
 
   // Mobile bottom nav state — which panel is open (null = closed)
-  const [mobileTab,      setMobileTab]      = useState<"exams" | "learn" | "more" | "account" | null>(null);
+  const [mobileTab,      setMobileTab]      = useState<"exams" | "more" | "account" | null>(null);
 
   const searchRef    = useRef<HTMLInputElement>(null);
   const lastScrollY  = useRef(0);
@@ -116,7 +115,6 @@ export default function MarketingHeader() {
 
   useEffect(() => {
     setShowUserMenu(false);
-    setShowLearnMenu(false);
     setShowSearch(false);
     setShowExamsMenu(false);
     setMobileTab(null);
@@ -146,7 +144,7 @@ export default function MarketingHeader() {
   const handleLogout = async () => { await logout(); router.push("/"); };
 
   const isExamsActive = examsNav.some((i) => pathname.startsWith(i.href.split("?")[0]));
-  const isLearnActive = learnNav.some((i) => pathname.startsWith(i.href.split("?")[0]));
+  const isLibraryActive = pathname.startsWith("/library");
   const isMoreActive  = moreNav.some((i) => pathname === i.href || pathname.startsWith(i.href + "/"));
 
   const toggleMobileTab = (tab: typeof mobileTab) =>
@@ -323,17 +321,7 @@ export default function MarketingHeader() {
                 />
 
                 <NavLink href="/mentorship">Mentorship</NavLink>
-
-                <NavDropdown
-                  trigger={<LearnFreeLabel />}
-                  items={learnNav}
-                  isActive={isLearnActive}
-                  show={showLearnMenu}
-                  onEnter={() => setShowLearnMenu(true)}
-                  onLeave={() => setShowLearnMenu(false)}
-                  wide
-                />
-
+                <NavLink href="/library">Nurture Library</NavLink>
                 <NavLink href="/contact">Contact</NavLink>
 
               </div>
@@ -533,27 +521,7 @@ export default function MarketingHeader() {
             </motion.div>
           )}
 
-          {mobileTab === "learn" && (
-            <motion.div
-              key="learn-panel"
-              initial={{ opacity: 0, y: 16, scale: 0.97 }}
-              animate={{ opacity: 1, y: 0, scale: 1 }}
-              exit={{ opacity: 0, y: 16, scale: 0.97 }}
-              transition={{ duration: 0.22, ease: "easeOut" as const }}
-              className="mb-3 bg-white/90 backdrop-blur-2xl rounded-2xl shadow-2xl border border-white/60 p-4 pointer-events-auto"
-            >
-              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-3 flex items-center gap-1.5">
-                <Zap className="w-3 h-3" />
-                Learn
-                <span className="flex items-center gap-[2px] text-amber-500 ml-0.5">
-                  <svg className="w-2 h-2" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0l1.6 5.6L16 8l-6.4 2.4L8 16l-1.6-5.6L0 8l6.4-2.4z"/></svg>
-                  <span className="text-[8px] font-bold">FREE</span>
-                  <svg className="w-2 h-2" viewBox="0 0 16 16" fill="currentColor"><path d="M8 0l1.6 5.6L16 8l-6.4 2.4L8 16l-1.6-5.6L0 8l6.4-2.4z"/></svg>
-                </span>
-              </p>
-              <MobileNavGrid items={learnNav} accent="amber" />
-            </motion.div>
-          )}
+
 
           {mobileTab === "more" && (
             <motion.div
@@ -673,24 +641,21 @@ export default function MarketingHeader() {
             }`}>Exams</span>
           </button>
 
-          {/* Learn */}
-          <button
-            onClick={() => toggleMobileTab("learn")}
+          {/* Nurture Library */}
+          <Link
+            href="/library"
+            onClick={() => setMobileTab(null)}
             className="flex flex-col items-center gap-0.5 px-3 py-1.5 rounded-xl transition-all"
           >
-            <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all relative ${
-              mobileTab === "learn" || (mobileTab === null && isLearnActive)
-                ? "bg-amber-500 text-white shadow-md shadow-amber-500/30"
-                : "text-gray-500"
+            <div className={`w-8 h-8 rounded-xl flex items-center justify-center transition-all ${
+              isLibraryActive ? "bg-blue-600 text-white shadow-md shadow-blue-500/30" : "text-gray-500"
             }`}>
-              <Zap className="w-4 h-4" />
-              {/* FREE badge */}
-              <span className="absolute -top-1.5 -right-1.5 bg-amber-400 text-white text-[7px] font-black leading-none px-1 py-0.5 rounded-full">FREE</span>
+              <Library className="w-4 h-4" />
             </div>
             <span className={`text-[10px] font-semibold ${
-              mobileTab === "learn" || (mobileTab === null && isLearnActive) ? "text-amber-500" : "text-gray-400"
-            }`}>Learn</span>
-          </button>
+              isLibraryActive ? "text-blue-600" : "text-gray-400"
+            }`}>Library</span>
+          </Link>
 
           {/* More */}
           <button

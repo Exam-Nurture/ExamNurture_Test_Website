@@ -217,7 +217,7 @@ function useStats(): { stats: PlatformStats | null; loading: boolean } {
   useEffect(() => {
     async function load() {
       try {
-        const res = await fetch(`${API_URL}/public/stats`);
+        const res = await fetch(`${API_URL}/stats`);
         if (!res.ok) throw new Error("Failed to fetch stats");
         const data = await res.json();
         setStats(data);

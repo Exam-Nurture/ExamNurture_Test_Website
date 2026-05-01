@@ -289,15 +289,30 @@ export async function apiGetTestSeries(params?: { examId?: string; page?: number
   return apiFetch(`/test-series${s ? `?${s}` : ""}`);
 }
 
+export async function apiGetTest(testId: string) {
+  return apiFetch(`/tests/${testId}`);
+}
+
+export async function apiStartAttempt(testId: string) {
+  return apiFetch(`/attempts/start`, {
+    method: "POST",
+    body: JSON.stringify({ testId }),
+  });
+}
+
 export async function apiSubmitAttempt(
   testId: string,
   answers: Record<string, number>,
   timeTakenSec: number,
 ) {
-  return apiFetch(`/attempts/${testId}/submit`, {
+  return apiFetch(`/attempts/submit`, {
     method: "POST",
     body: JSON.stringify({ testId, answers, timeTakenSec }),
   });
+}
+
+export async function apiGetAttemptResult(attemptId: string) {
+  return apiFetch(`/attempts/${attemptId}/result`);
 }
 
 /* ── PYQ Papers ─────────────────────────────────── */
@@ -310,6 +325,10 @@ export async function apiGetPYQPapers(params?: { examId?: string; year?: number;
   if (params?.limit) qs.set("limit", String(params.limit));
   const s = qs.toString();
   return apiFetch(`/pyq${s ? `?${s}` : ""}`);
+}
+
+export async function apiGetPYQPaperById(paperId: string) {
+  return apiFetch(`/pyq/${paperId}`);
 }
 
 export async function apiStartPYQAttempt(paperId: string) {
@@ -559,6 +578,10 @@ export async function apiAdminDeletePYQ(id: string) {
   return apiFetch(`/admin/pyq/${id}`, { method: "DELETE" });
 }
 
+export async function apiAdminCreatePYQBulk(body: { paper: Partial<AdminPYQPaper>; questions: Record<string, unknown>[] }) {
+  return apiFetch("/admin/pyq-bulk", { method: "POST", body: JSON.stringify(body) });
+}
+
 // Study Materials
 export interface AdminStudyMaterial {
   id: string; examId: string; subject: string; title: string; description?: string;
@@ -639,6 +662,16 @@ export async function apiAdminDeleteTeamMember(id: string) {
 }
 
 /* ── Public contact form ────────────────────────── */
+
+export async function apiGetCourses(params?: { featured?: boolean }) {
+  const qs = params?.featured ? "?featured=true" : "";
+  return apiFetch<any[]>(`/courses${qs}`);
+}
+
+export async function apiGetMentorshipPrograms(params?: { featured?: boolean }) {
+  const qs = params?.featured ? "?featured=true" : "";
+  return apiFetch<any[]>(`/mentorship-programs${qs}`);
+}
 
 export async function apiSubmitContact(body: {
   name: string;

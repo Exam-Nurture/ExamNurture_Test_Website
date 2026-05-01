@@ -54,7 +54,7 @@ const NAV_BEFORE_EXAMS = [
 
 const NAV_AFTER_EXAMS = [
   { href: "/pyq",        label: "Previous Year Papers" },
-  { href: "/mentorship", label: "Mentorship"           },
+  { href: "/mentorship-guidance", label: "Mentorship"           },
 ];
 
 /** Map routes → human-readable page titles for breadcrumb */
@@ -62,7 +62,7 @@ const PAGE_TITLES: Record<string, string> = {
   "/dashboard":  "Dashboard",
   "/series":     "Test Series",
   "/pyq":        "Previous Year Papers",
-  "/mentorship": "Mentorship",
+  "/mentorship-guidance": "Mentorship",
   "/analytics":  "Analytics",
   "/schedule":   "Schedule",
   "/exams":      "Browse Exams",

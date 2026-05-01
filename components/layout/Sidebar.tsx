@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import {
   LayoutDashboard, BookOpen, FileText, Users,
   BarChart3, CalendarDays, Library, Menu,
-  User, Zap, GraduationCap, ChevronDown, ChevronRight,
+  User, Zap, GraduationCap, PlayCircle, BookMarked
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
@@ -17,8 +17,10 @@ const NAV_ITEMS = [
   { href: "/series",     label: "Test Series",         icon: BookOpen        },
   { href: "/pyq",        label: "Previous Year Papers",icon: FileText        },
   { href: "/library",    label: "Nurture Library",     icon: Library         },
+  { href: "/my-library", label: "My Library",          icon: BookMarked      },
+  { href: "/courses",    label: "Video Courses",       icon: PlayCircle      },
   { href: "/analytics",  label: "Analytics",           icon: BarChart3       },
-  { href: "/mentorship", label: "Mentorship",          icon: Users           },
+  { href: "/mentorship-guidance", label: "Mentorship", icon: Users           },
   { href: "/schedule",   label: "Schedule",            icon: CalendarDays    },
 ];
 
