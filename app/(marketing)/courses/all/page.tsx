@@ -152,9 +152,15 @@ export default function AllCoursesPage() {
                            <FileText className="w-4 h-4 text-purple-500" />
                            <span className="font-medium">Resources: </span>
                            <div className="flex gap-1.5 ml-auto">
+<<<<<<< HEAD
                               {exam.hasTests && <Zap aria-label="Mock Tests" className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />}
                               {exam.hasPYQ && <BookOpen aria-label="PYQs" className="w-3.5 h-3.5 text-blue-500" />}
                               {exam.hasGuide && <Users aria-label="Guide" className="w-3.5 h-3.5 text-emerald-500" />}
+=======
+                              {exam.hasTests && <Zap title="Mock Tests" className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />}
+                              {exam.hasPYQ && <BookOpen title="PYQs" className="w-3.5 h-3.5 text-blue-500" />}
+                              {exam.hasGuide && <Users title="Guide" className="w-3.5 h-3.5 text-emerald-500" />}
+>>>>>>> origin/github-pages-deployment
                            </div>
                         </div>
                       </div>

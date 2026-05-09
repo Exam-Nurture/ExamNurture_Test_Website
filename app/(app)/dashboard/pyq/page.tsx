@@ -195,7 +195,11 @@ function PaperCard({ paper: p }: { paper: any }) {
       {/* Actions */}
       <div className="flex items-center gap-2">
         <Link
+<<<<<<< HEAD:app/(app)/dashboard/pyq/page.tsx
           href={`/dashboard/pyq/${p.id}`}
+=======
+          href={`/pyq/${p.id}`}
+>>>>>>> origin/github-pages-deployment:app/(app)/pyq/page.tsx
           className="flex-1 inline-flex items-center justify-center gap-2 rounded-[10px] text-[13px] font-semibold text-white transition-all duration-150 hover:brightness-110 active:scale-[0.98]"
           style={{ background: "var(--blue)", height: 38 }}
         >
@@ -275,7 +279,11 @@ function AttemptCard({ attempt: a }: { attempt: any }) {
       <div className="mt-5 mb-4" style={{ borderTop: "1px solid var(--line-soft)" }} />
 
       <Link
+<<<<<<< HEAD:app/(app)/dashboard/pyq/page.tsx
         href={`/dashboard/pyq/${a.paperId}?attemptId=${a.id}`}
+=======
+        href={`/pyq/${a.paperId}?attemptId=${a.id}`}
+>>>>>>> origin/github-pages-deployment:app/(app)/pyq/page.tsx
         className="inline-flex items-center justify-center rounded-[10px] text-[13px] font-semibold transition-all duration-150 hover:brightness-95 w-full"
         style={{ background: "var(--line-soft)", color: "var(--ink-1)", height: 38 }}
       >

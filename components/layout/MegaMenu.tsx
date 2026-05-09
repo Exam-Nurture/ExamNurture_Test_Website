@@ -147,7 +147,13 @@ export default function MegaMenu({ show, onMouseEnter, onMouseLeave }: MegaMenuP
   const activeExams = categories.find((c) => c.id === activeCategory)?.exams ?? [];
   const activeCat = categories.find((c) => c.id === activeCategory)!;
 
+<<<<<<< HEAD
   const isExamsActive = pathname === "/exams" || pathname.startsWith("/exams/");
+=======
+  const isPracticeActive = categories.some((cat) =>
+    cat.exams.some((e) => pathname.startsWith(e.href.split("?")[0]))
+  ) || pathname.startsWith("/series/all") || pathname.startsWith("/pyq/all") || pathname.startsWith("/daily-quiz");
+>>>>>>> origin/github-pages-deployment
 
   return (
     <div
@@ -207,6 +213,27 @@ export default function MegaMenu({ show, onMouseEnter, onMouseLeave }: MegaMenuP
                     </button>
                   )}
                 </div>
+<<<<<<< HEAD
+=======
+
+                {/* Quick links */}
+                <div className="flex items-center gap-1.5 flex-shrink-0">
+                  {[
+                    { label: "Courses",              href: "/courses/all",    icon: FileText,  color: "text-blue-600 bg-blue-50 hover:bg-blue-100"     },
+                    { label: "Study Material",       href: "/library",  icon: BookOpen,  color: "text-emerald-600 bg-emerald-50 hover:bg-emerald-100" },
+                    { label: "Previous Year Papers", href: "/pyq/all",      icon: Zap,       color: "text-amber-600 bg-amber-50 hover:bg-amber-100"   },
+                  ].map(({ label, href, icon: Icon, color }) => (
+                    <Link
+                      key={href}
+                      href={href}
+                      className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold transition-colors ${color}`}
+                    >
+                      <Icon className="w-3.5 h-3.5" />
+                      {label}
+                    </Link>
+                  ))}
+                </div>
+>>>>>>> origin/github-pages-deployment
               </div>
 
               {/* Search results overlay */}

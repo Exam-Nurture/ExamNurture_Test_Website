@@ -53,18 +53,31 @@ const NAV_BEFORE_EXAMS = [
 ];
 
 const NAV_AFTER_EXAMS = [
+<<<<<<< HEAD
   { href: "/dashboard/pyq",        label: "Previous Year Papers" },
   { href: "/dashboard/mentorship", label: "Mentorship"           },
+=======
+  { href: "/pyq",        label: "Previous Year Papers" },
+  { href: "/mentorship-guidance", label: "Mentorship"           },
+>>>>>>> origin/github-pages-deployment
 ];
 
 /** Map routes → human-readable page titles for breadcrumb */
 const PAGE_TITLES: Record<string, string> = {
   "/dashboard":  "Dashboard",
+<<<<<<< HEAD
   "/dashboard/series":     "Test Series",
   "/dashboard/pyq":        "Previous Year Papers",
   "/dashboard/mentorship": "Mentorship",
   "/dashboard/analytics":  "Analytics",
   "/dashboard/schedule":   "Schedule",
+=======
+  "/series":     "Test Series",
+  "/pyq":        "Previous Year Papers",
+  "/mentorship-guidance": "Mentorship",
+  "/analytics":  "Analytics",
+  "/schedule":   "Schedule",
+>>>>>>> origin/github-pages-deployment
   "/exams":      "Browse Exams",
   "/blog":    "Nurture Library",
   "/dashboard/plans":      "Upgrade Plan",

@@ -14,6 +14,7 @@ import { useAuth } from "@/lib/auth-context";
 const NAV_ITEMS = [
   { href: "/dashboard",  label: "Dashboard",           icon: LayoutDashboard },
   { href: "/exams",      label: "Browse Exams",        icon: GraduationCap   },
+<<<<<<< HEAD
   { href: "/dashboard/series",     label: "Test Series",         icon: BookOpen        },
   { href: "/dashboard/pyq",        label: "Previous Year Papers",icon: FileText        },
   { href: "/blog",    label: "Blog",                icon: Library         },
@@ -22,6 +23,16 @@ const NAV_ITEMS = [
   { href: "/dashboard/analytics",  label: "Analytics",           icon: BarChart3       },
   { href: "/dashboard/mentorship", label: "Mentorship", icon: Users           },
   { href: "/dashboard/schedule",   label: "Schedule",            icon: CalendarDays    },
+=======
+  { href: "/series",     label: "Test Series",         icon: BookOpen        },
+  { href: "/pyq",        label: "Previous Year Papers",icon: FileText        },
+  { href: "/library",    label: "Nurture Library",     icon: Library         },
+  { href: "/my-library", label: "My Library",          icon: BookMarked      },
+  { href: "/courses",    label: "Video Courses",       icon: PlayCircle      },
+  { href: "/analytics",  label: "Analytics",           icon: BarChart3       },
+  { href: "/mentorship-guidance", label: "Mentorship", icon: Users           },
+  { href: "/schedule",   label: "Schedule",            icon: CalendarDays    },
+>>>>>>> origin/github-pages-deployment
 ];
 
 const BOTTOM_ITEMS = [
