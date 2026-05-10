@@ -10,7 +10,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   if (!exam) return {};
 
   const board = getBoardForExam(exam);
-  const title = `${exam.name} Preparation — Mock Tests, PYQ & Study Material`;
+  const title = `${exam.name} Preparation — Test Series, PYQ & Study Material`;
   const description = `Prepare for ${exam.name} with full-length mock tests, previous year papers, and AI analytics on ExamNurture. ${exam.pattern}. Subjects: ${exam.subjects.slice(0, 4).join(", ")}.`;
   const canonicalUrl = `${BASE}/exams/${slug}`;
 

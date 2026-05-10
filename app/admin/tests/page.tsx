@@ -370,7 +370,7 @@ export default function AdminTestsPage() {
               options={series.map((s) => ({ value: s.id, label: s.title }))}
               required
             />
-            <Field label="Title" name="title" value={form.title ?? ""} onChange={(v) => set("title", v)} required placeholder="e.g. Full Mock Test #1" />
+            <Field label="Title" name="title" value={form.title ?? ""} onChange={(v) => set("title", v)} required placeholder="e.g. Full Test Series #1" />
             <div>
               <label className="block text-xs font-medium mb-1" style={{ color: "var(--ink-2)" }}>Description</label>
               <textarea

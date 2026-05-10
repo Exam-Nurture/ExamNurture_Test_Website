@@ -22,6 +22,11 @@ import {
   GraduationCap,
   Landmark,
   MapPin,
+  PlayCircle,
+  Library,
+  ClipboardList,
+  ScrollText,
+  Building2,
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
@@ -116,11 +121,11 @@ const stagger = {
 const features = [
   {
     icon: FileText,
-    title: "Full-Length Mock Tests",
+    title: "Full-Length Test Series",
     desc: "CBT-style exams with real exam interface, auto-timer, and question palette — just like the actual test.",
     color: "from-blue-500 to-blue-600",
     bg: "bg-blue-50",
-    href: "/dashboard/series",
+    href: "/series/all",
   },
   {
     icon: BookOpen,
@@ -128,32 +133,32 @@ const features = [
     desc: "Thousands of PYQ papers with detailed solutions across JPSC, Banking, SSC, Railway, and more.",
     color: "from-emerald-500 to-emerald-600",
     bg: "bg-emerald-50",
-    href: "/dashboard/pyq",
+    href: "/pyq/all",
   },
   {
-    icon: BarChart3,
-    title: "AI Analytics",
-    desc: "Detailed performance breakdown — weak areas, accuracy trends, percentile ranking, and improvement tips.",
+    icon: PlayCircle,
+    title: "Courses",
+    desc: "Comprehensive video courses, interactive lessons, and expert guidance for structured learning.",
     color: "from-purple-500 to-purple-600",
     bg: "bg-purple-50",
-    href: "/dashboard/analytics",
+    href: "/courses/all",
   },
   {
-    icon: Target,
-    title: "Study Library",
-    desc: "Structured study materials, notes, and topic-wise resources curated by expert faculties.",
+    icon: Library,
+    title: "Blogs",
+    desc: "Expert articles, preparation tips, exam strategies, and latest updates on government exams.",
     color: "from-amber-500 to-amber-600",
     bg: "bg-amber-50",
     href: "/blog",
   },
 
   {
-    icon: Calendar,
-    title: "Exam Guides",
-    desc: "Syllabus, eligibility, exam pattern, admit card dates — everything in one place per exam.",
+    icon: GraduationCap,
+    title: "Exams",
+    desc: "Browse all exams — syllabus, exam pattern, eligibility, important dates, and preparation resources.",
     color: "from-cyan-500 to-cyan-600",
     bg: "bg-cyan-50",
-    href: "/dashboard/guides",
+    href: "/exams",
   },
   {
     icon: Users,
@@ -166,14 +171,14 @@ const features = [
 ];
 
 const examCategories = [
-  { name: "JPSC Prelims", tag: "State PSC", color: "bg-blue-100 text-blue-700", slug: "jpsc-prelims" },
-  { name: "SBI PO", tag: "Banking", color: "bg-emerald-100 text-emerald-700", slug: "sbi-po" },
-  { name: "IBPS PO", tag: "Banking", color: "bg-emerald-100 text-emerald-700", slug: "ibps-po" },
-  { name: "SSC CGL", tag: "SSC", color: "bg-purple-100 text-purple-700", slug: "ssc-cgl" },
-  { name: "Railway NTPC", tag: "Railway", color: "bg-amber-100 text-amber-700", slug: "rrb-ntpc" },
-  { name: "Daroga SI", tag: "Police", color: "bg-rose-100 text-rose-700", slug: "up-si" },
-  { name: "RBI Grade B", tag: "Banking", color: "bg-emerald-100 text-emerald-700", slug: "rbi-grade-b" },
-  { name: "UET", tag: "Engineering", color: "bg-cyan-100 text-cyan-700", slug: null },
+  { name: "JPSC Prelims", tag: "State PSC", color: "bg-blue-100 text-blue-700", slug: "jpsc-prelims", state: "Jharkhand", board: "JPSC", numTests: 18, numPYQ: 40 },
+  { name: "SBI PO", tag: "Banking", color: "bg-emerald-100 text-emerald-700", slug: "sbi-po", state: "National", board: "SBI", numTests: 20, numPYQ: 60 },
+  { name: "IBPS PO", tag: "Banking", color: "bg-emerald-100 text-emerald-700", slug: "ibps-po", state: "National", board: "IBPS", numTests: 15, numPYQ: 55 },
+  { name: "SSC CGL", tag: "SSC", color: "bg-purple-100 text-purple-700", slug: "ssc-cgl", state: "National", board: "SSC", numTests: 25, numPYQ: 70 },
+  { name: "Railway NTPC", tag: "Railway", color: "bg-amber-100 text-amber-700", slug: "rrb-ntpc", state: "National", board: "RRB", numTests: 14, numPYQ: 45 },
+  { name: "Daroga SI", tag: "Police", color: "bg-rose-100 text-rose-700", slug: "up-si", state: "Uttar Pradesh", board: "UPPBPB", numTests: 12, numPYQ: 30 },
+  { name: "RBI Grade B", tag: "Banking", color: "bg-emerald-100 text-emerald-700", slug: "rbi-grade-b", state: "National", board: "RBI", numTests: 10, numPYQ: 35 },
+  { name: "UET", tag: "Engineering", color: "bg-cyan-100 text-cyan-700", slug: null, state: "Jharkhand", board: "JAC", numTests: 12, numPYQ: 50 },
 ];
 
 const testimonials = [
@@ -201,7 +206,7 @@ const testimonials = [
 ];
 
 const planHighlights = [
-  "Unlimited Mock Tests",
+  "Unlimited Test Series",
   "Full PYQ Access",
   "AI Weak Area Analysis",
   "Real-time Percentile",
@@ -528,6 +533,68 @@ function FeaturesSection() {
    EXAM CATEGORIES
 ══════════════════════════════════════════════ */
 function ExamCategoriesSection() {
+  const [selectedExam, setSelectedExam] = useState(examCategories[0]);
+  const examRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const sidebarRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const sidebarContainerRef = useRef<HTMLDivElement | null>(null);
+  const mobileExamRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const mobileTabRefs = useRef<Record<string, HTMLButtonElement | null>>({});
+  const mobileTabContainerRef = useRef<HTMLDivElement | null>(null);
+
+  const descriptions: Record<string, string> = {
+    "JPSC Prelims": "Prepare for Jharkhand Public Service Commission Prelims with full-length test series, previous year papers, and expert study materials.",
+    "SBI PO": "Master the State Bank of India Probationary Officer exam with comprehensive mock tests and detailed solutions.",
+    "IBPS PO": "Crack IBPS PO with our extensive test series, PYQ practice, and specialized banking preparation materials.",
+    "SSC CGL": "Comprehensive preparation for Staff Selection Commission Combined Graduate Level with all-India level resources.",
+    "Railway NTPC": "RRB NTPC exam preparation with CBT-style tests, previous year papers, and detailed solutions.",
+    "Daroga SI": "Uttar Pradesh Police Sub-Inspector preparation with specialized coaching materials and mock tests.",
+    "RBI Grade B": "Reserve Bank of India Grade B officer exam preparation with expert guidance and performance analytics.",
+    "UET": "Engineering entrance exam preparation with structured courses and practice tests.",
+  };
+
+  // Unified scroll tracking — guards by breakpoint so handlers don't conflict
+  useEffect(() => {
+    const LG = 1024; // matches Tailwind's lg breakpoint
+
+    const handleScroll = () => {
+      const isDesktop = window.innerWidth >= LG;
+
+      if (isDesktop) {
+        const TRIGGER_Y = 160;
+        let activeExam = examCategories[0];
+        for (const exam of examCategories) {
+          const el = examRefs.current[exam.name];
+          if (!el) continue;
+          if (el.getBoundingClientRect().top <= TRIGGER_Y) activeExam = exam;
+        }
+        setSelectedExam(activeExam);
+      } else {
+        const TRIGGER_Y = 120;
+        let activeExam = examCategories[0];
+        for (const exam of examCategories) {
+          const el = mobileExamRefs.current[exam.name];
+          if (!el) continue;
+          if (el.getBoundingClientRect().top <= TRIGGER_Y) activeExam = exam;
+        }
+        setSelectedExam(activeExam);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const sidebarButton = sidebarRefs.current[selectedExam.name];
+    if (sidebarButton) {
+      sidebarButton.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+    const mobileTab = mobileTabRefs.current[selectedExam.name];
+    if (mobileTab) {
+      mobileTab.scrollIntoView({ behavior: "smooth", block: "nearest", inline: "center" });
+    }
+  }, [selectedExam]);
+
   return (
     <section className="py-20 lg:py-28 bg-white border-t border-gray-100">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-12">
@@ -536,36 +603,248 @@ function ExamCategoriesSection() {
           whileInView="visible"
           viewport={{ once: true }}
           variants={fadeUp}
-          className="text-center mb-12"
+          className="text-center mb-16"
         >
-          <p className="text-sm font-semibold text-blue-600 uppercase tracking-wider mb-3">Exams Covered</p>
+          <p className="text-sm font-semibold text-blue-600 uppercase tracking-wider mb-3">Popular Exams</p>
           <h2 className="text-4xl lg:text-5xl font-bold text-gray-900 mb-4">Prepare for Any Exam</h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             From state PSC to banking to central government — comprehensive coverage for all major competitive exams.
           </p>
         </motion.div>
 
-        <motion.div
-          initial="hidden"
-          whileInView="visible"
-          viewport={{ once: true }}
-          variants={stagger}
-          className="flex flex-wrap gap-3 justify-center mb-12"
-        >
-          {examCategories.map((exam) => (
-            <motion.div key={exam.name} variants={fadeUp}>
-              <Link href={exam.slug ? `/exams/${exam.slug}` : "/exams"}>
-                <div className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-xl hover:border-blue-300 hover:shadow-md transition-all cursor-pointer">
-                  <span className={`text-xs font-semibold px-2 py-0.5 rounded-full ${exam.color}`}>{exam.tag}</span>
-                  <span className="text-sm font-semibold text-gray-800">{exam.name}</span>
-                  <ChevronRight className="w-3.5 h-3.5 text-gray-400" />
+        {/* Desktop: Two-column layout */}
+        <div className="hidden lg:grid grid-cols-3 gap-0">
+          {/* Left: Scrollable exam list */}
+          <div className="lg:col-span-1">
+            <div className="max-h-[600px] overflow-y-auto sticky top-24" ref={sidebarContainerRef}>
+              <div className="p-4">
+                <h3 className="text-sm font-bold text-gray-600 uppercase tracking-wider mb-4 px-2">Popular Exams</h3>
+                <div className="space-y-2">
+                  {examCategories.map((exam) => (
+                    <button
+                      key={exam.name}
+                      ref={(el) => {
+                        if (el) sidebarRefs.current[exam.name] = el;
+                      }}
+                      onClick={() => {
+                        setSelectedExam(exam);
+                        examRefs.current[exam.name]?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+                      }}
+                      className={`w-full text-left px-4 py-3 rounded-l-xl transition-all duration-200 ${
+                        selectedExam.name === exam.name
+                          ? "bg-blue-600 text-white border border-blue-600 border-r-0 shadow-md"
+                          : "hover:bg-gray-50 text-gray-800 bg-white border border-gray-200 hover:border-gray-300"
+                      }`}
+                    >
+                      <div className="font-semibold text-sm">{exam.name}</div>
+                      <div className={`text-xs mt-0.5 ${selectedExam.name === exam.name ? "text-blue-100" : "text-gray-500"}`}>
+                        {exam.tag}
+                      </div>
+                    </button>
+                  ))}
                 </div>
-              </Link>
-            </motion.div>
-          ))}
-        </motion.div>
+              </div>
+            </div>
+          </div>
 
-        <div className="text-center">
+          {/* Right: Exam details stack */}
+          <div className="lg:col-span-2 space-y-0">
+            {examCategories.map((exam, idx) => (
+              <div
+                key={exam.name}
+                ref={(el) => {
+                  if (el) examRefs.current[exam.name] = el;
+                }}
+                data-exam={exam.name}
+                className={`p-7 transition-all duration-300 border-l-0 ${
+                  selectedExam.name === exam.name
+                    ? "bg-blue-50 border-2 border-blue-400 shadow-md"
+                    : "bg-white border border-gray-100 opacity-50"
+                } ${idx === 0 ? "rounded-tr-xl" : ""} ${idx === examCategories.length - 1 ? "rounded-br-xl" : ""}`}
+              >
+                <motion.div
+                  initial={{ opacity: 0, y: 10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  {/* Header row */}
+                  <div className="flex items-start justify-between mb-3">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className={`text-xs font-semibold px-3 py-1 rounded-full ${exam.color}`}>
+                        {exam.tag}
+                      </span>
+                      {exam.state && (
+                        <span className="flex items-center gap-1 text-xs text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full">
+                          <MapPin className="w-3 h-3" />
+                          {exam.state}
+                        </span>
+                      )}
+                      {exam.board && (
+                        <span className="flex items-center gap-1 text-xs text-gray-500 bg-gray-100 px-2.5 py-1 rounded-full">
+                          <Building2 className="w-3 h-3" />
+                          {exam.board}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+
+                  <h3 className="text-2xl font-bold text-gray-900 mb-1.5">{exam.name}</h3>
+                  <p className="text-sm text-gray-500 leading-relaxed max-w-xl mb-5">
+                    {descriptions[exam.name] || "Comprehensive preparation with full-length test series, previous year papers, and expert study materials."}
+                  </p>
+
+                  {/* Stats row */}
+                  <div className="grid grid-cols-2 gap-3 mb-6">
+                    <div className="flex items-center gap-3 bg-white rounded-xl p-4 border border-blue-100 shadow-sm">
+                      <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
+                        <ClipboardList className="w-4.5 h-4.5 text-blue-600" />
+                      </div>
+                      <div>
+                        <div className="text-xl font-bold text-blue-600">{exam.numTests}+</div>
+                        <div className="text-xs text-gray-500">Practice Tests</div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3 bg-white rounded-xl p-4 border border-emerald-100 shadow-sm">
+                      <div className="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center flex-shrink-0">
+                        <ScrollText className="w-4.5 h-4.5 text-emerald-600" />
+                      </div>
+                      <div>
+                        <div className="text-xl font-bold text-emerald-600">{exam.numPYQ}+</div>
+                        <div className="text-xs text-gray-500">PYQ Papers</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Action buttons */}
+                  <div className="flex gap-3">
+                    <Link href={exam.slug ? `/exams/${exam.slug}` : "/exams"} className="flex-1">
+                      <button className="w-full px-5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-xl hover:bg-blue-700 transition-all flex items-center justify-center gap-2">
+                        Explore Exam
+                        <ArrowRight className="w-4 h-4" />
+                      </button>
+                    </Link>
+                    <Link href="/series/all" className="flex-1">
+                      <button className="w-full px-5 py-2.5 border-2 border-blue-600 text-blue-600 text-sm font-semibold rounded-xl hover:bg-blue-50 transition-all">
+                        Start Tests
+                      </button>
+                    </Link>
+                  </div>
+                </motion.div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Mobile: Horizontal tab + stacked scroll layout */}
+        <div className="lg:hidden">
+          {/* Sticky horizontal tab bar */}
+          <div className="sticky top-0 z-20 bg-white border-b border-gray-100 shadow-sm">
+            <div ref={mobileTabContainerRef} className="overflow-x-auto py-3 px-2">
+              <div className="flex gap-2 min-w-min">
+                {examCategories.map((exam) => (
+                  <button
+                    key={exam.name}
+                    ref={(el) => { if (el) mobileTabRefs.current[exam.name] = el; }}
+                    onClick={() => {
+                      setSelectedExam(exam);
+                      mobileExamRefs.current[exam.name]?.scrollIntoView({ behavior: "smooth", block: "start" });
+                    }}
+                    className={`px-4 py-2.5 rounded-xl whitespace-nowrap transition-all duration-200 flex-shrink-0 ${
+                      selectedExam.name === exam.name
+                        ? "bg-blue-600 text-white border border-blue-600 shadow-md"
+                        : "bg-white border border-gray-200 text-gray-800 hover:border-gray-300"
+                    }`}
+                  >
+                    <div className="font-semibold text-sm">{exam.name}</div>
+                    <div className={`text-xs mt-0.5 ${selectedExam.name === exam.name ? "text-blue-100" : "text-gray-500"}`}>
+                      {exam.tag}
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Stacked exam cards — all always rendered */}
+          <div className="space-y-4 pt-4">
+            {examCategories.map((exam) => (
+              <div
+                key={exam.name}
+                ref={(el) => { if (el) mobileExamRefs.current[exam.name] = el; }}
+                data-exam-mobile={exam.name}
+                className={`rounded-2xl border-2 p-5 transition-all duration-300 ${
+                  selectedExam.name === exam.name
+                    ? "bg-blue-50 border-blue-400 shadow-md"
+                    : "bg-white border-gray-100"
+                }`}
+              >
+                {/* Badges */}
+                <div className="flex items-center gap-2 flex-wrap mb-3">
+                  <span className={`text-xs font-semibold px-3 py-1 rounded-full ${exam.color}`}>
+                    {exam.tag}
+                  </span>
+                  {exam.state && (
+                    <span className="flex items-center gap-1 text-xs text-gray-500 bg-white border border-gray-200 px-2.5 py-1 rounded-full">
+                      <MapPin className="w-3 h-3" />
+                      {exam.state}
+                    </span>
+                  )}
+                  {exam.board && (
+                    <span className="flex items-center gap-1 text-xs text-gray-500 bg-white border border-gray-200 px-2.5 py-1 rounded-full">
+                      <Building2 className="w-3 h-3" />
+                      {exam.board}
+                    </span>
+                  )}
+                </div>
+
+                <h3 className="text-xl font-bold text-gray-900 mb-1.5">{exam.name}</h3>
+                <p className="text-gray-500 leading-relaxed mb-5 text-sm">
+                  {descriptions[exam.name] || "Comprehensive preparation with full-length test series, previous year papers, and expert study materials."}
+                </p>
+
+                {/* Stats */}
+                <div className="grid grid-cols-2 gap-3 mb-5">
+                  <div className="flex items-center gap-3 bg-white rounded-xl p-3 border border-blue-100 shadow-sm">
+                    <div className="w-8 h-8 rounded-lg bg-blue-50 flex items-center justify-center flex-shrink-0">
+                      <ClipboardList className="w-4 h-4 text-blue-600" />
+                    </div>
+                    <div>
+                      <div className="text-lg font-bold text-blue-600">{exam.numTests}+</div>
+                      <div className="text-xs text-gray-500">Practice Tests</div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 bg-white rounded-xl p-3 border border-emerald-100 shadow-sm">
+                    <div className="w-8 h-8 rounded-lg bg-emerald-50 flex items-center justify-center flex-shrink-0">
+                      <ScrollText className="w-4 h-4 text-emerald-600" />
+                    </div>
+                    <div>
+                      <div className="text-lg font-bold text-emerald-600">{exam.numPYQ}+</div>
+                      <div className="text-xs text-gray-500">PYQ Papers</div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action buttons */}
+                <div className="flex flex-col gap-3">
+                  <Link href={exam.slug ? `/exams/${exam.slug}` : "/exams"} className="w-full">
+                    <button className="w-full px-6 py-3 bg-blue-600 text-white font-semibold rounded-xl hover:bg-blue-700 transition-all flex items-center justify-center gap-2 text-sm">
+                      Explore Exam
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </Link>
+                  <Link href="/series/all" className="w-full">
+                    <button className="w-full px-6 py-3 border-2 border-blue-600 text-blue-600 font-semibold rounded-xl hover:bg-blue-50 transition-all text-sm">
+                      Start Tests
+                    </button>
+                  </Link>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Browse All CTA */}
+        <div className="text-center mt-12">
           <Link href="/exams">
             <button className="px-8 py-4 border-2 border-blue-500 text-blue-600 hover:bg-blue-50 rounded-xl font-semibold transition-all flex items-center justify-center gap-2 mx-auto">
               Browse All Exams

@@ -62,10 +62,10 @@ const CATEGORY_DISCOVERY = [
 ];
 
 const SEO_GROUPS = [
-  { title: "Popular SSC Test Series", links: ["SSC CGL Mock Test Series", "SSC CHSL Test Series", "SSC MTS Test Series", "SSC GD Constable Mock Tests", "SSC CPO Test Series"] },
-  { title: "Popular Banking Test Series", links: ["SBI PO Test Series", "IBPS PO Mock Tests", "IBPS Clerk Test Series", "RBI Grade B Test Series", "NABARD Grade A Mock Tests"] },
-  { title: "Popular State PSC Test Series", links: ["JPSC Prelims Test Series", "BPSC Mock Tests", "UPPSC Test Series", "MPSC Test Series", "JPSC Mains Practice Tests"] },
-  { title: "Popular Railway & Police Test Series", links: ["RRB NTPC Test Series", "RRB Group D Mock Tests", "Railway ALP Test Series", "UP Police Constable Tests", "Daroga SI Mock Tests"] },
+  { title: "Popular SSC Test Series", links: ["SSC CGL Test Series", "SSC CHSL Test Series", "SSC MTS Test Series", "SSC GD Constable Tests", "SSC CPO Test Series"] },
+  { title: "Popular Banking Test Series", links: ["SBI PO Test Series", "IBPS PO Tests", "IBPS Clerk Test Series", "RBI Grade B Test Series", "NABARD Grade A Tests"] },
+  { title: "Popular State PSC Test Series", links: ["JPSC Prelims Test Series", "BPSC Tests", "UPPSC Test Series", "MPSC Test Series", "JPSC Mains Practice Tests"] },
+  { title: "Popular Railway & Police Test Series", links: ["RRB NTPC Test Series", "RRB Group D Tests", "Railway ALP Test Series", "UP Police Constable Tests", "Daroga SI Tests"] },
 ];
 
 type SortValue = (typeof SORTS)[number]["value"];
@@ -167,8 +167,8 @@ function normalizeSeries(raw: RawTestSeries, index: number): TestSeriesItem {
   const discountedPrice = raw.discountedPrice ?? Math.max(0, price - 200);
   return {
     id: raw.id,
-    title: raw.title || `${examName} Complete Mock Test Series`,
-    description: raw.description || "Full-length CBT-style mock tests, sectional practice, analytics, and detailed solutions.",
+    title: raw.title || `${examName} Complete Test Series`,
+    description: raw.description || "Full-length CBT-style test series, sectional practice, analytics, and detailed solutions.",
     examName,
     examShortName: raw.exam?.shortName || examName.split(" ").map((word) => word[0]).join("").slice(0, 6),
     examSlug: raw.exam?.id || examName.toLowerCase().replace(/\s+/g, "-"),

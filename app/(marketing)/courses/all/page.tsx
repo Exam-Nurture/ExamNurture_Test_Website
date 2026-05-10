@@ -152,7 +152,7 @@ export default function AllCoursesPage() {
                            <FileText className="w-4 h-4 text-purple-500" />
                            <span className="font-medium">Resources: </span>
                            <div className="flex gap-1.5 ml-auto">
-                              {exam.hasTests && <Zap aria-label="Mock Tests" className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />}
+                              {exam.hasTests && <Zap aria-label="Test Series" className="w-3.5 h-3.5 text-amber-500 fill-amber-500" />}
                               {exam.hasPYQ && <BookOpen aria-label="PYQs" className="w-3.5 h-3.5 text-blue-500" />}
                               {exam.hasGuide && <Users aria-label="Guide" className="w-3.5 h-3.5 text-emerald-500" />}
                            </div>
@@ -184,7 +184,7 @@ export default function AllCoursesPage() {
             <h2 className="text-3xl md:text-4xl font-bold text-white mb-12">What's Inside Every Course?</h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
               {[
-                { title: "Full Mock Tests", icon: Zap, desc: "Real exam interface with auto-timer." },
+                { title: "Test Series", icon: Zap, desc: "Real exam interface with auto-timer." },
                 { title: "Subject Tests", icon: BookOpen, desc: "Focus on individual topics and subjects." },
                 { title: "Previous Papers", icon: FileText, desc: "Last 10 years solved papers with explanations." },
                 { title: "Performance AI", icon: Star, desc: "Detailed analysis of your weak areas." }

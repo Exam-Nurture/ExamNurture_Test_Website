@@ -351,7 +351,7 @@ export default function CheckoutPage() {
                 "Personalised Study Plan",
                 "Doubt Resolution Support",
                 "Interview Preparation",
-                "Mock Test Analysis",
+                "Test Series Analysis",
                 "Till Selection Support",
               ].map((item) => (
                 <div key={item} className="flex items-center gap-2 text-[12px]" style={{ color: "var(--ink-3)" }}>

@@ -163,7 +163,7 @@ export default function ExamHubPage({ params }: { params: Promise<{ slug: string
 
               <div className="flex flex-wrap gap-4 items-center">
                 <Link href={`/dashboard/series?exam=${exam.id}`} className="px-8 py-4 rounded-xl text-white font-bold transition-all shadow-lg hover:shadow-xl hover:-translate-y-0.5 flex items-center gap-2" style={{ backgroundColor: boardColor, "--tw-shadow-color": `${boardColor}40` } as React.CSSProperties}>
-                  <FlaskConical size={18} /> Start Free Mock Test
+                  <FlaskConical size={18} /> Start Free Test
                 </Link>
                 <Link href={`/dashboard/pyq?exam=${exam.id}`} className="px-8 py-4 rounded-xl font-bold bg-white dark:bg-gray-900 border-2 text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-gray-800 transition-all flex items-center gap-2" style={{ borderColor: `${boardColor}30` }}>
                   <FileText size={18} /> View PYQs
@@ -173,7 +173,7 @@ export default function ExamHubPage({ params }: { params: Promise<{ slug: string
 
             {/* Right side stat grid */}
             <div className="w-full lg:w-[400px] shrink-0 grid grid-cols-2 gap-3">
-               <StatCard label="Mock Tests" value={exam.testCount} icon={FlaskConical} color="#3B82F6" />
+               <StatCard label="Test Series" value={exam.testCount} icon={FlaskConical} color="#3B82F6" />
                <StatCard label="PYQ Papers" value={exam.pyqCount} icon={FileText} color="#8B5CF6" />
                <StatCard label="Study Notes" value={exam.notesCount} icon={BookOpen} color="#10B981" />
                <StatCard label="Difficulty" value={exam.difficulty || "Moderate"} icon={BarChart3} color="#F59E0B" />
@@ -351,12 +351,12 @@ export default function ExamHubPage({ params }: { params: Promise<{ slug: string
             <SectionHeading title="Practice & Preparation" icon={PlayCircle} color={boardColor} />
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               
-              {/* Mock Tests Card */}
+              {/* Test Series Card */}
               <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-3xl p-6 flex flex-col hover:shadow-xl dark:hover:shadow-gray-800/50 transition-all hover:-translate-y-1">
                 <div className="w-14 h-14 rounded-2xl bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-6">
                   <FlaskConical size={24} />
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Mock Tests</h3>
+                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Test Series</h3>
                 <p className="text-gray-500 dark:text-gray-400 mb-6 flex-1 text-sm">Full-length tests and sectionals based on the latest {exam.shortName} pattern.</p>
                 <div className="flex items-center justify-between mt-auto">
                   <span className="font-bold text-blue-600 dark:text-blue-400">{exam.testCount} Tests</span>
@@ -435,7 +435,7 @@ export default function ExamHubPage({ params }: { params: Promise<{ slug: string
             <div className="space-y-2">
               <Link href={`/dashboard/series?exam=${exam.id}`} className="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group">
                 <span className="font-bold text-gray-700 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 flex items-center gap-3">
-                  <FlaskConical size={16} className="text-blue-500" /> Start Mock Test
+                  <FlaskConical size={16} className="text-blue-500" /> Start Test Series
                 </span>
                 <ChevronRight size={16} className="text-gray-300 dark:text-gray-600 group-hover:text-blue-600 dark:group-hover:text-blue-400" />
               </Link>
