@@ -390,7 +390,7 @@ export default function ExamHubPage({ params }: { params: Promise<{ slug: string
                 <p className="text-gray-500 dark:text-gray-400 mb-6 flex-1 text-sm">Concise revision notes, formula sheets, and subject-wise guides.</p>
                 <div className="flex items-center justify-between mt-auto">
                   <span className="font-bold text-green-600 dark:text-green-400">{exam.notesCount} PDF notes</span>
-                  <Link href={`/library?exam=${exam.id}`} className="w-10 h-10 rounded-full bg-green-600 text-white flex items-center justify-center hover:bg-green-700 transition-colors">
+                  <Link href={`/blog?exam=${exam.id}`} className="w-10 h-10 rounded-full bg-green-600 text-white flex items-center justify-center hover:bg-green-700 transition-colors">
                     <ArrowRight size={18} />
                   </Link>
                 </div>
@@ -445,7 +445,7 @@ export default function ExamHubPage({ params }: { params: Promise<{ slug: string
                 </span>
                 <ChevronRight size={16} className="text-gray-300 dark:text-gray-600 group-hover:text-purple-600 dark:group-hover:text-purple-400" />
               </Link>
-              <Link href={`/library?exam=${exam.id}`} className="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group">
+              <Link href={`/blog?exam=${exam.id}`} className="flex items-center justify-between p-3 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-800/50 transition-colors group">
                 <span className="font-bold text-gray-700 dark:text-gray-300 group-hover:text-green-600 dark:group-hover:text-green-400 flex items-center gap-3">
                   <BookOpen size={16} className="text-green-500" /> Study Notes
                 </span>

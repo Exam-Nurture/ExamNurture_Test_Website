@@ -1,31 +1,39 @@
 import type { Metadata } from "next";
-import { ARTICLES } from "../data";
+import { apiGetBlogBySlug } from "@/lib/api";
 
 const BASE = process.env.NEXT_PUBLIC_SITE_URL || "https://examnurture.in";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const article = ARTICLES.find((a) => a.slug === slug);
-  if (!article) return {};
 
-  const canonicalUrl = `${BASE}/blog/${slug}`;
-  return {
-    title: article.title,
-    description: article.description,
-    alternates: { canonical: canonicalUrl },
-    openGraph: {
-      title: article.title,
-      description: article.description,
-      url: canonicalUrl,
-      type: "article",
-      siteName: "ExamNurture",
-    },
-    twitter: {
-      card: "summary",
-      title: article.title,
-      description: article.description,
-    },
-  };
+  try {
+    const post = await apiGetBlogBySlug(slug);
+    const canonicalUrl = `${BASE}/blog/${slug}`;
+    const description = post.excerpt ?? `Read "${post.title}" on ExamNurture — expert articles for competitive exam preparation.`;
+
+    return {
+      title: `${post.title} — ExamNurture Blog`,
+      description,
+      alternates: { canonical: canonicalUrl },
+      openGraph: {
+        title: post.title,
+        description,
+        url: canonicalUrl,
+        type: "article",
+        siteName: "ExamNurture",
+        ...(post.coverUrl ? { images: [{ url: post.coverUrl }] } : {}),
+        ...(post.publishedAt ? { publishedTime: post.publishedAt } : {}),
+      },
+      twitter: {
+        card: post.coverUrl ? "summary_large_image" : "summary",
+        title: post.title,
+        description,
+        ...(post.coverUrl ? { images: [post.coverUrl] } : {}),
+      },
+    };
+  } catch {
+    return {};
+  }
 }
 
 export default function BlogSlugLayout({ children }: { children: React.ReactNode }) {

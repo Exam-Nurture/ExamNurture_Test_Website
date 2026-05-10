@@ -3,7 +3,7 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Search, ArrowRight, FileText, BookOpen, Zap } from "lucide-react";
+import { Search, ArrowRight, FileText, Zap } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 /* ── Exam taxonomy ── */
@@ -31,11 +31,11 @@ const categories: Category[] = [
     color: "bg-blue-50",
     textColor: "text-blue-700",
     exams: [
-      { name: "JPSC Prelims", href: "/series/all?exam=jpsc", tag: { label: "Popular", color: "bg-amber-100 text-amber-700" }, desc: "Jharkhand Public Service" },
-      { name: "JPSC Mains", href: "/series/all?exam=jpsc-mains", desc: "Jharkhand Public Service" },
-      { name: "BPSC", href: "/series/all?exam=bpsc", tag: { label: "Hot", color: "bg-red-100 text-red-600" }, desc: "Bihar Public Service" },
-      { name: "UPPSC", href: "/series/all?exam=uppsc", desc: "Uttar Pradesh PSC" },
-      { name: "MPSC", href: "/series/all?exam=mpsc", desc: "Maharashtra PSC" },
+      { name: "JPSC Prelims", href: "/exams/jpsc", tag: { label: "Popular", color: "bg-amber-100 text-amber-700" }, desc: "Jharkhand Public Service" },
+      { name: "JPSC Mains", href: "/exams/jpsc-mains", desc: "Jharkhand Public Service" },
+      { name: "BPSC", href: "/exams/bpsc", tag: { label: "Hot", color: "bg-red-100 text-red-600" }, desc: "Bihar Public Service" },
+      { name: "UPPSC", href: "/exams/uppsc", desc: "Uttar Pradesh PSC" },
+      { name: "MPSC", href: "/exams/mpsc", desc: "Maharashtra PSC" },
     ],
   },
   {
@@ -45,12 +45,12 @@ const categories: Category[] = [
     color: "bg-emerald-50",
     textColor: "text-emerald-700",
     exams: [
-      { name: "SBI PO", href: "/series/all?exam=sbi-po", tag: { label: "🔥 Hot", color: "bg-red-100 text-red-600" }, desc: "State Bank of India PO" },
-      { name: "IBPS PO", href: "/series/all?exam=ibps-po", tag: { label: "Popular", color: "bg-amber-100 text-amber-700" }, desc: "Institute of Banking Personnel" },
-      { name: "IBPS Clerk", href: "/series/all?exam=ibps-clerk", desc: "IBPS Clerical Cadre" },
-      { name: "SBI Clerk", href: "/series/all?exam=sbi-clerk", desc: "SBI Junior Associates" },
-      { name: "RBI Grade B", href: "/series/all?exam=rbi-grade-b", tag: { label: "Hard", color: "bg-purple-100 text-purple-700" }, desc: "Reserve Bank of India" },
-      { name: "NABARD Grade A", href: "/series/all?exam=nabard", desc: "National Bank Agriculture" },
+      { name: "SBI PO", href: "/exams/sbi-po", tag: { label: "🔥 Hot", color: "bg-red-100 text-red-600" }, desc: "State Bank of India PO" },
+      { name: "IBPS PO", href: "/exams/ibps-po", tag: { label: "Popular", color: "bg-amber-100 text-amber-700" }, desc: "Institute of Banking Personnel" },
+      { name: "IBPS Clerk", href: "/exams/ibps-clerk", desc: "IBPS Clerical Cadre" },
+      { name: "SBI Clerk", href: "/exams/sbi-clerk", desc: "SBI Junior Associates" },
+      { name: "RBI Grade B", href: "/exams/rbi-grade-b", tag: { label: "Hard", color: "bg-purple-100 text-purple-700" }, desc: "Reserve Bank of India" },
+      { name: "NABARD Grade A", href: "/exams/nabard", desc: "National Bank Agriculture" },
     ],
   },
   {
@@ -60,11 +60,11 @@ const categories: Category[] = [
     color: "bg-purple-50",
     textColor: "text-purple-700",
     exams: [
-      { name: "SSC CGL", href: "/series/all?exam=ssc-cgl", tag: { label: "⭐ Popular", color: "bg-amber-100 text-amber-700" }, desc: "Combined Graduate Level" },
-      { name: "SSC CHSL", href: "/series/all?exam=ssc-chsl", tag: { label: "Popular", color: "bg-amber-100 text-amber-700" }, desc: "Combined Higher Sec. Level" },
-      { name: "SSC MTS", href: "/series/all?exam=ssc-mts", desc: "Multi Tasking Staff" },
-      { name: "SSC GD Constable", href: "/series/all?exam=ssc-gd", desc: "General Duty Constable" },
-      { name: "SSC CPO", href: "/series/all?exam=ssc-cpo", desc: "Central Police Organisation" },
+      { name: "SSC CGL", href: "/exams/ssc-cgl", tag: { label: "⭐ Popular", color: "bg-amber-100 text-amber-700" }, desc: "Combined Graduate Level" },
+      { name: "SSC CHSL", href: "/exams/ssc-chsl", tag: { label: "Popular", color: "bg-amber-100 text-amber-700" }, desc: "Combined Higher Sec. Level" },
+      { name: "SSC MTS", href: "/exams/ssc-mts", desc: "Multi Tasking Staff" },
+      { name: "SSC GD Constable", href: "/exams/ssc-gd", desc: "General Duty Constable" },
+      { name: "SSC CPO", href: "/exams/ssc-cpo", desc: "Central Police Organisation" },
     ],
   },
   {
@@ -74,10 +74,10 @@ const categories: Category[] = [
     color: "bg-amber-50",
     textColor: "text-amber-700",
     exams: [
-      { name: "RRB NTPC", href: "/series/all?exam=rrb-ntpc", tag: { label: "🔥 Hot", color: "bg-red-100 text-red-600" }, desc: "Non-Technical Popular Cat." },
-      { name: "RRB Group D", href: "/series/all?exam=rrb-group-d", tag: { label: "Popular", color: "bg-amber-100 text-amber-700" }, desc: "Railway Group D Posts" },
-      { name: "RRB ALP", href: "/series/all?exam=rrb-alp", desc: "Assistant Loco Pilot" },
-      { name: "RRB JE", href: "/series/all?exam=rrb-je", desc: "Junior Engineer" },
+      { name: "RRB NTPC", href: "/exams/rrb-ntpc", tag: { label: "🔥 Hot", color: "bg-red-100 text-red-600" }, desc: "Non-Technical Popular Cat." },
+      { name: "RRB Group D", href: "/exams/rrb-group-d", tag: { label: "Popular", color: "bg-amber-100 text-amber-700" }, desc: "Railway Group D Posts" },
+      { name: "RRB ALP", href: "/exams/rrb-alp", desc: "Assistant Loco Pilot" },
+      { name: "RRB JE", href: "/exams/rrb-je", desc: "Junior Engineer" },
     ],
   },
   {
@@ -87,11 +87,11 @@ const categories: Category[] = [
     color: "bg-rose-50",
     textColor: "text-rose-700",
     exams: [
-      { name: "Jharkhand Daroga SI", href: "/series/all?exam=daroga", tag: { label: "⭐ Popular", color: "bg-amber-100 text-amber-700" }, desc: "Sub Inspector Recruitment" },
-      { name: "UP Police Constable", href: "/series/all?exam=up-police", tag: { label: "Hot", color: "bg-red-100 text-red-600" }, desc: "UP Police Recruitment" },
-      { name: "CRPF", href: "/series/all?exam=crpf", desc: "Central Reserve Police" },
-      { name: "CDS", href: "/series/all?exam=cds", tag: { label: "Hard", color: "bg-purple-100 text-purple-700" }, desc: "Combined Defence Services" },
-      { name: "NDA", href: "/series/all?exam=nda", desc: "National Defence Academy" },
+      { name: "Jharkhand Daroga SI", href: "/exams/daroga", tag: { label: "⭐ Popular", color: "bg-amber-100 text-amber-700" }, desc: "Sub Inspector Recruitment" },
+      { name: "UP Police Constable", href: "/exams/up-police", tag: { label: "Hot", color: "bg-red-100 text-red-600" }, desc: "UP Police Recruitment" },
+      { name: "CRPF", href: "/exams/crpf", desc: "Central Reserve Police" },
+      { name: "CDS", href: "/exams/cds", tag: { label: "Hard", color: "bg-purple-100 text-purple-700" }, desc: "Combined Defence Services" },
+      { name: "NDA", href: "/exams/nda", desc: "National Defence Academy" },
     ],
   },
   {
@@ -101,10 +101,10 @@ const categories: Category[] = [
     color: "bg-cyan-50",
     textColor: "text-cyan-700",
     exams: [
-      { name: "CTET", href: "/series/all?exam=ctet", tag: { label: "Popular", color: "bg-amber-100 text-amber-700" }, desc: "Central Teacher Eligibility" },
-      { name: "STET (Jharkhand)", href: "/series/all?exam=stet", desc: "State Teacher Eligibility" },
-      { name: "KVS PGT/TGT", href: "/series/all?exam=kvs", desc: "Kendriya Vidyalaya" },
-      { name: "DSSSB", href: "/series/all?exam=dsssb", desc: "Delhi Subordinate Services" },
+      { name: "CTET", href: "/exams/ctet", tag: { label: "Popular", color: "bg-amber-100 text-amber-700" }, desc: "Central Teacher Eligibility" },
+      { name: "STET (Jharkhand)", href: "/exams/stet", desc: "State Teacher Eligibility" },
+      { name: "KVS PGT/TGT", href: "/exams/kvs", desc: "Kendriya Vidyalaya" },
+      { name: "DSSSB", href: "/exams/dsssb", desc: "Delhi Subordinate Services" },
     ],
   },
 ];
@@ -212,8 +212,7 @@ export default function MegaMenu({ show, onMouseEnter, onMouseLeave }: MegaMenuP
                 <div className="flex items-center gap-1.5 flex-shrink-0">
                   {[
                     { label: "Courses",              href: "/courses/all",    icon: FileText,  color: "text-blue-600 bg-blue-50 hover:bg-blue-100"     },
-                    { label: "Study Material",       href: "/library",        icon: BookOpen,  color: "text-emerald-600 bg-emerald-50 hover:bg-emerald-100" },
-                    { label: "Previous Year Papers", href: "/pyq/all",        icon: Zap,       color: "text-amber-600 bg-amber-50 hover:bg-amber-100"   },
+{ label: "Previous Year Papers", href: "/pyq/all",        icon: Zap,       color: "text-amber-600 bg-amber-50 hover:bg-amber-100"   },
                   ].map(({ label, href, icon: Icon, color }) => (
                     <Link
                       key={href}

@@ -453,6 +453,20 @@ export async function apiAdminDeleteState(id: number) {
   return apiFetch(`/admin/states/${id}`, { method: "DELETE" });
 }
 
+// Exam Categories
+export async function apiAdminGetExamCategories() {
+  return apiFetch<{ id: number; name: string; _count?: { exams: number } }[]>("/admin/exam-categories");
+}
+export async function apiAdminCreateExamCategory(name: string) {
+  return apiFetch("/admin/exam-categories", { method: "POST", body: JSON.stringify({ name }) });
+}
+export async function apiAdminUpdateExamCategory(id: number, name: string) {
+  return apiFetch(`/admin/exam-categories/${id}`, { method: "PATCH", body: JSON.stringify({ name }) });
+}
+export async function apiAdminDeleteExamCategory(id: number) {
+  return apiFetch(`/admin/exam-categories/${id}`, { method: "DELETE" });
+}
+
 // Boards
 export interface AdminBoard {
   id: string; name: string; shortName: string; description: string;
@@ -586,22 +600,84 @@ export async function apiAdminCreatePYQBulk(body: { paper: Partial<AdminPYQPaper
 }
 
 // Study Materials
+export interface AdminStudyMaterialExam {
+  examId: string;
+  exam: { id: string; name: string; shortName: string };
+}
 export interface AdminStudyMaterial {
-  id: string; examId: string; subject: string; title: string; description?: string;
-  buyLink?: string; language: string; pageCount: number; coverUrl?: string;
-  tierRequired: number; isActive: boolean; isFeatured: boolean;
+  id: string;
+  title: string;
+  subject: string;
+  description?: string;
+  fileUrl?: string;
+  fileType?: string;
+  buyLink?: string;
+  language: string;
+  pageCount: number;
+  coverUrl?: string;
+  tierRequired: number;
+  isActive: boolean;
+  isFeatured: boolean;
+  exams: AdminStudyMaterialExam[];
+}
+export interface AdminStudyMaterialPayload extends Omit<AdminStudyMaterial, 'id' | 'exams'> {
+  examIds: string[];
 }
 export async function apiAdminGetStudyMaterials(params?: { page?: number; limit?: number; examId?: string }) {
   return apiFetch<PaginatedResponse<AdminStudyMaterial>>(`/admin/study-materials${buildQS(params ?? {})}`);
 }
-export async function apiAdminCreateStudyMaterial(body: Partial<AdminStudyMaterial>) {
+export async function apiAdminCreateStudyMaterial(body: Partial<AdminStudyMaterialPayload>) {
   return apiFetch("/admin/study-materials", { method: "POST", body: JSON.stringify(body) });
 }
-export async function apiAdminUpdateStudyMaterial(id: string, body: Partial<AdminStudyMaterial>) {
+export async function apiAdminUpdateStudyMaterial(id: string, body: Partial<AdminStudyMaterialPayload>) {
   return apiFetch(`/admin/study-materials/${id}`, { method: "PATCH", body: JSON.stringify(body) });
 }
 export async function apiAdminDeleteStudyMaterial(id: string) {
   return apiFetch(`/admin/study-materials/${id}`, { method: "DELETE" });
+}
+
+// Blog Posts
+export interface AdminBlogPost {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt?: string;
+  content: string;
+  coverUrl?: string;
+  author: string;
+  category: string;
+  tags: string;
+  isPublished: boolean;
+  publishedAt?: string;
+  readTimeMin: number;
+  viewCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+export interface AdminBlogPayload {
+  slug: string;
+  title: string;
+  excerpt?: string;
+  content: string;
+  coverUrl?: string;
+  author?: string;
+  category?: string;
+  tags?: string[];
+  isPublished?: boolean;
+  publishedAt?: string | null;
+  readTimeMin?: number;
+}
+export async function apiAdminGetBlogs(params?: { page?: number; limit?: number; published?: boolean }) {
+  return apiFetch<PaginatedResponse<AdminBlogPost>>(`/admin/blogs${buildQS(params ?? {})}`);
+}
+export async function apiAdminCreateBlog(body: AdminBlogPayload) {
+  return apiFetch("/admin/blogs", { method: "POST", body: JSON.stringify(body) });
+}
+export async function apiAdminUpdateBlog(id: string, body: Partial<AdminBlogPayload>) {
+  return apiFetch(`/admin/blogs/${id}`, { method: "PATCH", body: JSON.stringify(body) });
+}
+export async function apiAdminDeleteBlog(id: string) {
+  return apiFetch(`/admin/blogs/${id}`, { method: "DELETE" });
 }
 
 // Mentorship Programs
@@ -1111,4 +1187,44 @@ export async function apiAdminGrantEntitlement(data: {
 
 export async function apiAdminRevokeEntitlement(id: string) {
   return apiFetch(`/admin/entitlements/${id}`, { method: 'DELETE' });
+}
+
+// ── Public Blog (server + client safe) ───────────────────────────────────────
+
+export interface PublicBlogPost {
+  id: string;
+  slug: string;
+  title: string;
+  excerpt?: string;
+  coverUrl?: string;
+  author: string;
+  category: string;
+  tags: string;
+  readTimeMin: number;
+  viewCount: number;
+  publishedAt?: string;
+}
+
+export interface PublicBlogPostFull extends PublicBlogPost {
+  content: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+async function publicFetch<T>(path: string, options?: RequestInit): Promise<T> {
+  const url = `${BASE}${path}`;
+  const res = await fetch(url, { next: { revalidate: 60 }, ...options });
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({}));
+    throw new ApiError(res.status, (err as { message?: string }).message ?? res.statusText);
+  }
+  return res.json() as Promise<T>;
+}
+
+export async function apiGetBlogs(params?: { page?: number; limit?: number; category?: string }) {
+  return publicFetch<PaginatedResponse<PublicBlogPost>>(`/blogs${buildQS(params ?? {})}`);
+}
+
+export async function apiGetBlogBySlug(slug: string) {
+  return publicFetch<PublicBlogPostFull>(`/blogs/${slug}`);
 }
