@@ -465,29 +465,17 @@ function PyqAllPageInner() {
             ) : (
               <>
                 {viewMode === "grid" ? (
-                  <motion.div
-                    initial="hidden" animate="show"
-                    variants={{ hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.04 } } }}
-                    className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-                  >
+                  <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {visiblePapers.map((paper) => (
-                      <motion.div key={paper.id} variants={{ hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } }}>
-                        <PyqCard paper={paper} bookmarked={bookmarks.has(paper.id)} onBookmark={() => toggleBookmark(paper.id)} onRequireAuth={requireAuth} />
-                      </motion.div>
+                      <PyqCard key={paper.id} paper={paper} bookmarked={bookmarks.has(paper.id)} onBookmark={() => toggleBookmark(paper.id)} onRequireAuth={requireAuth} />
                     ))}
-                  </motion.div>
+                  </div>
                 ) : (
-                  <motion.div
-                    initial="hidden" animate="show"
-                    variants={{ hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.03 } } }}
-                    className="flex flex-col gap-2"
-                  >
+                  <div className="flex flex-col gap-2">
                     {visiblePapers.map((paper) => (
-                      <motion.div key={paper.id} variants={{ hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}>
-                        <PyqRow paper={paper} bookmarked={bookmarks.has(paper.id)} onBookmark={() => toggleBookmark(paper.id)} onRequireAuth={requireAuth} />
-                      </motion.div>
+                      <PyqRow key={paper.id} paper={paper} bookmarked={bookmarks.has(paper.id)} onBookmark={() => toggleBookmark(paper.id)} onRequireAuth={requireAuth} />
                     ))}
-                  </motion.div>
+                  </div>
                 )}
                 <div ref={sentinelRef} className="h-4" />
                 {visibleCount < filteredPapers.length && (
@@ -571,66 +559,63 @@ function HeroSection({ stats, onRequireAuth }: {
   onRequireAuth: (href: string, e: React.MouseEvent) => void;
 }) {
   return (
-    <section className="relative overflow-hidden border-b border-slate-200/80 bg-gradient-to-br from-slate-50 via-blue-50/40 to-white dark:border-white/10 dark:from-slate-950 dark:via-blue-950/20 dark:to-slate-900">
-      <div className="pointer-events-none absolute left-0 top-0 h-64 w-64 rounded-full bg-blue-500/10 blur-3xl" />
-      <div className="pointer-events-none absolute right-0 top-0 h-64 w-64 rounded-full bg-violet-500/10 blur-3xl" />
-      <div className="pointer-events-none absolute bottom-0 left-1/2 h-48 w-96 -translate-x-1/2 rounded-full bg-cyan-500/8 blur-3xl" />
-
-      <div className="relative mx-auto grid max-w-[1440px] gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[1.15fr_0.85fr] lg:px-8 lg:py-20">
+    <section className="bg-white border-b border-[#e6e6e6]">
+      <div className="mx-auto grid max-w-[1440px] gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[1.15fr_0.85fr] lg:px-8 lg:py-20">
         {/* Left */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-black text-blue-700 dark:border-blue-500/30 dark:bg-blue-500/15 dark:text-blue-300">
-            <FileText className="h-3 w-3" /> PYQ Library
-          </span>
-          <h1 className="mt-5 max-w-2xl text-4xl font-black tracking-tight text-slate-950 sm:text-5xl lg:text-[3.5rem] lg:leading-[1.08] dark:text-white">
-            Previous Year<br />
-            <span className="bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">Question Papers</span>
+        <div>
+          <p className="text-[11px] font-normal uppercase mb-5 text-black"
+             style={{ fontFamily: "var(--font-mono)", letterSpacing: "0.6px" }}>
+            PYQ Library
+          </p>
+          <h1 className="max-w-2xl text-[36px] sm:text-[48px] lg:text-[56px] leading-[1.10] text-black"
+              style={{ fontWeight: 300, letterSpacing: "-0.96px" }}>
+            Previous Year<br />Question Papers
           </h1>
-          <p className="mt-5 max-w-xl text-base font-medium leading-7 text-slate-600 dark:text-slate-300">
-            Solve real exam papers for SSC, Banking, Railway, State PSC, Police, UPSC & more — with live timer, detailed solutions and AI analytics.
+          <p className="mt-5 max-w-xl text-[17px] leading-[1.45] text-[#6b7280]"
+             style={{ fontWeight: 300, letterSpacing: "-0.26px" }}>
+            Solve real exam papers for SSC, Banking, Railway, State PSC, Police, UPSC &amp; more — with live timer, detailed solutions and AI analytics.
           </p>
           <div className="mt-7 flex flex-wrap gap-3">
             <Link
               href="/dashboard/pyq?tab=attempts"
               onClick={(e) => onRequireAuth("/dashboard/pyq?tab=attempts", e)}
-              className="inline-flex h-12 items-center gap-2 rounded-2xl bg-blue-600 px-6 text-sm font-black text-white shadow-lg shadow-blue-600/25 transition hover:bg-blue-700"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-black hover:bg-[#1a1a1a] text-white text-[15px] font-medium transition-colors"
+              style={{ fontWeight: 480, letterSpacing: "-0.10px" }}
             >
               My PYQ Attempts <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               href="/dashboard/plans"
               onClick={(e) => onRequireAuth("/dashboard/plans", e)}
-              className="inline-flex h-12 items-center gap-2 rounded-2xl border-2 border-slate-200 bg-white px-6 text-sm font-black text-slate-700 transition hover:border-blue-300 hover:text-blue-700 dark:border-white/10 dark:bg-white/8 dark:text-white"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white border border-[#e6e6e6] text-black text-[15px] font-medium hover:bg-[#f7f7f5] transition-colors"
+              style={{ fontWeight: 480, letterSpacing: "-0.10px" }}
             >
               View Plans
             </Link>
           </div>
-        </motion.div>
+        </div>
 
         {/* Right — Stats cards */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.12 }}
-          className="grid grid-cols-2 gap-4"
-        >
-          <StatCard icon={FileText} label="PYQ Papers" value={`${Math.max(stats.total, 18)}+`} gradient="from-blue-500 to-blue-600" />
-          <StatCard icon={Users} label="Total Attempts" value={`${Math.max(Math.round(stats.attempts / 1000), 120)}k+`} gradient="from-emerald-500 to-emerald-600" />
-          <StatCard icon={GraduationCap} label="Exams Covered" value={`${Math.max(stats.exams, 8)}+`} gradient="from-violet-500 to-violet-600" />
-          <StatCard icon={Trophy} label="Years Covered" value={`${Math.max(stats.years, 8)}+`} gradient="from-amber-500 to-amber-600" />
-        </motion.div>
+        <div className="grid grid-cols-2 gap-4">
+          <StatCard icon={FileText} label="PYQ Papers" value={`${Math.max(stats.total, 18)}+`} />
+          <StatCard icon={Users} label="Total Attempts" value={`${Math.max(Math.round(stats.attempts / 1000), 120)}k+`} />
+          <StatCard icon={GraduationCap} label="Exams Covered" value={`${Math.max(stats.exams, 8)}+`} />
+          <StatCard icon={Trophy} label="Years Covered" value={`${Math.max(stats.years, 8)}+`} />
+        </div>
       </div>
     </section>
   );
 }
 
-function StatCard({ icon: Icon, label, value, gradient }: { icon: React.ElementType; label: string; value: string; gradient: string }) {
+function StatCard({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string }) {
   return (
-    <div className="group relative overflow-hidden rounded-3xl border border-white/80 bg-white/70 p-5 shadow-lg backdrop-blur-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl dark:border-white/10 dark:bg-slate-900/60">
-      <div className={`mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${gradient} text-white shadow-lg transition-transform duration-300 group-hover:scale-110`}>
+    <div className="rounded-[16px] border border-[#e6e6e6] bg-[#f7f7f5] p-5 hover:border-black transition-colors duration-200">
+      <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-[8px] bg-black text-white">
         <Icon className="h-5 w-5" />
       </div>
-      <p className="text-3xl font-black tracking-tight text-slate-950 dark:text-white">{value}</p>
-      <p className="mt-1 text-[11px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">{label}</p>
+      <p className="text-[28px] font-black tracking-tight text-black tabular-nums leading-none">{value}</p>
+      <p className="mt-1.5 text-[11px] font-normal uppercase text-[#6b7280]"
+         style={{ fontFamily: "var(--font-mono)", letterSpacing: "0.6px" }}>{label}</p>
     </div>
   );
 }
@@ -752,33 +737,33 @@ function CategoryDiscoveryGrid({ papers, onSelectCategory, activeCategory }: {
 function PyqCard({ paper, bookmarked, onBookmark, onRequireAuth }: { paper: PyqPaper; bookmarked: boolean; onBookmark: () => void; onRequireAuth?: (href: string, e: React.MouseEvent) => void }) {
   const locked = paper.isPremium && paper.completionPercentage === 0;
   return (
-    <article className="group flex flex-col overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl dark:border-white/8 dark:bg-slate-900">
-      {/* Gradient banner */}
-      <div className={`relative h-[72px] bg-gradient-to-br ${paper.bannerGradient} overflow-hidden`}>
-        {locked && <div className="absolute inset-x-0 top-0 h-1 bg-amber-400" />}
+    <article className="group flex flex-col overflow-hidden rounded-[16px] border border-[#e6e6e6] bg-white hover:border-black transition-colors duration-200">
+      {/* Neutral banner */}
+      <div className="relative h-[64px] bg-[#f7f7f5] overflow-hidden flex items-center justify-center border-b border-[#e6e6e6]">
+        <span className="text-2xl font-black text-[#e6e6e6] select-none">PYQ</span>
         <div className="absolute bottom-2 left-3 flex gap-1.5">
-          <span className="rounded-full bg-white/25 px-2 py-0.5 text-[9px] font-black text-white backdrop-blur-sm">{paper.year}</span>
-          {paper.isNew && <span className="rounded-full bg-white/25 px-2 py-0.5 text-[9px] font-black text-white backdrop-blur-sm">New</span>}
-          {paper.isPremium && <span className="rounded-full bg-amber-400/80 px-2 py-0.5 text-[9px] font-black text-white backdrop-blur-sm">Premium</span>}
+          <span className="rounded-full bg-black px-2 py-0.5 text-[9px] font-medium text-white">{paper.year}</span>
+          {paper.isNew && <span className="rounded-full bg-[#e6e6e6] px-2 py-0.5 text-[9px] font-medium text-[#6b7280]">New</span>}
+          {paper.isPremium && <span className="rounded-full bg-[#e6e6e6] px-2 py-0.5 text-[9px] font-medium text-[#6b7280]">Premium</span>}
         </div>
-        <div className="absolute right-3 top-2.5">
-          <span className="rounded-lg bg-white/20 px-2 py-1 text-[10px] font-black tracking-wider text-white backdrop-blur-sm">
+        <div className="absolute right-2.5 top-2.5 flex items-center gap-1.5">
+          <span className="rounded-[6px] bg-white border border-[#e6e6e6] px-2 py-0.5 text-[9px] font-medium text-[#6b7280]">
             {paper.paperType}
           </span>
+          <button
+            type="button"
+            onClick={onBookmark}
+            className={`flex h-7 w-7 items-center justify-center rounded-[6px] border transition-colors ${bookmarked ? "bg-black border-black text-white" : "bg-white border-[#e6e6e6] text-[#6b7280] hover:border-black hover:text-black"}`}
+          >
+            <Bookmark className={`h-3.5 w-3.5 ${bookmarked ? "fill-white" : ""}`} />
+          </button>
         </div>
-        <button
-          type="button"
-          onClick={onBookmark}
-          className={`absolute left-3 top-2.5 flex h-7 w-7 items-center justify-center rounded-lg backdrop-blur-sm transition ${bookmarked ? "bg-white/40 text-white" : "bg-white/20 text-white/80 hover:bg-white/35"}`}
-        >
-          <Bookmark className={`h-3.5 w-3.5 ${bookmarked ? "fill-white" : ""}`} />
-        </button>
-        <div className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10" />
       </div>
 
       <div className="flex flex-1 flex-col p-4">
-        <p className="text-[10px] font-black uppercase tracking-widest text-blue-600">{paper.examName}</p>
-        <h3 className="mt-1 line-clamp-2 text-[15px] font-black leading-snug text-slate-950 group-hover:text-blue-700 dark:text-white">
+        <p className="text-[10px] font-normal uppercase text-[#6b7280] mb-1"
+           style={{ fontFamily: "var(--font-mono)", letterSpacing: "0.6px" }}>{paper.examName}</p>
+        <h3 className="line-clamp-2 text-[15px] font-semibold leading-snug text-black">
           {paper.title}
         </h3>
 
@@ -794,17 +779,17 @@ function PyqCard({ paper, bookmarked, onBookmark, onRequireAuth }: { paper: PyqP
           <MetricChip icon={Clock3} value={`${paper.duration}m`} label="Duration" />
         </div>
 
-        <div className="mt-3 rounded-xl bg-slate-50 px-3 py-2 dark:bg-white/4">
-          <div className="flex items-center justify-between text-[11px] font-bold text-slate-500">
+        <div className="mt-3 rounded-[8px] bg-[#f7f7f5] border border-[#e6e6e6] px-3 py-2">
+          <div className="flex items-center justify-between text-[11px] text-[#6b7280]">
             <span>{paper.attempts.toLocaleString()} attempts</span>
-            <span className="flex items-center gap-1"><Star className="h-3 w-3 fill-amber-400 text-amber-400" />{paper.rating}</span>
+            <span className="flex items-center gap-1"><Star className="h-3 w-3 fill-[#6b7280] text-[#6b7280]" />{paper.rating}</span>
           </div>
           {paper.completionPercentage > 0 && (
             <div className="mt-2">
-              <div className="h-1.5 overflow-hidden rounded-full bg-slate-200 dark:bg-white/10">
-                <div className="h-full rounded-full bg-gradient-to-r from-blue-600 to-cyan-400" style={{ width: `${paper.completionPercentage}%` }} />
+              <div className="h-1.5 overflow-hidden rounded-full bg-[#e6e6e6]">
+                <div className="h-full rounded-full bg-black" style={{ width: `${paper.completionPercentage}%` }} />
               </div>
-              <p className="mt-1 text-[10px] font-bold text-blue-600">{paper.completionPercentage}% completed</p>
+              <p className="mt-1 text-[10px] font-medium text-[#6b7280]">{paper.completionPercentage}% completed</p>
             </div>
           )}
         </div>
@@ -814,7 +799,8 @@ function PyqCard({ paper, bookmarked, onBookmark, onRequireAuth }: { paper: PyqP
             <Link
               href="/dashboard/plans"
               onClick={(e) => onRequireAuth?.("/dashboard/plans", e)}
-              className="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-xl bg-slate-900 text-xs font-black text-white transition hover:bg-slate-800 dark:bg-white dark:text-slate-950"
+              className="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-full bg-black text-[13px] font-medium text-white transition-colors hover:bg-[#1a1a1a]"
+              style={{ fontWeight: 480 }}
             >
               <Zap className="h-3.5 w-3.5" /> Unlock
             </Link>
@@ -822,7 +808,8 @@ function PyqCard({ paper, bookmarked, onBookmark, onRequireAuth }: { paper: PyqP
             <Link
               href={`/dashboard/pyq/${paper.id}`}
               onClick={(e) => onRequireAuth?.(`/dashboard/pyq/${paper.id}`, e)}
-              className="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 text-xs font-black text-white shadow-md shadow-blue-600/20 transition hover:brightness-105"
+              className="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-full bg-black text-[13px] font-medium text-white transition-colors hover:bg-[#1a1a1a]"
+              style={{ fontWeight: 480 }}
             >
               <Play className="h-3.5 w-3.5 fill-white" />
               {paper.completionPercentage ? "Continue" : "Start Solving"}
@@ -831,14 +818,15 @@ function PyqCard({ paper, bookmarked, onBookmark, onRequireAuth }: { paper: PyqP
           <Link
             href={`/dashboard/pyq/${paper.id}`}
             onClick={(e) => onRequireAuth?.(`/dashboard/pyq/${paper.id}`, e)}
-            className="flex h-10 items-center justify-center rounded-xl border-2 border-slate-200 px-3 text-xs font-black text-slate-700 transition hover:border-blue-300 hover:text-blue-700 dark:border-white/10 dark:text-slate-200"
+            className="flex h-10 items-center justify-center rounded-full border border-[#e6e6e6] px-3 text-[13px] font-medium text-black transition-colors hover:border-black hover:bg-[#f7f7f5]"
+            style={{ fontWeight: 480 }}
           >
             Details
           </Link>
           {paper.pdfUrl && paper.pdfUrl !== "#" && (
             <a
               href={paper.pdfUrl}
-              className="flex h-10 w-10 items-center justify-center rounded-xl border-2 border-slate-200 text-slate-500 transition hover:border-blue-300 hover:text-blue-600 dark:border-white/10"
+              className="flex h-10 w-10 items-center justify-center rounded-full border border-[#e6e6e6] text-[#6b7280] transition-colors hover:border-black hover:text-black"
               aria-label="Download PDF"
             >
               <Download className="h-3.5 w-3.5" />

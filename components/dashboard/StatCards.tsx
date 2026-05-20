@@ -16,11 +16,11 @@ function StatCard({ label, value, sub, trend, trendUp = true, accent }: StatCard
     <div className="card card-lift p-6">
       <div className="flex justify-between items-start gap-2">
         <div>
-          <div className="text-xs font-semibold uppercase tracking-widest" style={{ color: "var(--ink-4)" }}>
+          <div className="text-[11px] font-semibold tracking-wide" style={{ color: "var(--ink-4)" }}>
             {label}
           </div>
           <div
-            className="text-3xl font-bold tracking-tight leading-none mt-2 flex items-baseline gap-1"
+            className="text-3xl font-bold tracking-tight leading-none mt-2 flex items-baseline gap-1 tabular"
             style={{ color: accent ?? "var(--ink-1)", fontFamily: "var(--font-sora)" }}
           >
             {value}

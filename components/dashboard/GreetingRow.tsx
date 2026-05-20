@@ -15,7 +15,7 @@ export default function GreetingRow() {
       initial={{ opacity: 0, y: 10 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="p-8 rounded-2xl mesh-gradient text-[var(--ink-1)] shadow-sm flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6"
+      className="p-8 rounded-2xl mesh-gradient text-[var(--ink-1)] shadow-ambient flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6 reveal"
     >
       <div>
         <h1 className="text-3xl font-bold tracking-tight leading-tight font-[var(--font-sora)]">
@@ -23,7 +23,7 @@ export default function GreetingRow() {
           <span className="wave inline-block origin-[70%_70%]">👋</span>
         </h1>
         <p className="mt-2 text-[var(--ink-3)] text-sm">
-          Here&apos;s your study snapshot for today. Let&apos;s hit your goals!
+          Here&apos;s your study snapshot for today.
         </p>
       </div>
     </motion.div>

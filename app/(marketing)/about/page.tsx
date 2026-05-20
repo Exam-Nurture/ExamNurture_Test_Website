@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { motion } from "framer-motion";
 import { ArrowRight, Globe, Mail } from "lucide-react";
 
 function LinkedInIcon({ className }: { className?: string }) {
@@ -35,16 +34,6 @@ interface TeamMember {
   bio?: string;
 }
 
-const containerVariants = {
-  hidden: { opacity: 0 },
-  visible: { opacity: 1, transition: { staggerChildren: 0.1, delayChildren: 0.2 } },
-};
-
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
-  visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
-};
-
 export default function AboutPage() {
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([]);
   const [loading, setLoading] = useState(true);
@@ -62,48 +51,32 @@ export default function AboutPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[var(--bg)]">
-      {/* Hero */}
-      <section className="relative pt-32 pb-20 px-4 sm:px-6 lg:px-8 overflow-hidden">
-        <div className="pointer-events-none absolute top-20 right-10 w-72 h-72 bg-blue-100/20 dark:bg-blue-500/10 rounded-full blur-3xl" />
-        <div className="pointer-events-none absolute bottom-20 left-10 w-96 h-96 bg-blue-200/10 dark:bg-blue-400/5 rounded-full blur-3xl" />
+    <div className="min-h-screen bg-white">
 
+      {/* Hero */}
+      <section className="py-24 lg:py-32 px-4 sm:px-6 lg:px-8 bg-white">
         <div className="max-w-4xl mx-auto text-center">
-          <motion.div
-            initial={{ opacity: 1, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.45 }}
-          >
-            <h1 className="text-5xl sm:text-6xl font-bold text-gray-900 dark:text-[var(--ink-1)] mb-6 leading-tight">
-              Building India's
-              <span className="block bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
-                Future of Education
-              </span>
-            </h1>
-            <p className="text-lg sm:text-xl text-gray-600 dark:text-[var(--ink-3)] leading-relaxed max-w-2xl mx-auto">
-              We're on a mission to empower students with world-class learning experiences and mentorship to excel in competitive exams.
-            </p>
-          </motion.div>
+          <p className="text-[11px] font-normal uppercase mb-5 text-black"
+             style={{ fontFamily: "var(--font-mono)", letterSpacing: "0.6px" }}>
+            Our Story
+          </p>
+          <h1 className="text-[40px] sm:text-[56px] lg:text-[64px] leading-[1.10] text-black mb-6"
+              style={{ fontWeight: 300, letterSpacing: "-0.96px" }}>
+            Building India's Future<br />of Education
+          </h1>
+          <p className="text-[18px] leading-[1.45] text-[#6b7280] max-w-2xl mx-auto"
+             style={{ fontWeight: 300, letterSpacing: "-0.26px" }}>
+            We're on a mission to empower students with world-class learning experiences and mentorship to excel in competitive exams.
+          </p>
         </div>
       </section>
 
       {/* Mission */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-[#f7f7f5]">
         <div className="max-w-6xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            className="grid md:grid-cols-2 gap-12 lg:gap-16 items-center"
-          >
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="w-full flex justify-center"
-            >
-              <div className="rounded-2xl overflow-hidden shadow-lg border border-gray-200 dark:border-[var(--line)] w-full">
+          <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-center">
+            <div className="w-full flex justify-center">
+              <div className="rounded-[16px] overflow-hidden border border-[#e6e6e6] w-full">
                 <img
                   alt="Our Mission"
                   src="/mission.jpg"
@@ -111,72 +84,55 @@ export default function AboutPage() {
                   style={{ minHeight: "400px" }}
                 />
               </div>
-            </motion.div>
+            </div>
 
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="space-y-6"
-            >
-              <div className="inline-block px-3 py-1 bg-blue-50 dark:bg-blue-900/20 rounded-full">
-                <span className="text-sm font-semibold text-blue-700 dark:text-blue-300">Our Mission</span>
-              </div>
-              <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-[var(--ink-1)] leading-tight">
+            <div className="space-y-6">
+              <p className="text-[11px] font-normal uppercase text-black"
+                 style={{ fontFamily: "var(--font-mono)", letterSpacing: "0.6px" }}>
+                Our Mission
+              </p>
+              <h2 className="text-[32px] sm:text-[40px] leading-[1.10] text-black"
+                  style={{ fontWeight: 300, letterSpacing: "-0.96px" }}>
                 Empower Every Student
               </h2>
-              <p className="text-lg text-gray-600 dark:text-[var(--ink-3)] leading-relaxed">
+              <p className="text-[18px] leading-[1.45] text-[#6b7280]"
+                 style={{ fontWeight: 300, letterSpacing: "-0.26px" }}>
                 To provide every student in India with comprehensive, accessible, and high-quality test series, courses, mentorship, and study materials — enabling them to excel in competitive exams with confidence and clarity.
               </p>
-              <div className="pt-4 flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold">
+              <div className="pt-2 flex items-center gap-2 text-black font-medium text-[15px]">
                 <span>Transforming education</span>
-                <ArrowRight className="w-5 h-5" />
+                <ArrowRight className="w-4 h-4" />
               </div>
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* Vision */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50/50 dark:bg-[var(--card)]/30">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
         <div className="max-w-6xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0 }}
-            whileInView={{ opacity: 1 }}
-            viewport={{ once: true }}
-            className="grid md:grid-cols-2 gap-12 lg:gap-16 items-center"
-          >
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="md:order-1 space-y-6"
-            >
-              <div className="inline-block px-3 py-1 bg-blue-50 dark:bg-blue-900/20 rounded-full">
-                <span className="text-sm font-semibold text-blue-700 dark:text-blue-300">Our Vision</span>
-              </div>
-              <h2 className="text-4xl sm:text-5xl font-bold text-gray-900 dark:text-[var(--ink-1)] leading-tight">
+          <div className="grid md:grid-cols-2 gap-12 lg:gap-16 items-center">
+            <div className="md:order-1 space-y-6">
+              <p className="text-[11px] font-normal uppercase text-black"
+                 style={{ fontFamily: "var(--font-mono)", letterSpacing: "0.6px" }}>
+                Our Vision
+              </p>
+              <h2 className="text-[32px] sm:text-[40px] leading-[1.10] text-black"
+                  style={{ fontWeight: 300, letterSpacing: "-0.96px" }}>
                 India's Most Trusted Platform
               </h2>
-              <p className="text-lg text-gray-600 dark:text-[var(--ink-3)] leading-relaxed">
+              <p className="text-[18px] leading-[1.45] text-[#6b7280]"
+                 style={{ fontWeight: 300, letterSpacing: "-0.26px" }}>
                 To become the most trusted and innovative online education platform in India, dedicated to transforming learning experiences and fostering lifelong success for students across all exam disciplines.
               </p>
-              <div className="pt-4 flex items-center gap-2 text-blue-600 dark:text-blue-400 font-semibold">
+              <div className="pt-2 flex items-center gap-2 text-black font-medium text-[15px]">
                 <span>Building the future</span>
-                <ArrowRight className="w-5 h-5" />
+                <ArrowRight className="w-4 h-4" />
               </div>
-            </motion.div>
+            </div>
 
-            <motion.div
-              initial={{ opacity: 0, x: 30 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.6 }}
-              className="md:order-2 w-full flex justify-center"
-            >
-              <div className="rounded-2xl overflow-hidden shadow-lg border border-gray-200 dark:border-[var(--line)] w-full">
+            <div className="md:order-2 w-full flex justify-center">
+              <div className="rounded-[16px] overflow-hidden border border-[#e6e6e6] w-full">
                 <img
                   alt="Our Vision"
                   src="/vision.jpg"
@@ -184,170 +140,153 @@ export default function AboutPage() {
                   style={{ minHeight: "400px" }}
                 />
               </div>
-            </motion.div>
-          </motion.div>
+            </div>
+          </div>
         </div>
       </section>
 
       {/* Values */}
-      <section className="py-24 px-4 sm:px-6 lg:px-8 bg-gradient-to-b from-white via-gray-50/30 to-white dark:from-[var(--bg)] dark:via-[var(--card)]/30 dark:to-[var(--bg)]">
-        <div className="max-w-6xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-20"
-          >
-            <h2 className="text-5xl font-bold text-gray-900 dark:text-[var(--ink-1)] mb-4">Our Core Values</h2>
-            <div className="w-12 h-1 bg-blue-500 rounded-full mx-auto mb-6" />
-            <p className="text-lg text-gray-600 dark:text-[var(--ink-3)]">The principles that drive everything we do</p>
-          </motion.div>
+      <section className="py-5 bg-white">
+        <div className="max-w-[1280px] mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="bg-[#f7f7f5] rounded-none sm:rounded-[24px] px-5 pt-14 pb-14">
+            <div className="text-center mb-12">
+              <p className="text-[11px] font-normal uppercase mb-5 text-black"
+                 style={{ fontFamily: "var(--font-mono)", letterSpacing: "0.6px" }}>
+                What We Stand For
+              </p>
+              <h2 className="text-[32px] sm:text-[40px] leading-[1.10] text-black"
+                  style={{ fontWeight: 300, letterSpacing: "-0.96px" }}>
+                Our Core Values
+              </h2>
+            </div>
 
-          <motion.div
-            variants={containerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true }}
-            className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8"
-          >
-            {[
-              { icon: "✨", title: "Excellence", desc: "We pursue the highest standards in everything we do, ensuring quality in every interaction.", color: "from-blue-500/10 to-blue-400/5" },
-              { icon: "🌍", title: "Accessibility", desc: "Quality education should be available to everyone, regardless of background or location.", color: "from-emerald-500/10 to-emerald-400/5" },
-              { icon: "🚀", title: "Innovation", desc: "We constantly evolve and adapt to serve students better with cutting-edge solutions.", color: "from-cyan-500/10 to-cyan-400/5" },
-              { icon: "🤝", title: "Integrity", desc: "We build trust through transparency, honesty, and ethical practices in all dealings.", color: "from-purple-500/10 to-purple-400/5" },
-              { icon: "🎯", title: "Impact", desc: "We measure success by student achievement and real-world outcomes.", color: "from-orange-500/10 to-orange-400/5" },
-              { icon: "❤️", title: "Community", desc: "Together, we create a supportive ecosystem where every student can thrive and succeed.", color: "from-rose-500/10 to-rose-400/5" },
-            ].map((value, idx) => (
-              <motion.div
-                key={idx}
-                variants={itemVariants}
-                whileHover={{ y: -8, transition: { duration: 0.3 } }}
-                className={`group relative p-8 bg-gradient-to-br ${value.color} rounded-2xl border border-gray-200 dark:border-[var(--line)] hover:border-gray-300 dark:hover:border-[var(--line-soft)] transition-all duration-300 overflow-hidden`}
-              >
-                <div className="absolute -top-8 -right-8 w-24 h-24 bg-white/40 dark:bg-white/5 rounded-full blur-2xl group-hover:blur-3xl transition-all duration-500" />
-                <div className="relative mb-4 text-5xl">{value.icon}</div>
-                <div className="relative">
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-[var(--ink-1)] mb-3">{value.title}</h3>
-                  <p className="text-gray-600 dark:text-[var(--ink-3)] leading-relaxed text-sm">{value.desc}</p>
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {[
+                { icon: "✨", title: "Excellence", desc: "We pursue the highest standards in everything we do, ensuring quality in every interaction." },
+                { icon: "🌍", title: "Accessibility", desc: "Quality education should be available to everyone, regardless of background or location." },
+                { icon: "🚀", title: "Innovation", desc: "We constantly evolve and adapt to serve students better with cutting-edge solutions." },
+                { icon: "🤝", title: "Integrity", desc: "We build trust through transparency, honesty, and ethical practices in all dealings." },
+                { icon: "🎯", title: "Impact", desc: "We measure success by student achievement and real-world outcomes." },
+                { icon: "❤️", title: "Community", desc: "Together, we create a supportive ecosystem where every student can thrive and succeed." },
+              ].map((value, idx) => (
+                <div
+                  key={idx}
+                  className="bg-white rounded-[8px] p-7 border border-[#e6e6e6] hover:border-black transition-colors duration-200"
+                >
+                  <div className="text-4xl mb-4">{value.icon}</div>
+                  <h3 className="text-[18px] font-semibold text-black mb-2">{value.title}</h3>
+                  <p className="text-[15px] text-[#6b7280] leading-relaxed">{value.desc}</p>
                 </div>
-                <div className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-blue-500 to-cyan-400 w-0 group-hover:w-full transition-all duration-500" />
-              </motion.div>
-            ))}
-          </motion.div>
+              ))}
+            </div>
+          </div>
         </div>
       </section>
 
       {/* Team */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-gray-50/50 dark:bg-[var(--card)]/30">
+      <section className="py-20 px-4 sm:px-6 lg:px-8 bg-white">
         <div className="max-w-6xl mx-auto">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            className="text-center mb-16"
-          >
-            <h2 className="text-4xl font-bold text-gray-900 dark:text-[var(--ink-1)] mb-4">
-              Meet Our{" "}
-              <span className="bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">Team</span>
+          <div className="text-center mb-14">
+            <p className="text-[11px] font-normal uppercase mb-5 text-black"
+               style={{ fontFamily: "var(--font-mono)", letterSpacing: "0.6px" }}>
+              The People
+            </p>
+            <h2 className="text-[32px] sm:text-[40px] leading-[1.10] text-black mb-4"
+                style={{ fontWeight: 300, letterSpacing: "-0.96px" }}>
+              Meet Our Team
             </h2>
-            <p className="text-lg text-gray-600 dark:text-[var(--ink-3)]">Passionate educators and technologists building the future</p>
-          </motion.div>
+            <p className="text-[18px] text-[#6b7280]" style={{ fontWeight: 300 }}>
+              Passionate educators and technologists building the future
+            </p>
+          </div>
 
           {loading ? (
             <div className="text-center py-16">
-              <div className="animate-spin rounded-full h-12 w-12 border-2 border-blue-200 dark:border-blue-900 border-t-blue-600 mx-auto" />
-              <p className="text-gray-600 dark:text-[var(--ink-3)] mt-4 font-medium">Loading team members...</p>
+              <div className="animate-spin rounded-full h-10 w-10 border-2 border-[#e6e6e6] border-t-black mx-auto" />
+              <p className="text-[#6b7280] mt-4 text-sm">Loading team members...</p>
             </div>
           ) : error || teamMembers.length === 0 ? (
-            <motion.div initial={{ opacity: 1, y: 16 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.4 }} className="relative">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="relative">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
                 {[1, 2, 3, 4].map((i) => (
-                  <div key={i} className="rounded-xl bg-gradient-to-br from-gray-50 to-white dark:from-[var(--card)] dark:to-[var(--bg)] border border-gray-200 dark:border-[var(--line)] overflow-hidden">
-                    <div className="aspect-square bg-gradient-to-br from-blue-100/50 to-blue-50/30 dark:from-blue-900/20 dark:to-blue-800/10 flex items-center justify-center">
-                      <div className="w-20 h-20 rounded-full bg-gradient-to-br from-blue-200/60 to-blue-100/40 dark:from-blue-800/40 dark:to-blue-900/20 flex items-center justify-center">
-                        <svg className="w-10 h-10 text-blue-300 dark:text-blue-700" fill="currentColor" viewBox="0 0 24 24">
+                  <div key={i} className="rounded-[12px] bg-[#f7f7f5] border border-[#e6e6e6] overflow-hidden">
+                    <div className="aspect-square bg-[#eeeeec] flex items-center justify-center">
+                      <div className="w-20 h-20 rounded-full bg-[#e6e6e6] flex items-center justify-center">
+                        <svg className="w-10 h-10 text-[#6b7280]" fill="currentColor" viewBox="0 0 24 24">
                           <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
                         </svg>
                       </div>
                     </div>
-                    <div className="p-4 space-y-3">
-                      <div className="h-4 bg-gray-200/60 dark:bg-[var(--line)]/60 rounded-full w-3/4" />
-                      <div className="h-3 bg-blue-100/60 dark:bg-blue-900/30 rounded-full w-1/2" />
+                    <div className="p-4 space-y-2">
+                      <div className="h-4 bg-[#e6e6e6] rounded w-3/4" />
+                      <div className="h-3 bg-[#e6e6e6] rounded w-1/2" />
                     </div>
                   </div>
                 ))}
               </div>
-              <div className="absolute inset-0 flex items-center justify-center bg-white/80 dark:bg-[var(--bg)]/80 backdrop-blur-sm rounded-2xl">
+              <div className="absolute inset-0 flex items-center justify-center bg-white/80 backdrop-blur-sm rounded-[16px]">
                 <div className="text-center px-6 py-8">
-                  <div className="w-16 h-16 bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-900/30 dark:to-blue-800/20 rounded-2xl flex items-center justify-center mx-auto mb-4">
-                    <svg className="w-8 h-8 text-blue-500 dark:text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                  <div className="w-14 h-14 bg-[#f7f7f5] rounded-[12px] flex items-center justify-center mx-auto mb-4 border border-[#e6e6e6]">
+                    <svg className="w-7 h-7 text-black" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
                   </div>
-                  <h3 className="text-xl font-bold text-gray-900 dark:text-[var(--ink-1)] mb-2">Team Directory Coming Soon</h3>
-                  <p className="text-gray-600 dark:text-[var(--ink-3)] max-w-sm mx-auto">Our amazing team will be introduced here shortly!</p>
+                  <h3 className="text-[18px] font-semibold text-black mb-2">Team Directory Coming Soon</h3>
+                  <p className="text-[#6b7280] text-sm max-w-xs mx-auto">Our amazing team will be introduced here shortly!</p>
                 </div>
               </div>
-            </motion.div>
+            </div>
           ) : (
-            <motion.div
-              variants={containerVariants}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6"
-            >
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
               {teamMembers.map((member) => (
-                <motion.div
+                <div
                   key={member.id}
-                  variants={itemVariants}
-                  className="group rounded-xl bg-white dark:bg-[var(--card)] border border-gray-200 dark:border-[var(--line)] overflow-hidden hover:border-blue-300 dark:hover:border-blue-700 hover:shadow-lg dark:hover:shadow-blue-900/20 transition-all duration-300"
+                  className="rounded-[12px] bg-[#f7f7f5] border border-[#e6e6e6] overflow-hidden hover:border-black transition-colors duration-200"
                 >
-                  <div className="relative overflow-hidden aspect-square bg-gradient-to-br from-blue-100 to-blue-50 dark:from-blue-900/30 dark:to-blue-800/10">
+                  <div className="relative overflow-hidden aspect-square bg-[#eeeeec]">
                     {member.photo_image_url ? (
-                      <img src={member.photo_image_url} alt={member.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                      <img src={member.photo_image_url} alt={member.name} className="w-full h-full object-cover" />
                     ) : (
                       <div className="w-full h-full flex items-center justify-center">
-                        <span className="text-5xl font-bold text-blue-200 dark:text-blue-700">{member.name.charAt(0).toUpperCase()}</span>
+                        <span className="text-5xl font-bold text-[#6b7280]">{member.name.charAt(0).toUpperCase()}</span>
                       </div>
                     )}
                   </div>
-                  <div className="p-4 space-y-3">
+                  <div className="p-4 space-y-2">
                     <div>
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-[var(--ink-1)]">{member.name}</h3>
-                      <p className="text-sm text-blue-600 dark:text-blue-400 font-medium">{member.role}</p>
+                      <h3 className="text-[15px] font-semibold text-black">{member.name}</h3>
+                      <p className="text-[13px] text-[#6b7280]">{member.role}</p>
                     </div>
-                    {member.bio && <p className="text-sm text-gray-600 dark:text-[var(--ink-3)] line-clamp-2">{member.bio}</p>}
-                    <div className="flex items-center gap-2 pt-2">
+                    {member.bio && <p className="text-[13px] text-[#6b7280] line-clamp-2">{member.bio}</p>}
+                    <div className="flex items-center gap-2 pt-1">
                       {member.linkedin_url && (
-                        <a href={member.linkedin_url} target="_blank" rel="noreferrer" className="p-2 rounded-lg bg-gray-100 dark:bg-[var(--line-soft)] hover:bg-blue-100 dark:hover:bg-blue-900/30 text-gray-700 dark:text-[var(--ink-3)] hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                          <LinkedInIcon className="w-4 h-4" />
+                        <a href={member.linkedin_url} target="_blank" rel="noreferrer" className="p-1.5 rounded-[6px] bg-white border border-[#e6e6e6] text-[#6b7280] hover:text-black hover:border-black transition-colors">
+                          <LinkedInIcon className="w-3.5 h-3.5" />
                         </a>
                       )}
                       {member.github_url && (
-                        <a href={member.github_url} target="_blank" rel="noreferrer" className="p-2 rounded-lg bg-gray-100 dark:bg-[var(--line-soft)] hover:bg-blue-100 dark:hover:bg-blue-900/30 text-gray-700 dark:text-[var(--ink-3)] hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                          <GithubIcon className="w-4 h-4" />
+                        <a href={member.github_url} target="_blank" rel="noreferrer" className="p-1.5 rounded-[6px] bg-white border border-[#e6e6e6] text-[#6b7280] hover:text-black hover:border-black transition-colors">
+                          <GithubIcon className="w-3.5 h-3.5" />
                         </a>
                       )}
                       {member.website_url && (
-                        <a href={member.website_url} target="_blank" rel="noreferrer" className="p-2 rounded-lg bg-gray-100 dark:bg-[var(--line-soft)] hover:bg-blue-100 dark:hover:bg-blue-900/30 text-gray-700 dark:text-[var(--ink-3)] hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                          <Globe className="w-4 h-4" />
+                        <a href={member.website_url} target="_blank" rel="noreferrer" className="p-1.5 rounded-[6px] bg-white border border-[#e6e6e6] text-[#6b7280] hover:text-black hover:border-black transition-colors">
+                          <Globe className="w-3.5 h-3.5" />
                         </a>
                       )}
                       {member.twitter_url && (
-                        <a href={member.twitter_url} target="_blank" rel="noreferrer" className="p-2 rounded-lg bg-gray-100 dark:bg-[var(--line-soft)] hover:bg-blue-100 dark:hover:bg-blue-900/30 text-gray-700 dark:text-[var(--ink-3)] hover:text-blue-600 dark:hover:text-blue-400 transition-colors">
-                          <Mail className="w-4 h-4" />
+                        <a href={member.twitter_url} target="_blank" rel="noreferrer" className="p-1.5 rounded-[6px] bg-white border border-[#e6e6e6] text-[#6b7280] hover:text-black hover:border-black transition-colors">
+                          <Mail className="w-3.5 h-3.5" />
                         </a>
                       )}
                     </div>
                   </div>
-                </motion.div>
+                </div>
               ))}
-            </motion.div>
+            </div>
           )}
         </div>
       </section>
-
 
     </div>
   );

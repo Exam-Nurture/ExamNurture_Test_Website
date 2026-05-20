@@ -47,14 +47,12 @@ function parseTags(raw: string): string[] {
 
 /* ── Blog Card ── */
 function BlogCard({ post }: { post: PublicBlogPost }) {
-  const gradient = CAT_GRADIENTS[post.category] ?? CAT_GRADIENTS["General"];
   const tags = parseTags(post.tags).slice(0, 2);
-  const catColor = getCatColor(post.category);
 
   return (
     <Link
       href={`/blog/${post.slug}`}
-      className="group flex flex-col bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden hover:shadow-xl hover:-translate-y-1 transition-all duration-200"
+      className="group flex flex-col bg-[#f7f7f5] border border-[#e6e6e6] rounded-[12px] overflow-hidden hover:border-black transition-colors duration-200"
     >
       {/* Cover */}
       <div className="relative h-44 w-full shrink-0 overflow-hidden">
@@ -62,30 +60,26 @@ function BlogCard({ post }: { post: PublicBlogPost }) {
           <img
             src={post.coverUrl}
             alt={post.title}
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+            className="w-full h-full object-cover"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center" style={{ background: gradient }}>
-            <BookOpen size={48} className="text-white/30" strokeWidth={1} />
+          <div className="w-full h-full flex items-center justify-center bg-[#eeeeec]">
+            <BookOpen size={40} className="text-[#6b7280]" strokeWidth={1} />
           </div>
         )}
-        {/* Category badge overlay */}
-        <span
-          className="absolute bottom-3 left-3 text-[11px] font-bold px-2.5 py-1 rounded-full text-white backdrop-blur-sm"
-          style={{ background: `${catColor}cc` }}
-        >
+        <span className="absolute bottom-3 left-3 text-[11px] font-medium px-2.5 py-1 rounded-full bg-black text-white">
           {post.category}
         </span>
       </div>
 
       {/* Body */}
       <div className="flex flex-col flex-1 p-5 gap-3">
-        <h3 className="text-base font-bold leading-snug line-clamp-2 text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+        <h3 className="text-[15px] font-semibold leading-snug line-clamp-2 text-black">
           {post.title}
         </h3>
 
         {post.excerpt && (
-          <p className="text-sm text-gray-500 dark:text-gray-400 line-clamp-2 leading-relaxed">
+          <p className="text-[13px] text-[#6b7280] line-clamp-2 leading-relaxed">
             {post.excerpt}
           </p>
         )}
@@ -93,23 +87,22 @@ function BlogCard({ post }: { post: PublicBlogPost }) {
         {tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
             {tags.map((tag) => (
-              <span key={tag} className="text-[10px] font-medium px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-900/40">
+              <span key={tag} className="text-[11px] font-medium px-2 py-0.5 rounded-full bg-white border border-[#e6e6e6] text-[#6b7280]">
                 #{tag}
               </span>
             ))}
           </div>
         )}
 
-        <div className="mt-auto flex items-center justify-between pt-3 border-t border-gray-100 dark:border-gray-800">
+        <div className="mt-auto flex items-center justify-between pt-3 border-t border-[#e6e6e6]">
           <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-full flex items-center justify-center text-white text-[10px] font-bold shrink-0"
-              style={{ background: gradient }}>
+            <div className="w-6 h-6 rounded-full bg-black flex items-center justify-center text-white text-[10px] font-bold shrink-0">
               {post.author[0]?.toUpperCase() ?? "E"}
             </div>
-            <span className="text-xs text-gray-500 dark:text-gray-400 truncate max-w-[100px]">{post.author}</span>
+            <span className="text-xs text-[#6b7280] truncate max-w-[100px]">{post.author}</span>
           </div>
 
-          <div className="flex items-center gap-3 text-[11px] text-gray-400 dark:text-gray-500">
+          <div className="flex items-center gap-3 text-[11px] text-[#6b7280]">
             {post.publishedAt && (
               <span className="flex items-center gap-1">
                 <Calendar size={11} />
@@ -125,7 +118,7 @@ function BlogCard({ post }: { post: PublicBlogPost }) {
       </div>
 
       <div className="px-5 pb-4">
-        <span className="inline-flex items-center gap-1 text-xs font-semibold text-blue-600 dark:text-blue-400 group-hover:gap-2 transition-all">
+        <span className="inline-flex items-center gap-1 text-xs font-medium text-black group-hover:gap-2 transition-all">
           Read more <ArrowRight size={12} />
         </span>
       </div>
@@ -135,42 +128,42 @@ function BlogCard({ post }: { post: PublicBlogPost }) {
 
 /* ── Featured Card (large) ── */
 function FeaturedCard({ post }: { post: PublicBlogPost }) {
-  const gradient = CAT_GRADIENTS[post.category] ?? CAT_GRADIENTS["General"];
-  const catColor = getCatColor(post.category);
-
   return (
     <Link
       href={`/blog/${post.slug}`}
-      className="group relative flex flex-col md:flex-row bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-200"
+      className="group relative flex flex-col md:flex-row bg-[#f7f7f5] border border-[#e6e6e6] rounded-[16px] overflow-hidden hover:border-black transition-colors duration-200"
     >
       <div className="relative md:w-2/5 h-56 md:h-auto shrink-0 overflow-hidden">
         {post.coverUrl ? (
-          <img src={post.coverUrl} alt={post.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" />
+          <img src={post.coverUrl} alt={post.title} className="w-full h-full object-cover" />
         ) : (
-          <div className="w-full h-full flex items-center justify-center" style={{ background: gradient }}>
-            <Sparkles size={64} className="text-white/25" strokeWidth={1} />
+          <div className="w-full h-full flex items-center justify-center bg-[#eeeeec]">
+            <Sparkles size={48} className="text-[#6b7280]" strokeWidth={1} />
           </div>
         )}
-        <span className="absolute top-4 left-4 text-[11px] font-bold px-2.5 py-1 rounded-full text-white" style={{ background: `${catColor}dd` }}>
+        <span className="absolute top-4 left-4 text-[11px] font-medium px-2.5 py-1 rounded-full bg-black text-white">
           {post.category}
         </span>
       </div>
 
       <div className="flex flex-col flex-1 p-6 md:p-8 gap-4">
-        <div className="inline-flex items-center gap-1.5 text-[11px] font-bold text-amber-600 dark:text-amber-400">
-          <TrendingUp size={12} /> Featured
+        <div className="inline-flex items-center gap-1.5 text-[11px] font-medium text-[#6b7280]"
+             style={{ fontFamily: "var(--font-mono)", letterSpacing: "0.6px" }}>
+          <TrendingUp size={12} /> FEATURED
         </div>
-        <h2 className="text-xl md:text-2xl font-bold leading-snug text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+        <h2 className="text-[22px] md:text-[28px] leading-tight text-black"
+            style={{ fontWeight: 300, letterSpacing: "-0.96px" }}>
           {post.title}
         </h2>
         {post.excerpt && (
-          <p className="text-sm text-gray-500 dark:text-gray-400 leading-relaxed line-clamp-3">
+          <p className="text-[15px] text-[#6b7280] leading-relaxed line-clamp-3"
+             style={{ fontWeight: 300 }}>
             {post.excerpt}
           </p>
         )}
-        <div className="mt-auto flex items-center gap-4 text-xs text-gray-400 dark:text-gray-500">
-          <span className="flex items-center gap-1.5 font-medium text-gray-700 dark:text-gray-300">
-            <div className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[9px] font-bold" style={{ background: gradient }}>
+        <div className="mt-auto flex items-center gap-4 text-xs text-[#6b7280]">
+          <span className="flex items-center gap-1.5 font-medium text-black">
+            <div className="w-5 h-5 rounded-full bg-black flex items-center justify-center text-white text-[9px] font-bold">
               {post.author[0]?.toUpperCase()}
             </div>
             {post.author}
@@ -181,7 +174,7 @@ function FeaturedCard({ post }: { post: PublicBlogPost }) {
           <span className="flex items-center gap-1"><Clock size={11} />{post.readTimeMin} min read</span>
           <span className="flex items-center gap-1"><Eye size={11} />{post.viewCount.toLocaleString()}</span>
         </div>
-        <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-blue-600 dark:text-blue-400 group-hover:gap-2.5 transition-all">
+        <span className="inline-flex items-center gap-1.5 text-sm font-medium text-black group-hover:gap-2.5 transition-all">
           Read full article <ArrowRight size={14} />
         </span>
       </div>
@@ -235,35 +228,32 @@ export default function BlogPage() {
   const rest = filtered.slice(1);
 
   return (
-    <div className="min-h-screen" style={{ background: "var(--bg)" }}>
+    <div className="min-h-screen bg-white">
       {/* Hero */}
-      <section className="relative overflow-hidden border-b" style={{ borderColor: "var(--line)" }}>
-        <div className="absolute inset-0 pointer-events-none" style={{
-          background: "radial-gradient(ellipse 80% 60% at 50% -10%,rgba(59,130,246,0.08) 0%,transparent 70%)"
-        }} />
-        <div className="max-w-6xl mx-auto px-4 py-16 md:py-24 text-center relative">
-          <div className="inline-flex items-center gap-2 text-sm font-semibold px-4 py-1.5 rounded-full mb-6 border"
-            style={{ background: "rgba(59,130,246,0.06)", color: "var(--blue)", borderColor: "rgba(59,130,246,0.15)" }}>
-            <Rss size={13} /> ExamNurture Blog
-          </div>
-          <h1 className="text-4xl md:text-5xl font-extrabold mb-4" style={{ color: "var(--ink-1)" }}>
-            Insights, Strategies &{" "}
-            <span style={{ color: "var(--blue)" }}>Exam Updates</span>
+      <section className="py-20 md:py-28 px-4 bg-white border-b border-[#e6e6e6]">
+        <div className="max-w-6xl mx-auto text-center">
+          <p className="text-[11px] font-normal uppercase mb-5 text-black"
+             style={{ fontFamily: "var(--font-mono)", letterSpacing: "0.6px" }}>
+            ExamNurture Blog
+          </p>
+          <h1 className="text-[40px] md:text-[56px] leading-[1.10] text-black mb-5"
+              style={{ fontWeight: 300, letterSpacing: "-0.96px" }}>
+            Insights, Strategies &amp;<br />Exam Updates
           </h1>
-          <p className="text-lg max-w-2xl mx-auto mb-8" style={{ color: "var(--ink-3)" }}>
+          <p className="text-[18px] max-w-2xl mx-auto mb-8 text-[#6b7280]"
+             style={{ fontWeight: 300, letterSpacing: "-0.26px" }}>
             Expert articles, current affairs, exam strategies, and study tips for government competitive exams across India.
           </p>
 
           {/* Search */}
           <div className="relative max-w-md mx-auto">
-            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2" style={{ color: "var(--ink-3)" }} />
+            <Search size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-[#6b7280]" />
             <input
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search articles..."
-              className="w-full pl-10 pr-4 py-2.5 rounded-xl text-sm outline-none"
-              style={{ border: "1.5px solid var(--line)", background: "var(--card)", color: "var(--ink-1)" }}
+              className="w-full pl-10 pr-4 py-2.5 rounded-full text-sm outline-none border border-[#e6e6e6] bg-[#f7f7f5] text-black focus:border-black transition-colors"
             />
           </div>
         </div>
@@ -272,18 +262,18 @@ export default function BlogPage() {
       <div className="max-w-6xl mx-auto px-4 py-10">
         {/* Category filter */}
         <div className="flex items-center gap-2 mb-8 overflow-x-auto pb-1 scrollbar-none">
-          <Filter size={14} style={{ color: "var(--ink-3)", flexShrink: 0 }} />
+          <Filter size={14} className="text-[#6b7280] shrink-0" />
           {CATEGORIES.map((c) => {
             const active = c.key === category;
             return (
               <button
                 key={c.key}
                 onClick={() => handleCategory(c.key)}
-                className="shrink-0 px-4 py-1.5 rounded-full text-sm font-semibold transition-all"
+                className="shrink-0 px-4 py-1.5 rounded-full text-sm font-medium transition-colors"
                 style={{
-                  background: active ? c.color : "var(--card)",
-                  color: active ? "#fff" : "var(--ink-2)",
-                  border: active ? `1.5px solid ${c.color}` : "1.5px solid var(--line)",
+                  background: active ? "#000" : "#f7f7f5",
+                  color: active ? "#fff" : "#6b7280",
+                  border: active ? "1.5px solid #000" : "1.5px solid #e6e6e6",
                 }}
               >
                 {c.label}

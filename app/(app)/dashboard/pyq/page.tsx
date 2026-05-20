@@ -50,19 +50,19 @@ function PYQPageInner() {
       <div className="flex items-start justify-between flex-wrap gap-4 mb-7">
         <div>
           <h1
-            className="text-3xl font-bold tracking-tight leading-none"
-            style={{ fontFamily: "var(--font-sora)", color: "var(--ink-1)" }}
+            className="text-[28px] leading-none"
+            style={{ fontWeight: 300, letterSpacing: "-0.96px", color: "var(--ink-1)" }}
           >
             PYQ Papers
           </h1>
-          <p className="text-[12px] mt-2" style={{ color: "var(--ink-4)", letterSpacing: "0.01em" }}>
+          <p className="text-[13px] mt-2" style={{ color: "var(--ink-4)" }}>
             Past year question papers with detailed solutions and analytics.
           </p>
         </div>
         <Link
           href="/pyq/all"
-          className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold border transition-all hover:bg-[var(--bg)]"
-          style={{ color: "var(--blue)", borderColor: "var(--blue)", borderWidth: 1.5 }}
+          className="flex items-center gap-1.5 px-4 py-2 rounded-full text-sm font-medium border border-[#e6e6e6] hover:border-black transition-colors"
+          style={{ color: "var(--ink-2)" }}
         >
           Browse All PYQs
         </Link>
@@ -208,9 +208,9 @@ function PaperCard({ paper: p }: { paper: any }) {
       {/* Actions */}
       <div className="flex items-center gap-2">
         <Link
-          href={`/dashboard/pyq/${p.id}`}
-          className="flex-1 inline-flex items-center justify-center gap-2 rounded-[10px] text-[13px] font-semibold text-white transition-all duration-150 hover:brightness-110 active:scale-[0.98]"
-          style={{ background: "var(--blue)", height: 38 }}
+          href={`/pyq/${p.id}`}
+          className="flex-1 inline-flex items-center justify-center gap-2 rounded-full text-[13px] font-medium text-white bg-black hover:bg-[#1a1a1a] transition-colors"
+          style={{ height: 38, fontWeight: 480 }}
         >
           <Play size={11} fill="white" stroke="none" />
           {cta}
@@ -220,7 +220,7 @@ function PaperCard({ paper: p }: { paper: any }) {
             href={p.pdfUrl}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center justify-center rounded-[10px] transition-all duration-150 hover:bg-[var(--bg)] active:scale-[0.96]"
+            className="inline-flex items-center justify-center rounded-full transition-colors hover:border-black"
             style={{ width: 38, height: 38, border: "1px solid var(--line)", color: "var(--ink-4)" }}
             title="Download paper PDF"
           >
@@ -288,9 +288,9 @@ function AttemptCard({ attempt: a }: { attempt: any }) {
       <div className="mt-5 mb-4" style={{ borderTop: "1px solid var(--line-soft)" }} />
 
       <Link
-        href={`/dashboard/pyq/${a.paperId}?attemptId=${a.id}`}
-        className="inline-flex items-center justify-center rounded-[10px] text-[13px] font-semibold transition-all duration-150 hover:brightness-95 w-full"
-        style={{ background: "var(--line-soft)", color: "var(--ink-1)", height: 38 }}
+        href={`/pyq/${a.paperId}?attemptId=${a.id}`}
+        className="inline-flex items-center justify-center rounded-full text-[13px] font-medium border border-[#e6e6e6] hover:border-black transition-colors w-full"
+        style={{ color: "var(--ink-1)", height: 38, fontWeight: 480 }}
       >
         View Detailed Report
       </Link>

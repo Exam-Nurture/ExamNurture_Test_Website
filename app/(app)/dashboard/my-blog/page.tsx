@@ -404,15 +404,18 @@ export default function MyLibraryPage() {
               if (!q) return null;
               let opts: string[] = [];
               try { opts = typeof q.options === "string" ? JSON.parse(q.options) : q.options; } catch { /* ignore */ }
+              // Strip HTML tags for safety — preview rendering should never trust raw HTML
+              // from question content (LLM-generated, could contain injected scripts).
+              const stripHtml = (s: string) => (s || "").replace(/<[^>]*>/g, "").replace(/&nbsp;/g, " ");
+              const previewText = stripHtml(q.text);
               return (
                 <div key={bm.id} className="card p-4">
                   <p
                     className="text-[13px] font-medium leading-relaxed mb-3"
                     style={{ color: "var(--ink-1)" }}
-                    dangerouslySetInnerHTML={{
-                      __html: q.text?.slice(0, 200) + (q.text?.length > 200 ? "…" : ""),
-                    }}
-                  />
+                  >
+                    {previewText.slice(0, 200)}{previewText.length > 200 ? "…" : ""}
+                  </p>
                   <div className="flex flex-col gap-1.5">
                     {opts.slice(0, 4).map((opt: string, i: number) => (
                       <div
@@ -425,7 +428,7 @@ export default function MyLibraryPage() {
                         style={i !== q.correctIndex ? { color: "var(--ink-3)" } : {}}
                       >
                         <span className="font-bold shrink-0 w-4">{["A","B","C","D"][i]}.</span>
-                        <span dangerouslySetInnerHTML={{ __html: opt }} />
+                        <span>{stripHtml(opt)}</span>
                       </div>
                     ))}
                   </div>

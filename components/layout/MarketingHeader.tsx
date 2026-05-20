@@ -6,8 +6,8 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import {
   LogIn, LayoutDashboard, LogOut, Smartphone, ChevronDown,
   Search, Library, X, Zap, Newspaper, BookMarked,
-  User, FileText, TrendingUp, CreditCard,
-  GraduationCap, Users, Mail, BarChart3,
+  User, FileText, CreditCard,
+  GraduationCap, Mail, BarChart3,
   Home, MoreHorizontal,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -32,9 +32,7 @@ const learnNav = [
 ];
 
 const moreNav = [
-  { name: "Contact",              href: "/contact",     icon: Mail,          desc: "Get in touch with us" },
-  { name: "Courses",              href: "/courses/all", icon: GraduationCap, desc: "Structured exam-wise courses" },
-  { name: "Mentorship",           href: "/mentorship",  icon: Users,         desc: "Personal guidance for preparation" },
+  { name: "Contact", href: "/contact", icon: Mail, desc: "Get in touch with us" },
 ];
 
 /* ── Inner component that safely reads searchParams ── */
@@ -294,23 +292,13 @@ export default function MarketingHeader() {
 
       {showAuthModal && <AuthModal onClose={handleCloseAuthModal} next={nextParam} />}
 
-      {/* ── Main Header ── */}
-      <motion.header
-        animate={{ y: isHidden ? -100 : 0 }}
-        transition={{ duration: 0.3, ease: "easeInOut" as const }}
-        className="fixed top-0 left-0 right-0 z-50"
+      {/* ── Main Header — flat DocuSeal style ── */}
+      <header
+        className={`fixed top-0 left-0 right-0 z-50 bg-[var(--card)] border-b border-[var(--line-soft)] transition-transform duration-500 ${isHidden ? "-translate-y-full" : "translate-y-0"}`}
       >
-        {/* Glass background */}
-        <div className={`absolute inset-0 transition-all duration-500 ${
-          isScrolled
-            ? "bg-[var(--glass)] backdrop-blur-2xl border-b border-[var(--line-soft)] shadow-lg shadow-black/10 dark:shadow-blue-950/20"
-            : "bg-transparent"
-        }`} />
-
-        <div className="relative w-full px-4 sm:px-6 lg:px-8 xl:px-12">
-          <div className={`flex items-center justify-between gap-3 transition-all duration-500 ${
-            isScrolled ? "h-16 lg:h-[62px]" : "h-16 lg:h-20"
-          }`}>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="relative w-full">
+          <div className="flex items-center justify-between gap-3 h-16">
 
             {/* Logo */}
             <Link href="/" className="flex items-center gap-2.5 hover:opacity-90 transition-opacity flex-shrink-0">
@@ -321,13 +309,9 @@ export default function MarketingHeader() {
               </span>
             </Link>
 
-            {/* Desktop nav pill */}
+            {/* Desktop nav */}
             <div className="hidden lg:flex flex-1 justify-center">
-              <div className={`flex items-center gap-0.5 transition-all duration-500 ${
-                isScrolled
-                  ? "px-0"
-                  : "px-4 py-2 rounded-full bg-[var(--card)]/80 backdrop-blur-lg border border-[var(--line-soft)] shadow-md shadow-black/5"
-              }`}>
+              <div className="flex items-center gap-0.5">
 
                 <NavLink href="/">Home</NavLink>
                 <NavLink href="/about">About</NavLink>
@@ -406,7 +390,7 @@ export default function MarketingHeader() {
 
               {/* Get App — desktop only */}
               <a href={PLAYSTORE_URL} target="_blank" rel="noopener noreferrer"
-                className="hidden xl:flex items-center gap-1.5 px-3 py-2 bg-gradient-to-r from-blue-600 to-cyan-500 text-white rounded-full font-semibold text-sm hover:shadow-lg hover:shadow-blue-500/25 hover:scale-[1.02] transition-all"
+                className="hidden xl:flex items-center gap-1.5 px-3 py-2 bg-[var(--blue)] hover:bg-[var(--blue-ink)] text-white rounded-full font-semibold text-sm transition-colors"
               >
                 <Smartphone className="w-4 h-4" />
                 Get App
@@ -424,7 +408,7 @@ export default function MarketingHeader() {
                     {user.avatarUrl ? (
                       <img src={user.avatarUrl} alt={displayName} className="w-7 h-7 rounded-full object-cover" />
                     ) : (
-                      <span className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold bg-gradient-to-br from-blue-600 to-cyan-500">
+                      <span className="w-7 h-7 rounded-full flex items-center justify-center text-white text-xs font-bold bg-[var(--blue)]">
                         {initials}
                       </span>
                     )}
@@ -446,9 +430,8 @@ export default function MarketingHeader() {
                           <p className="text-[10px] text-[var(--ink-4)] uppercase tracking-wider font-bold mt-0.5">{planLabel} Plan</p>
                         </div>
                         {[
-                          { icon: LayoutDashboard, label: "Dashboard",    href: "/dashboard" },
+                          { icon: LayoutDashboard, label: "Dashboard",    href: "/dashboard"           },
                           { icon: FileText,        label: "My Tests",     href: "/dashboard/series"    },
-                          { icon: TrendingUp,      label: "Performance",  href: "/dashboard/analytics" },
                           { icon: CreditCard,      label: "Upgrade Plan", href: "/dashboard/plans"     },
                           { icon: User,            label: "Profile",      href: "/dashboard/profile"   },
                         ].map(({ icon: Icon, label, href }) => (
@@ -510,7 +493,8 @@ export default function MarketingHeader() {
             </motion.div>
           )}
         </AnimatePresence>
-      </motion.header>
+        </div>
+      </header>
 
       {/* ════════════════════════════════════════
           MOBILE FLOATING BOTTOM NAV  (lg:hidden)
@@ -565,7 +549,7 @@ export default function MarketingHeader() {
               <MobileNavGrid items={moreNav} accent="blue" />
               {/* Get App button */}
               <a href={PLAYSTORE_URL} target="_blank" rel="noopener noreferrer"
-                className="mt-3 flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-gradient-to-r from-blue-600 to-cyan-500 text-white text-sm font-bold shadow-lg shadow-blue-500/25"
+                className="mt-3 flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-[var(--blue)] hover:bg-[var(--blue-ink)] text-white text-sm font-bold transition-colors"
                 onClick={() => setMobileTab(null)}
               >
                 <Smartphone className="w-4 h-4" /> Get App
@@ -585,11 +569,11 @@ export default function MarketingHeader() {
               {user ? (
                 <>
                   {/* User card */}
-                  <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-blue-600/10 to-cyan-600/10 rounded-xl border border-blue-500/20 mb-3">
+                  <div className="flex items-center gap-3 p-3 bg-[var(--blue-soft)] rounded-xl border border-[var(--line-soft)] mb-3">
                     {user.avatarUrl ? (
                       <img src={user.avatarUrl} alt={displayName} className="w-10 h-10 rounded-xl object-cover" />
                     ) : (
-                      <span className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm bg-gradient-to-br from-blue-600 to-cyan-500">{initials}</span>
+                      <span className="w-10 h-10 rounded-xl flex items-center justify-center text-white font-bold text-sm bg-[var(--blue)]">{initials}</span>
                     )}
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-bold text-[var(--ink-1)] truncate">{displayName}</p>
@@ -598,10 +582,9 @@ export default function MarketingHeader() {
                   </div>
                   <div className="grid grid-cols-2 gap-2 mb-3">
                     {[
-                      { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard" },
-                      { icon: FileText,        label: "My Tests",  href: "/dashboard/series"    },
-                      { icon: TrendingUp,      label: "Analytics", href: "/dashboard/analytics" },
-                      { icon: User,            label: "Profile",   href: "/dashboard/profile"   },
+                      { icon: LayoutDashboard, label: "Dashboard", href: "/dashboard"        },
+                      { icon: FileText,        label: "My Tests",  href: "/dashboard/series" },
+                      { icon: User,            label: "Profile",   href: "/dashboard/profile"},
                     ].map(({ icon: Icon, label, href }) => (
                       <Link key={href} href={href} onClick={() => setMobileTab(null)}
                         className="flex items-center gap-2.5 px-3 py-3 rounded-xl border border-[var(--line-soft)] bg-[var(--bg)] text-sm font-semibold text-[var(--ink-2)] hover:bg-[var(--card)] transition-all"
@@ -716,7 +699,7 @@ export default function MarketingHeader() {
               {user?.avatarUrl ? (
                 <img src={user.avatarUrl} alt={displayName} className="w-8 h-8 rounded-xl object-cover" />
               ) : user ? (
-                <span className="w-8 h-8 rounded-xl flex items-center justify-center text-white text-xs font-bold bg-gradient-to-br from-blue-600 to-cyan-500">
+                <span className="w-8 h-8 rounded-xl flex items-center justify-center text-white text-xs font-bold bg-[var(--blue)]">
                   {initials}
                 </span>
               ) : (

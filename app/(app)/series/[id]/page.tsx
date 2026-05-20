@@ -150,7 +150,7 @@ export default function SeriesDetailPage() {
                   </div>
                 ) : (
                   <Link
-                    href={`/tests/${test.id}`}
+                    href={`/exam/${test.id}`}
                     className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-blue-600 text-white text-[13px] font-bold shadow-md shadow-blue-500/20 hover:bg-blue-700 transition-all active:scale-95"
                   >
                     <Play size={12} fill="white" stroke="none" /> Start Test

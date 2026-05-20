@@ -4,9 +4,9 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import {
-  LayoutDashboard, BookOpen, FileText, Users,
-  BarChart3, CalendarDays, Library, Menu,
-  User, Zap, GraduationCap, PlayCircle, BookMarked
+  LayoutDashboard, BookOpen, FileText,
+  CalendarDays, Library, Menu,
+  User, Zap, GraduationCap, BookMarked
 } from "lucide-react";
 import { useAuth } from "@/lib/auth-context";
 
@@ -18,9 +18,6 @@ const NAV_ITEMS = [
   { href: "/dashboard/pyq",        label: "Previous Year Papers",icon: FileText        },
   { href: "/blog",    label: "Blog",                icon: Library         },
   { href: "/dashboard/my-blog", label: "My Library",          icon: BookMarked      },
-  { href: "/dashboard/courses",    label: "Video Courses",       icon: PlayCircle      },
-  { href: "/dashboard/analytics",  label: "Analytics",           icon: BarChart3       },
-  { href: "/dashboard/mentorship", label: "Mentorship", icon: Users           },
   { href: "/dashboard/schedule",   label: "Schedule",            icon: CalendarDays    },
 ];
 

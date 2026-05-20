@@ -2,17 +2,14 @@ import Link from "next/link";
 
 const footerLinks = {
   explore: [
-    { name: "All Exams",          href: "/exams"                },
-    { name: "All Test Series",    href: "/series/all"           },
-    { name: "All PYQ Papers",     href: "/pyq/all"              },
-    { name: "Nurture Library",    href: "/library"              },
-    { name: "All Courses",        href: "/courses/all"          },
-    { name: "Mentorship",         href: "/mentorship"           },
+    { name: "All Exams",          href: "/exams"      },
+    { name: "All Test Series",    href: "/series/all" },
+    { name: "All PYQ Papers",     href: "/pyq/all"    },
+    { name: "Nurture Library",    href: "/library"    },
   ],
   account: [
     { name: "Dashboard",          href: "/dashboard"            },
     { name: "My Library",         href: "/dashboard/my-library" },
-    { name: "Analytics",          href: "/dashboard/analytics"  },
     { name: "Subscription Plans", href: "/dashboard/plans"      },
   ],
   company: [
@@ -118,11 +115,11 @@ export default function MarketingFooter() {
 
           {/* Explore */}
           <div>
-            <h3 className="text-[var(--ink-1)] font-semibold text-sm mb-4 uppercase tracking-wider">Explore</h3>
+            <h3 className="text-[var(--ink-2)] font-semibold text-[13px] mb-4">Explore</h3>
             <ul className="space-y-2.5">
               {footerLinks.explore.map((item) => (
                 <li key={item.name}>
-                  <Link href={item.href} className="text-sm text-[var(--ink-4)] hover:text-blue-600 transition-colors">
+                  <Link href={item.href} className="text-sm text-[var(--ink-4)] hover:text-[var(--blue)] transition-colors">
                     {item.name}
                   </Link>
                 </li>
@@ -132,11 +129,11 @@ export default function MarketingFooter() {
 
           {/* Account */}
           <div>
-            <h3 className="text-[var(--ink-1)] font-semibold text-sm mb-4 uppercase tracking-wider">Account</h3>
+            <h3 className="text-[var(--ink-2)] font-semibold text-[13px] mb-4">Account</h3>
             <ul className="space-y-2.5">
               {footerLinks.account.map((item) => (
                 <li key={item.name}>
-                  <Link href={item.href} className="text-sm text-[var(--ink-4)] hover:text-blue-600 transition-colors">
+                  <Link href={item.href} className="text-sm text-[var(--ink-4)] hover:text-[var(--blue)] transition-colors">
                     {item.name}
                   </Link>
                 </li>
@@ -146,11 +143,11 @@ export default function MarketingFooter() {
 
           {/* Company */}
           <div>
-            <h3 className="text-[var(--ink-1)] font-semibold text-sm mb-4 uppercase tracking-wider">Company</h3>
+            <h3 className="text-[var(--ink-2)] font-semibold text-[13px] mb-4">Company</h3>
             <ul className="space-y-2.5">
               {footerLinks.company.map((item) => (
                 <li key={item.name}>
-                  <Link href={item.href} className="text-sm text-[var(--ink-4)] hover:text-blue-600 transition-colors">
+                  <Link href={item.href} className="text-sm text-[var(--ink-4)] hover:text-[var(--blue)] transition-colors">
                     {item.name}
                   </Link>
                 </li>
@@ -160,11 +157,11 @@ export default function MarketingFooter() {
 
           {/* Legal */}
           <div>
-            <h3 className="text-[var(--ink-1)] font-semibold text-sm mb-4 uppercase tracking-wider">Legal</h3>
+            <h3 className="text-[var(--ink-2)] font-semibold text-[13px] mb-4">Legal</h3>
             <ul className="space-y-2.5">
               {footerLinks.legal.map((item) => (
                 <li key={item.name}>
-                  <Link href={item.href} className="text-sm text-[var(--ink-4)] hover:text-blue-600 transition-colors">
+                  <Link href={item.href} className="text-sm text-[var(--ink-4)] hover:text-[var(--blue)] transition-colors">
                     {item.name}
                   </Link>
                 </li>

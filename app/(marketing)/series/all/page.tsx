@@ -502,29 +502,17 @@ function SeriesAllPageInner() {
             ) : (
               <>
                 {viewMode === "grid" ? (
-                  <motion.div
-                    initial="hidden" animate="show"
-                    variants={{ hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.04 } } }}
-                    className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
-                  >
+                  <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {visibleSeries.map((item) => (
-                      <motion.div key={item.id} variants={{ hidden: { opacity: 0, y: 16 }, show: { opacity: 1, y: 0 } }}>
-                        <SeriesCard series={item} bookmarked={bookmarks.has(item.id)} onBookmark={() => toggleBookmark(item.id)} onRequireAuth={requireAuth} />
-                      </motion.div>
+                      <SeriesCard key={item.id} series={item} bookmarked={bookmarks.has(item.id)} onBookmark={() => toggleBookmark(item.id)} onRequireAuth={requireAuth} />
                     ))}
-                  </motion.div>
+                  </div>
                 ) : (
-                  <motion.div
-                    initial="hidden" animate="show"
-                    variants={{ hidden: { opacity: 0 }, show: { opacity: 1, transition: { staggerChildren: 0.03 } } }}
-                    className="flex flex-col gap-2"
-                  >
+                  <div className="flex flex-col gap-2">
                     {visibleSeries.map((item) => (
-                      <motion.div key={item.id} variants={{ hidden: { opacity: 0, y: 10 }, show: { opacity: 1, y: 0 } }}>
-                        <SeriesRow series={item} bookmarked={bookmarks.has(item.id)} onBookmark={() => toggleBookmark(item.id)} onRequireAuth={requireAuth} />
-                      </motion.div>
+                      <SeriesRow key={item.id} series={item} bookmarked={bookmarks.has(item.id)} onBookmark={() => toggleBookmark(item.id)} onRequireAuth={requireAuth} />
                     ))}
-                  </motion.div>
+                  </div>
                 )}
                 <div ref={sentinelRef} className="h-4" />
                 {visibleCount < filteredSeries.length && (
@@ -601,66 +589,63 @@ function HeroSection({ stats, onRequireAuth }: {
   onRequireAuth: (href: string, e: React.MouseEvent) => void;
 }) {
   return (
-    <section className="relative overflow-hidden border-b border-slate-200/80 bg-gradient-to-br from-slate-50 via-blue-50/40 to-white dark:border-white/10 dark:from-slate-950 dark:via-blue-950/20 dark:to-slate-900">
-      <div className="pointer-events-none absolute left-0 top-0 h-64 w-64 rounded-full bg-blue-500/10 blur-3xl" />
-      <div className="pointer-events-none absolute right-0 top-0 h-64 w-64 rounded-full bg-violet-500/10 blur-3xl" />
-      <div className="pointer-events-none absolute bottom-0 left-1/2 h-48 w-96 -translate-x-1/2 rounded-full bg-cyan-500/8 blur-3xl" />
-
-      <div className="relative mx-auto grid max-w-[1440px] gap-10 px-4 py-12 sm:px-6 lg:grid-cols-[1.15fr_0.85fr] lg:px-8 lg:py-20">
+    <section className="bg-white border-b border-[#e6e6e6]">
+      <div className="mx-auto grid max-w-[1440px] gap-10 px-4 py-14 sm:px-6 lg:grid-cols-[1.15fr_0.85fr] lg:px-8 lg:py-20">
         {/* Left */}
-        <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
-          <span className="inline-flex items-center gap-1.5 rounded-full border border-blue-200 bg-blue-50 px-3 py-1 text-xs font-black text-blue-700 dark:border-blue-500/30 dark:bg-blue-500/15 dark:text-blue-300">
-            <BookOpen className="h-3 w-3" /> Test Series Marketplace
-          </span>
-          <h1 className="mt-5 max-w-2xl text-4xl font-black tracking-tight text-slate-950 sm:text-5xl lg:text-[3.5rem] lg:leading-[1.08] dark:text-white">
-            Practice Smarter,<br />
-            <span className="bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">Rank Higher</span>
+        <div>
+          <p className="text-[11px] font-normal uppercase mb-5 text-black"
+             style={{ fontFamily: "var(--font-mono)", letterSpacing: "0.6px" }}>
+            Test Series Marketplace
+          </p>
+          <h1 className="max-w-2xl text-[36px] sm:text-[48px] lg:text-[56px] leading-[1.10] text-black"
+              style={{ fontWeight: 300, letterSpacing: "-0.96px" }}>
+            Practice Smarter,<br />Rank Higher
           </h1>
-          <p className="mt-5 max-w-xl text-base font-medium leading-7 text-slate-600 dark:text-slate-300">
-            Full-length mock tests for SSC, Banking, Railway, State PSC, Police, Teaching & more — with CBT interface, live timer & AI analytics.
+          <p className="mt-5 max-w-xl text-[17px] leading-[1.45] text-[#6b7280]"
+             style={{ fontWeight: 300, letterSpacing: "-0.26px" }}>
+            Full-length mock tests for SSC, Banking, Railway, State PSC, Police, Teaching &amp; more — with CBT interface, live timer &amp; AI analytics.
           </p>
           <div className="mt-7 flex flex-wrap gap-3">
             <Link
               href="/dashboard/series"
               onClick={(e) => onRequireAuth("/dashboard/series", e)}
-              className="inline-flex h-12 items-center gap-2 rounded-2xl bg-blue-600 px-6 text-sm font-black text-white shadow-lg shadow-blue-600/25 transition hover:bg-blue-700"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-black hover:bg-[#1a1a1a] text-white text-[15px] font-medium transition-colors"
+              style={{ fontWeight: 480, letterSpacing: "-0.10px" }}
             >
               My Series <ArrowRight className="h-4 w-4" />
             </Link>
             <Link
               href="/dashboard/plans"
               onClick={(e) => onRequireAuth("/dashboard/plans", e)}
-              className="inline-flex h-12 items-center gap-2 rounded-2xl border-2 border-slate-200 bg-white px-6 text-sm font-black text-slate-700 transition hover:border-blue-300 hover:text-blue-700 dark:border-white/10 dark:bg-white/8 dark:text-white"
+              className="inline-flex items-center gap-2 px-6 py-3 rounded-full bg-white border border-[#e6e6e6] text-black text-[15px] font-medium hover:bg-[#f7f7f5] transition-colors"
+              style={{ fontWeight: 480, letterSpacing: "-0.10px" }}
             >
               View Plans
             </Link>
           </div>
-        </motion.div>
+        </div>
 
         {/* Right — stat cards */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.12 }}
-          className="grid grid-cols-2 gap-4"
-        >
-          <StatCard icon={BookOpen} label="Test Series" value={`${Math.max(stats.total, 18)}+`} gradient="from-blue-500 to-blue-600" />
-          <StatCard icon={FileText} label="Mock Tests" value={`${Math.max(stats.tests, 220)}+`} gradient="from-emerald-500 to-emerald-600" />
-          <StatCard icon={Users} label="Learners" value={`${Math.max(Math.round(stats.learners / 1000), 240)}k+`} gradient="from-violet-500 to-violet-600" />
-          <StatCard icon={GraduationCap} label="Exams Covered" value={`${Math.max(stats.exams, 8)}+`} gradient="from-amber-500 to-amber-600" />
-        </motion.div>
+        <div className="grid grid-cols-2 gap-4">
+          <StatCard icon={BookOpen} label="Test Series" value={`${Math.max(stats.total, 18)}+`} />
+          <StatCard icon={FileText} label="Mock Tests" value={`${Math.max(stats.tests, 220)}+`} />
+          <StatCard icon={Users} label="Learners" value={`${Math.max(Math.round(stats.learners / 1000), 240)}k+`} />
+          <StatCard icon={GraduationCap} label="Exams Covered" value={`${Math.max(stats.exams, 8)}+`} />
+        </div>
       </div>
     </section>
   );
 }
 
-function StatCard({ icon: Icon, label, value, gradient }: { icon: React.ElementType; label: string; value: string; gradient: string }) {
+function StatCard({ icon: Icon, label, value }: { icon: React.ElementType; label: string; value: string }) {
   return (
-    <div className="group relative overflow-hidden rounded-3xl border border-white/80 bg-white/70 p-5 shadow-lg backdrop-blur-sm transition-all duration-300 hover:-translate-y-1.5 hover:shadow-xl dark:border-white/10 dark:bg-slate-900/60">
-      <div className={`mb-4 flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br ${gradient} text-white shadow-lg transition-transform duration-300 group-hover:scale-110`}>
+    <div className="rounded-[16px] border border-[#e6e6e6] bg-[#f7f7f5] p-5 hover:border-black transition-colors duration-200">
+      <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-[8px] bg-black text-white">
         <Icon className="h-5 w-5" />
       </div>
-      <p className="text-3xl font-black tracking-tight text-slate-950 dark:text-white">{value}</p>
-      <p className="mt-1 text-[11px] font-black uppercase tracking-widest text-slate-500 dark:text-slate-400">{label}</p>
+      <p className="text-[28px] font-black tracking-tight text-black tabular-nums leading-none">{value}</p>
+      <p className="mt-1.5 text-[11px] font-normal uppercase text-[#6b7280]"
+         style={{ fontFamily: "var(--font-mono)", letterSpacing: "0.6px" }}>{label}</p>
     </div>
   );
 }
@@ -786,44 +771,41 @@ function CategoryDiscoveryGrid({ series, onSelectCategory, activeCategory }: {
 
 function SeriesCard({ series: s, bookmarked, onBookmark, onRequireAuth }: { series: TestSeriesItem; bookmarked: boolean; onBookmark: () => void; onRequireAuth?: (href: string, e: React.MouseEvent) => void }) {
   return (
-    <article className="group flex flex-col overflow-hidden rounded-3xl border border-slate-100 bg-white shadow-sm transition-all duration-300 hover:-translate-y-1 hover:border-blue-200 hover:shadow-xl dark:border-white/8 dark:bg-slate-900">
-      {/* Gradient banner */}
-      <div className={`relative h-[72px] bg-gradient-to-br ${s.bannerGradient} overflow-hidden`}>
+    <article className="group flex flex-col overflow-hidden rounded-[16px] border border-[#e6e6e6] bg-white hover:border-black transition-colors duration-200">
+      {/* Neutral banner */}
+      <div className="relative h-[64px] bg-[#f7f7f5] overflow-hidden flex items-center justify-center border-b border-[#e6e6e6]">
+        <span className="text-2xl font-black text-[#e6e6e6] select-none uppercase tracking-widest">
+          {s.examShortName}
+        </span>
         <div className="absolute bottom-2 left-3 flex gap-1.5">
           {s.isFeatured && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-white/25 px-2 py-0.5 text-[9px] font-black text-white backdrop-blur-sm">
+            <span className="inline-flex items-center gap-1 rounded-full bg-black px-2 py-0.5 text-[9px] font-medium text-white">
               <Trophy className="h-2.5 w-2.5" /> Best Seller
             </span>
           )}
           {s.isTrending && !s.isFeatured && (
-            <span className="inline-flex items-center gap-1 rounded-full bg-white/25 px-2 py-0.5 text-[9px] font-black text-white backdrop-blur-sm">
+            <span className="inline-flex items-center gap-1 rounded-full bg-black px-2 py-0.5 text-[9px] font-medium text-white">
               <Flame className="h-2.5 w-2.5" /> Trending
             </span>
           )}
           {s.isNew && (
-            <span className="rounded-full bg-white/25 px-2 py-0.5 text-[9px] font-black text-white backdrop-blur-sm">New</span>
+            <span className="rounded-full bg-[#e6e6e6] px-2 py-0.5 text-[9px] font-medium text-[#6b7280]">New</span>
           )}
-        </div>
-        <div className="absolute right-3 top-2.5">
-          <span className="rounded-lg bg-white/20 px-2 py-1 text-[10px] font-black tracking-wider text-white backdrop-blur-sm">
-            {s.examShortName}
-          </span>
         </div>
         <button
           type="button"
           onClick={onBookmark}
-          className={`absolute left-3 top-2.5 flex h-7 w-7 items-center justify-center rounded-lg backdrop-blur-sm transition ${bookmarked ? "bg-white/40 text-white" : "bg-white/20 text-white/80 hover:bg-white/35"}`}
+          className={`absolute right-2.5 top-2.5 flex h-7 w-7 items-center justify-center rounded-[6px] border transition-colors ${bookmarked ? "bg-black border-black text-white" : "bg-white border-[#e6e6e6] text-[#6b7280] hover:border-black hover:text-black"}`}
         >
           <Bookmark className={`h-3.5 w-3.5 ${bookmarked ? "fill-white" : ""}`} />
         </button>
-        <div className="pointer-events-none absolute -right-6 -top-6 h-24 w-24 rounded-full bg-white/10" />
       </div>
 
       <div className="flex flex-1 flex-col p-4">
-        <h3 className="line-clamp-2 text-[15px] font-black leading-snug text-slate-950 group-hover:text-blue-700 dark:text-white">
+        <h3 className="line-clamp-2 text-[15px] font-semibold leading-snug text-black">
           {s.title}
         </h3>
-        <p className="mt-1.5 line-clamp-2 text-xs font-medium leading-5 text-slate-500 dark:text-slate-400">
+        <p className="mt-1.5 line-clamp-2 text-xs leading-5 text-[#6b7280]">
           {s.description}
         </p>
 
@@ -834,14 +816,14 @@ function SeriesCard({ series: s, bookmarked, onBookmark, onRequireAuth }: { seri
           <Tag tone={s.difficulty === "Advanced" ? "red" : s.difficulty === "Moderate" ? "amber" : "green"}>{s.difficulty}</Tag>
         </div>
 
-        <div className="mt-3 flex items-center gap-3 rounded-xl bg-slate-50 px-3 py-2 dark:bg-white/4">
-          <span className="flex items-center gap-1 text-[11px] font-bold text-slate-500">
-            <Users className="h-3 w-3 text-blue-500" />{(s.learners / 1000).toFixed(0)}k learners
+        <div className="mt-3 flex items-center gap-3 rounded-[8px] bg-[#f7f7f5] px-3 py-2 border border-[#e6e6e6]">
+          <span className="flex items-center gap-1 text-[11px] text-[#6b7280]">
+            <Users className="h-3 w-3" />{(s.learners / 1000).toFixed(0)}k learners
           </span>
-          <span className="flex items-center gap-1 text-[11px] font-bold text-slate-500">
-            <Star className="h-3 w-3 fill-amber-400 text-amber-400" />{s.rating}
+          <span className="flex items-center gap-1 text-[11px] text-[#6b7280]">
+            <Star className="h-3 w-3 fill-[#6b7280] text-[#6b7280]" />{s.rating}
           </span>
-          <span className="ml-auto flex items-center gap-1 text-[11px] font-bold text-slate-500">
+          <span className="ml-auto flex items-center gap-1 text-[11px] text-[#6b7280]">
             <Clock3 className="h-3 w-3" />{s.duration}m
           </span>
         </div>
@@ -850,14 +832,14 @@ function SeriesCard({ series: s, bookmarked, onBookmark, onRequireAuth }: { seri
           <div className="mb-3 flex items-end gap-2">
             {s.isPaid ? (
               <>
-                <span className="text-xl font-black text-slate-950 dark:text-white">₹{s.discountedPrice}</span>
-                <span className="mb-0.5 text-sm font-bold text-slate-400 line-through">₹{s.price}</span>
-                <span className="mb-0.5 inline-flex items-center gap-0.5 rounded-full bg-emerald-50 px-2 py-0.5 text-[10px] font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400">
-                  <BadgePercent className="h-2.5 w-2.5" />{s.discountPercent}% OFF
+                <span className="text-[20px] font-black text-black tabular-nums leading-none">₹{s.discountedPrice}</span>
+                <span className="mb-0.5 text-sm text-[#6b7280] line-through">₹{s.price}</span>
+                <span className="mb-0.5 text-[10px] font-medium text-[#6b7280]">
+                  {s.discountPercent}% OFF
                 </span>
               </>
             ) : (
-              <span className="inline-flex items-center gap-1 rounded-full bg-emerald-50 px-3 py-1 text-sm font-black text-emerald-700 dark:bg-emerald-500/15 dark:text-emerald-400">
+              <span className="inline-flex items-center gap-1 rounded-full bg-[#f7f7f5] border border-[#e6e6e6] px-3 py-1 text-sm font-medium text-black">
                 <Zap className="h-3.5 w-3.5" /> Free
               </span>
             )}
@@ -868,13 +850,15 @@ function SeriesCard({ series: s, bookmarked, onBookmark, onRequireAuth }: { seri
                 <Link
                   href={`/dashboard/checkout/TEST_SERIES:${s.id}?title=${encodeURIComponent(s.title)}&days=365`}
                   onClick={(e) => onRequireAuth?.(`/dashboard/checkout/TEST_SERIES:${s.id}?title=${encodeURIComponent(s.title)}&days=365`, e)}
-                  className="flex h-11 flex-1 items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 text-sm font-black text-white shadow-md shadow-blue-600/20 transition hover:brightness-105 active:scale-[0.98]"
+                  className="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-full bg-black text-[13px] font-medium text-white transition-colors hover:bg-[#1a1a1a]"
+                  style={{ fontWeight: 480 }}
                 >
                   Buy Now
                 </Link>
                 <Link
                   href={`/series/${s.id}`}
-                  className="flex h-11 items-center justify-center rounded-xl border-2 border-slate-200 px-4 text-sm font-black text-slate-700 transition hover:border-blue-300 hover:text-blue-700 dark:border-white/10 dark:text-slate-200"
+                  className="flex h-10 items-center justify-center rounded-full border border-[#e6e6e6] px-4 text-[13px] font-medium text-black transition-colors hover:border-black hover:bg-[#f7f7f5]"
+                  style={{ fontWeight: 480 }}
                 >
                   Details
                 </Link>
@@ -882,7 +866,8 @@ function SeriesCard({ series: s, bookmarked, onBookmark, onRequireAuth }: { seri
             ) : (
               <Link
                 href={`/series/${s.id}`}
-                className="flex h-11 flex-1 items-center justify-center gap-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-emerald-700 text-sm font-black text-white shadow-md shadow-emerald-600/20 transition hover:brightness-105"
+                className="flex h-10 flex-1 items-center justify-center gap-1.5 rounded-full bg-black text-[13px] font-medium text-white transition-colors hover:bg-[#1a1a1a]"
+                style={{ fontWeight: 480 }}
               >
                 <Play className="h-3.5 w-3.5 fill-white" /> Start Free
               </Link>

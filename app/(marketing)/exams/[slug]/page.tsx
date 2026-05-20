@@ -349,53 +349,75 @@ export default function ExamHubPage({ params }: { params: Promise<{ slug: string
           {/* ── PRACTICE MATERIALS ── */}
           <section id="materials" className="scroll-mt-32">
             <SectionHeading title="Practice & Preparation" icon={PlayCircle} color={boardColor} />
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-              
-              {/* Test Series Card */}
-              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-3xl p-6 flex flex-col hover:shadow-xl dark:hover:shadow-gray-800/50 transition-all hover:-translate-y-1">
-                <div className="w-14 h-14 rounded-2xl bg-blue-50 dark:bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center mb-6">
-                  <FlaskConical size={24} />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Test Series</h3>
-                <p className="text-gray-500 dark:text-gray-400 mb-6 flex-1 text-sm">Full-length tests and sectionals based on the latest {exam.shortName} pattern.</p>
-                <div className="flex items-center justify-between mt-auto">
-                  <span className="font-bold text-blue-600 dark:text-blue-400">{exam.testCount} Tests</span>
-                  <Link href={`/dashboard/series?exam=${exam.id}`} className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 transition-colors">
-                    <ArrowRight size={18} />
-                  </Link>
-                </div>
-              </div>
+            <div className="grid grid-cols-3 gap-5 overflow-x-auto" style={{ minWidth: 0 }}>
+              {[
+                {
+                  icon: FlaskConical,
+                  title: "Test Series",
+                  desc: `Full-length tests and sectionals based on the latest ${exam.shortName} pattern.`,
+                  count: `${exam.testCount} Tests`,
+                  accentColor: "#3B82F6",
+                  iconBg: "#EFF6FF",
+                  href: `/dashboard/series?exam=${exam.id}`,
+                },
+                {
+                  icon: FileText,
+                  title: "Previous Papers",
+                  desc: "Official question papers from past years with detailed solutions.",
+                  count: `${exam.pyqCount} Papers`,
+                  accentColor: "#7C3AED",
+                  iconBg: "#F5F3FF",
+                  href: `/dashboard/pyq?exam=${exam.id}`,
+                },
+                {
+                  icon: BookOpen,
+                  title: "Study Notes",
+                  desc: "Concise revision notes, formula sheets, and subject-wise guides.",
+                  count: `${exam.notesCount} PDF notes`,
+                  accentColor: "#059669",
+                  iconBg: "#ECFDF5",
+                  href: `/blog?exam=${exam.id}`,
+                },
+              ].map((card) => (
+                <div
+                  key={card.title}
+                  className="bg-white dark:bg-gray-900 border border-gray-100 dark:border-gray-800 rounded-3xl p-7 flex flex-col group hover:shadow-2xl hover:-translate-y-1.5 transition-all duration-300 min-w-[200px]"
+                  style={{ boxShadow: "0 2px 12px rgba(0,0,0,0.05)" }}
+                >
+                  {/* Icon */}
+                  <div
+                    className="w-[72px] h-[72px] rounded-2xl flex items-center justify-center mb-8 transition-transform duration-300 group-hover:scale-110"
+                    style={{ backgroundColor: card.iconBg }}
+                  >
+                    <card.icon size={30} style={{ color: card.accentColor }} />
+                  </div>
 
-              {/* PYQ Card */}
-              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-3xl p-6 flex flex-col hover:shadow-xl dark:hover:shadow-gray-800/50 transition-all hover:-translate-y-1">
-                <div className="w-14 h-14 rounded-2xl bg-purple-50 dark:bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center mb-6">
-                  <FileText size={24} />
-                </div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Previous Papers</h3>
-                <p className="text-gray-500 dark:text-gray-400 mb-6 flex-1 text-sm">Official question papers from past years with detailed solutions.</p>
-                <div className="flex items-center justify-between mt-auto">
-                  <span className="font-bold text-purple-600 dark:text-purple-400">{exam.pyqCount} Papers</span>
-                  <Link href={`/dashboard/pyq?exam=${exam.id}`} className="w-10 h-10 rounded-full bg-purple-600 text-white flex items-center justify-center hover:bg-purple-700 transition-colors">
-                    <ArrowRight size={18} />
-                  </Link>
-                </div>
-              </div>
+                  {/* Text */}
+                  <h3 className="text-[19px] font-bold text-gray-900 dark:text-white mb-3 leading-snug">
+                    {card.title}
+                  </h3>
+                  <p className="text-[13px] text-gray-500 dark:text-gray-400 leading-relaxed flex-1 mb-8">
+                    {card.desc}
+                  </p>
 
-              {/* Notes Card */}
-              <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-3xl p-6 flex flex-col hover:shadow-xl dark:hover:shadow-gray-800/50 transition-all hover:-translate-y-1">
-                <div className="w-14 h-14 rounded-2xl bg-green-50 dark:bg-green-500/10 text-green-600 dark:text-green-400 flex items-center justify-center mb-6">
-                  <BookOpen size={24} />
+                  {/* Footer */}
+                  <div className="flex items-center justify-between mt-auto">
+                    <span className="text-[14px] font-extrabold" style={{ color: card.accentColor }}>
+                      {card.count}
+                    </span>
+                    <Link
+                      href={card.href}
+                      className="w-11 h-11 rounded-full text-white flex items-center justify-center transition-all duration-200 hover:scale-110 active:scale-95"
+                      style={{
+                        backgroundColor: card.accentColor,
+                        boxShadow: `0 6px 18px ${card.accentColor}50`,
+                      }}
+                    >
+                      <ArrowRight size={18} />
+                    </Link>
+                  </div>
                 </div>
-                <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">Study Notes</h3>
-                <p className="text-gray-500 dark:text-gray-400 mb-6 flex-1 text-sm">Concise revision notes, formula sheets, and subject-wise guides.</p>
-                <div className="flex items-center justify-between mt-auto">
-                  <span className="font-bold text-green-600 dark:text-green-400">{exam.notesCount} PDF notes</span>
-                  <Link href={`/blog?exam=${exam.id}`} className="w-10 h-10 rounded-full bg-green-600 text-white flex items-center justify-center hover:bg-green-700 transition-colors">
-                    <ArrowRight size={18} />
-                  </Link>
-                </div>
-              </div>
-
+              ))}
             </div>
           </section>
 

@@ -372,7 +372,7 @@ export async function apiSubmitAttempt(
   answers: Record<string, number>,
   timeTakenSec: number,
 ) {
-  return apiFetch(`/attempts/submit`, {
+  return apiFetch(`/attempts/${testId}/submit`, {
     method: "POST",
     body: JSON.stringify({ testId, answers, timeTakenSec }),
   });
@@ -396,6 +396,10 @@ export async function apiGetPYQPapers(params?: { examId?: string; year?: number;
 
 export async function apiGetPYQPaperById(paperId: string) {
   return apiFetch(`/pyq/${paperId}`);
+}
+
+export async function apiGetPYQQuestions(paperId: string) {
+  return apiFetch(`/pyq/${paperId}/questions`);
 }
 
 export async function apiStartPYQAttempt(paperId: string) {

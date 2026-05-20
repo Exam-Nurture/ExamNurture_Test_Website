@@ -12,7 +12,7 @@ export interface ButtonProps extends Omit<HTMLMotionProps<"button">, "ref" | "ch
 }
 
 const buttonVariants = {
-  base: "inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-[var(--blue)] disabled:pointer-events-none disabled:opacity-50",
+  base: "inline-flex items-center justify-center rounded-lg text-sm font-semibold tracking-[-0.01em] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--blue)] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-40",
   variants: {
     default: "bg-[var(--blue)] text-white hover:bg-[var(--blue-ink)] shadow-sm",
     secondary: "bg-[var(--line-soft)] text-[var(--ink-1)] hover:bg-[var(--line)]",
@@ -22,8 +22,8 @@ const buttonVariants = {
   },
   sizes: {
     default: "h-10 px-4 py-2",
-    sm: "h-8 rounded-md px-3 text-xs",
-    lg: "h-12 rounded-md px-8 text-base",
+    sm: "h-8 rounded-lg px-3 text-xs",
+    lg: "h-12 rounded-xl px-8 text-[15px]",
     icon: "h-9 w-9",
   },
 };
@@ -32,7 +32,9 @@ export const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = "default", size = "default", isLoading, children, ...props }, ref) => {
     return (
       <motion.button
-        whileTap={{ scale: 0.98 }}
+        whileHover={{ scale: 1.015, y: -1 }}
+        whileTap={{ scale: 0.975 }}
+        transition={{ duration: 0.15, ease: "easeOut" }}
         ref={ref}
         className={cn(
           buttonVariants.base,
